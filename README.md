@@ -18,7 +18,7 @@ This app helps manage and share our South America adventure, covering 43 locatio
 **Tech Stack:**
 - **Frontend**: React + Vite (fast, modern)
 - **Backend**: Node.js + Express
-- **Database**: SQLite (local development) → Azure SQL (production)
+- **Database**: SQLite with sql.js (pure JS, ARM64 compatible) → Azure SQL (production)
 - **Maps**: Leaflet.js with OpenStreetMap tiles
 - **Authentication**: JWT with PIN-based access (2 levels)
 
@@ -67,9 +67,9 @@ Optional:
 
 4. **Initialize the database**
    ```bash
-   node database/init.js
+   node server/init-db.js
    ```
-   This will create the SQLite database with schema and load seed data from your CSV.
+   This will create the SQLite database with schema and load seed data from your itinerary.
 
 5. **Start development servers**
    ```bash
