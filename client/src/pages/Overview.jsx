@@ -6,7 +6,6 @@ import './Overview.css'
 export default function Overview() {
   const { isAdmin } = useAuth()
   const [trip, setTrip] = useState(null)
-  const [progress, setProgress] = useState(null)
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -25,10 +24,6 @@ export default function Overview() {
       const tripRes = await api.get('/trips/1')
       setTrip(tripRes.data.data)
       setStartDate(tripRes.data.data.start_date || '')
-      
-      // Fetch progress data
-      const progressRes = await api.get('/progress')
-      setProgress(progressRes.data.data)
       
       // Fetch stats
       const locationsRes = await api.get('/locations')
@@ -94,6 +89,19 @@ export default function Overview() {
     ? ((stats.visitedLocations / stats.totalLocations) * 100).toFixed(1)
     : 0
 
+  // Calculate days elapsed from trip start date
+  const calculateDaysElapsed = () => {
+    if (!trip?.start_date) return 0
+    const startDate = new Date(trip.start_date)
+    const today = new Date()
+    if (startDate > today) return 0 // Trip hasn't started yet
+    const diffTime = Math.abs(today - startDate)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
+
+  const daysElapsed = calculateDaysElapsed()
+
   return (
     <div className="overview">
       <div className="overview-header">
@@ -153,7 +161,7 @@ export default function Overview() {
         <div className="stat-card">
           <div className="stat-icon">🗓️</div>
           <div className="stat-content">
-            <div className="stat-value">{progress?.current_day || 0} / {stats?.totalDays || 0}</div>
+            <div className="stat-value">{daysElapsed} / {stats?.totalDays || 0}</div>
             <div className="stat-label">Days Elapsed</div>
           </div>
         </div>
