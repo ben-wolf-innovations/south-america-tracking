@@ -84,14 +84,19 @@ Optional:
 - ✅ React frontend with Vite (mobile-responsive)
 - ✅ API client with auth interceptors
 - ✅ Express backend with middleware
-- ✅ Database abstraction layer (SQLite)
-- ✅ JWT authentication system
+- ✅ Database abstraction layer (SQLite with sql.js)
+- ✅ JWT authentication system with PIN-based access
 - ✅ Database schema (38 locations from your itinerary)
 - ✅ Database initialization with seed data
-- ⏳ API endpoints for locations, costs, blog (next)
+- ✅ **Complete RESTful API (Phase 2)**
+  - ✅ Locations CRUD with dynamic sequence reordering
+  - ✅ Costs tracking with planned vs actual
+  - ✅ Blog posts with draft/publish workflow
+  - ✅ Progress tracking with auto-recalculation
 - ⏳ Frontend components (route manager, map, blog)
 - ⏳ Route mapping with Leaflet
 - ⏳ Cost tracking dashboard
+- ⏳ Authentication UI (login page)
 
 ## 📁 Project Structure
 
@@ -186,7 +191,44 @@ The schema supports:
 - ✅ Running day counter auto-calculated from sequence
 - ✅ Map coordinates for route visualization
 
-## 🗺️ Itinerary Overview
+## � API Endpoints
+
+All API endpoints require JWT authentication. Admin PIN required for mutations.
+
+### Authentication
+- `POST /api/auth/login` - Login with PIN, returns JWT token
+- `POST /api/auth/verify` - Verify token validity
+
+### Locations
+- `GET /api/locations` - Get all locations (ordered by sequence)
+- `GET /api/locations/:id` - Get single location
+- `POST /api/locations` - Create location (optional sequence for insertion)
+- `PUT /api/locations/:id` - Update location details
+- `PUT /api/locations/:id/reorder` - Change sequence position
+- `DELETE /api/locations/:id` - Delete and resequence
+
+### Costs
+- `GET /api/costs` - Get all costs (filterable by location/category)
+- `GET /api/costs/summary` - Get planned vs actual breakdown
+- `GET /api/costs/:id` - Get single cost entry
+- `POST /api/costs` - Create cost entry
+- `PUT /api/costs/:id` - Update cost entry
+- `DELETE /api/costs/:id` - Delete cost entry
+
+### Blog
+- `GET /api/blog` - Get blog posts (family sees published only)
+- `GET /api/blog/:id` - Get single post
+- `POST /api/blog` - Create post (draft or published)
+- `PUT /api/blog/:id` - Update post content/metadata
+- `PUT /api/blog/:id/publish` - Toggle publish status
+- `DELETE /api/blog/:id` - Delete post
+
+### Progress
+- `GET /api/progress` - Get trip progress with current location
+- `PUT /api/progress` - Update progress metrics
+- `POST /api/progress/recalculate` - Auto-calculate from locations & costs
+
+## �🗺️ Itinerary Overview
 
 43 stops across 5 countries over ~103 days:
 - Peru: 9 locations (Lima, Cusco, Sacred Valley, Machu Picchu, etc.)
