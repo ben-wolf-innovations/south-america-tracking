@@ -216,7 +216,7 @@ export default function Locations() {
           <h2>📍 Locations</h2>
           <p className="subtitle">{locations.length} stops on your journey</p>
         </div>
-        {isAdmin() && !showAddForm && !editingLocation && (
+        {isAdmin() && !showAddForm && (
           <button
             onClick={() => setShowAddForm(true)}
             className="add-button"
@@ -226,14 +226,14 @@ export default function Locations() {
         )}
       </div>
 
-      {/* Add/Edit Form */}
-      {(showAddForm || editingLocation) && (
+      {/* Add Form Only */}
+      {showAddForm && (
         <div className="location-form-container">
           <div className="location-form-header">
-            <h3>{editingLocation ? '✏️ Edit Location' : '➕ Add New Location'}</h3>
+            <h3>➕ Add New Location</h3>
             <button onClick={resetForm} className="close-button">✕</button>
           </div>
-          <form onSubmit={editingLocation ? handleEditLocation : handleAddLocation} className="location-form">
+          <form onSubmit={handleAddLocation} className="location-form">
             <div className="form-section">
               <h4>Basic Information</h4>
               <div className="form-grid">
@@ -294,20 +294,18 @@ export default function Locations() {
                     placeholder="2"
                   />
                 </div>
-                {!editingLocation && (
-                  <div className="form-field">
-                    <label>Insert at Position</label>
-                    <input
-                      type="number"
-                      name="sequence"
-                      value={formData.sequence}
-                      onChange={handleInputChange}
-                      min="1"
-                      max={locations.length + 1}
-                      placeholder={`Leave empty for end (${locations.length + 1})`}
-                    />
-                  </div>
-                )}
+                <div className="form-field">
+                  <label>Insert at Position</label>
+                  <input
+                    type="number"
+                    name="sequence"
+                    value={formData.sequence}
+                    onChange={handleInputChange}
+                    min="1"
+                    max={locations.length + 1}
+                    placeholder={`Leave empty for end (${locations.length + 1})`}
+                  />
+                </div>
               </div>
             </div>
 
@@ -449,7 +447,7 @@ export default function Locations() {
                 Cancel
               </button>
               <button type="submit" className="submit-button">
-                {editingLocation ? 'Update Location' : 'Add Location'}
+                Add Location
               </button>
             </div>
           </form>
@@ -458,8 +456,11 @@ export default function Locations() {
 
       {/* Locations List */}
       <div className="locations-list">
-        {locations.map((location, index) => (
-          <div key={location.id} className="location-card">
+        {locations.map((location, index) => {
+          const isEditing = editingLocation?.id === location.id
+          
+          return (
+          <div key={location.id} className={`location-card ${isEditing ? 'editing' : ''}`}>
             <div className="location-card-header">
               <div className="location-sequence">#{location.sequence}</div>
               <div className="location-main">
@@ -469,11 +470,11 @@ export default function Locations() {
                 </h3>
                 <p className="country">📍 {location.country}</p>
               </div>
-              {isAdmin() && !showAddForm && !editingLocation && (
+              {isAdmin() && !showAddForm && (
                 <div className="location-actions">
                   <button
                     onClick={() => handleReorder(location.id, 'up')}
-                    disabled={index === 0}
+                    disabled={index === 0 || isEditing}
                     className="reorder-button"
                     title="Move up"
                   >
@@ -481,23 +482,26 @@ export default function Locations() {
                   </button>
                   <button
                     onClick={() => handleReorder(location.id, 'down')}
-                    disabled={index === locations.length - 1}
+                    disabled={index === locations.length - 1 || isEditing}
                     className="reorder-button"
                     title="Move down"
                   >
                     ⬇️
                   </button>
-                  <button
-                    onClick={() => startEdit(location)}
-                    className="edit-button"
-                    title="Edit"
-                  >
-                    ✏️
-                  </button>
+                  {!isEditing && (
+                    <button
+                      onClick={() => startEdit(location)}
+                      className="edit-button"
+                      title="Edit"
+                    >
+                      ✏️
+                    </button>
+                  )}
                   <button
                     onClick={() => setDeleteConfirm(location.id)}
                     className="delete-button"
                     title="Delete"
+                    disabled={isEditing}
                   >
                     🗑️
                   </button>
@@ -505,6 +509,8 @@ export default function Locations() {
               )}
             </div>
 
+            {/* Show view mode or edit mode */}
+            {!isEditing ? (
             <div className="location-card-body">
               <div className="location-info-grid">
                 {location.nights > 0 && (
@@ -582,8 +588,220 @@ export default function Locations() {
                 <small>🌐 {location.latitude}, {location.longitude}</small>
               </div>
             </div>
+            ) : (
+            // Edit form inline
+            <div className="location-card-body editing-form">
+              <form onSubmit={handleEditLocation} className="location-form inline">
+                <div className="form-section">
+                  <h4>Basic Information</h4>
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label>Location Name *</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="e.g., Lima"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Country *</label>
+                      <input
+                        type="text"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="e.g., Peru"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Latitude *</label>
+                      <input
+                        type="number"
+                        step="any"
+                        name="latitude"
+                        value={formData.latitude}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="-12.0464"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Longitude *</label>
+                      <input
+                        type="number"
+                        step="any"
+                        name="longitude"
+                        value={formData.longitude}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="-77.0428"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Nights</label>
+                      <input
+                        type="number"
+                        name="nights"
+                        value={formData.nights}
+                        onChange={handleInputChange}
+                        min="0"
+                        placeholder="2"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h4>Dates</h4>
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label>Arrival Date</label>
+                      <input
+                        type="date"
+                        name="arrival_date"
+                        value={formData.arrival_date}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Departure Date</label>
+                      <input
+                        type="date"
+                        name="departure_date"
+                        value={formData.departure_date}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h4>Accommodation</h4>
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label>Name</label>
+                      <input
+                        type="text"
+                        name="accommodation_name"
+                        value={formData.accommodation_name}
+                        onChange={handleInputChange}
+                        placeholder="Hostel/Hotel name"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Type</label>
+                      <input
+                        type="text"
+                        name="accommodation_type"
+                        value={formData.accommodation_type}
+                        onChange={handleInputChange}
+                        placeholder="Hostel/Hotel/Airbnb"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Cost (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="accommodation_cost"
+                        value={formData.accommodation_cost}
+                        onChange={handleInputChange}
+                        placeholder="50.00"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h4>Travel Details</h4>
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label>From</label>
+                      <input
+                        type="text"
+                        name="travel_from"
+                        value={formData.travel_from}
+                        onChange={handleInputChange}
+                        placeholder="Previous location"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Method</label>
+                      <input
+                        type="text"
+                        name="travel_method"
+                        value={formData.travel_method}
+                        onChange={handleInputChange}
+                        placeholder="Bus/Flight/Train"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Cost (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="travel_cost"
+                        value={formData.travel_cost}
+                        onChange={handleInputChange}
+                        placeholder="25.00"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Duration (hours)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        name="travel_duration"
+                        value={formData.travel_duration}
+                        onChange={handleInputChange}
+                        placeholder="4.5"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h4>Additional Details</h4>
+                  <div className="form-field full-width">
+                    <label>Activities</label>
+                    <textarea
+                      name="activities"
+                      value={formData.activities}
+                      onChange={handleInputChange}
+                      rows="3"
+                      placeholder="Things to do here..."
+                    />
+                  </div>
+                  <div className="form-field full-width">
+                    <label>Notes</label>
+                    <textarea
+                      name="notes"
+                      value={formData.notes}
+                      onChange={handleInputChange}
+                      rows="3"
+                      placeholder="Any additional notes..."
+                    />
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button type="button" onClick={resetForm} className="cancel-button">
+                    Cancel
+                  </button>
+                  <button type="submit" className="submit-button">
+                    Update Location
+                  </button>
+                </div>
+              </form>
+            </div>
+            )}
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Delete Confirmation Modal */}
