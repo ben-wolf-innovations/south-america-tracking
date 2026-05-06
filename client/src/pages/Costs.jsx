@@ -88,11 +88,18 @@ export default function Costs() {
     e.preventDefault()
     try {
       const payload = {
-        ...formData,
-        location_id: formData.location_id ? parseInt(formData.location_id) : null,
-        amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0
+        category: formData.category,
+        description: formData.description,
+        amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0,
+        date: formData.date || null
+      }
+      
+      // Only include location_id if one was selected
+      if (formData.location_id) {
+        payload.location_id = parseInt(formData.location_id)
       }
 
+      console.log('Submitting cost payload:', payload)
       await api.post('/costs', payload)
       await loadData()
       resetForm()
@@ -106,11 +113,18 @@ export default function Costs() {
     e.preventDefault()
     try {
       const payload = {
-        ...formData,
-        location_id: formData.location_id ? parseInt(formData.location_id) : null,
-        amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0
+        category: formData.category,
+        description: formData.description,
+        amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0,
+        date: formData.date || null
+      }
+      
+      // Only include location_id if one was selected
+      if (formData.location_id) {
+        payload.location_id = parseInt(formData.location_id)
       }
 
+      console.log('Updating cost payload:', payload)
       await api.put(`/costs/${editingCost.id}`, payload)
       await loadData()
       resetForm()
