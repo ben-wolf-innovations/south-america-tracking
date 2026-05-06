@@ -21,6 +21,8 @@ export default function Costs() {
   const [costs, setCosts] = useState([])
   const [locations, setLocations] = useState([])
   const [summary, setSummary] = useState([])
+  const [locationBudgets, setLocationBudgets] = useState({ total_planned: 0 })
+  const [locationActuals, setLocationActuals] = useState({ total_actual: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -55,6 +57,8 @@ export default function Costs() {
       setCosts(costsRes.data.data)
       setLocations(locationsRes.data.data)
       setSummary(summaryRes.data.data.by_category || [])
+      setLocationBudgets(summaryRes.data.data.location_budgets || { total_planned: 0 })
+      setLocationActuals(summaryRes.data.data.location_actuals || { total_actual: 0 })
       setError(null)
     } catch (err) {
       console.error('Failed to load costs:', err)
@@ -90,7 +94,8 @@ export default function Costs() {
       const payload = {
         category: formData.category,
         description: formData.description,
-        amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0,
+        // Round to 2 decimal places to avoid floating point precision issues
+        amount_actual: formData.amount_actual ? Math.round(parseFloat(formData.amount_actual) * 100) / 100 : 0,
         date: formData.date || null
       }
       
@@ -115,7 +120,8 @@ export default function Costs() {
       const payload = {
         category: formData.category,
         description: formData.description,
-        amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0,
+        // Round to 2 decimal places to avoid floating point precision issues
+        amount_actual: formData.amount_actual ? Math.round(parseFloat(formData.amount_actual) * 100) / 100 : 0,
         date: formData.date || null
       }
       
@@ -165,7 +171,7 @@ export default function Costs() {
   })
 
   // Calculate totals
-  const totalPlanned = summary.reduce((sum, item) => sum + parseFloat(item.total_planned || 0), 0)
+  const totalPlanned = parseFloat(locationBudgets.total_planned || 0)
   const totalActual = summary.reduce((sum, item) => sum + parseFloat(item.total_actual || 0), 0)
 
   if (loading) {
@@ -215,18 +221,18 @@ export default function Costs() {
             <div className="summary-label">Total Budget</div>
             <div className="summary-amounts">
               <div className="amount planned">
-                <span className="label">Planned:</span>
+                <span className="label">Budget (from locations):</span>
                 <span className="value">£{totalPlanned.toFixed(2)}</span>
               </div>
               <div className="amount actual">
-                <span className="label">Actual:</span>
+                <span className="label">Actual Spent:</span>
                 <span className="value">£{totalActual.toFixed(2)}</span>
               </div>
               <div className="amount difference">
                 <span className="label">Difference:</span>
                 <span className={`value ${totalActual > totalPlanned ? 'over' : 'under'}`}>
                   £{Math.abs(totalActual - totalPlanned).toFixed(2)}
-                  {totalActual > totalPlanned ? ' over' : ' under'}
+                  {totalActual > totalPlanned ? ' over budget' : ' under budget'}
                 </span>
               </div>
             </div>
@@ -234,28 +240,22 @@ export default function Costs() {
         </div>
 
         <div className="category-breakdown">
-          <h3>📊 By Category</h3>
+          <h3>📊 Actual Spending by Category</h3>
           <div className="category-grid">
             {summary.map(item => {
-              const planned = parseFloat(item.total_planned || 0)
               const actual = parseFloat(item.total_actual || 0)
-              const diff = actual - planned
               
               return (
                 <div key={item.category} className="category-summary-card">
-                  <div className="category-name">{item.category}</div>
+                  <div className="category-name">{getCategoryLabel(item.category)}</div>
                   <div className="category-amounts">
                     <div className="amount-row">
-                      <span>Planned:</span>
-                      <span className="planned-amount">£{planned.toFixed(2)}</span>
-                    </div>
-                    <div className="amount-row">
-                      <span>Actual:</span>
+                      <span>Actual Spent:</span>
                       <span className="actual-amount">£{actual.toFixed(2)}</span>
                     </div>
-                    <div className={`amount-row diff ${diff > 0 ? 'over' : 'under'}`}>
-                      <span>{diff > 0 ? 'Over' : 'Under'}:</span>
-                      <span>£{Math.abs(diff).toFixed(2)}</span>
+                    <div className="amount-row">
+                      <span>Count:</span>
+                      <span>{item.count} {item.count === 1 ? 'item' : 'items'}</span>
                     </div>
                   </div>
                 </div>
@@ -416,9 +416,7 @@ export default function Costs() {
         ) : (
           filteredCosts.map((cost) => {
             const location = locations.find(loc => loc.id === cost.location_id)
-            const planned = parseFloat(cost.amount_planned || 0)
             const actual = parseFloat(cost.amount_actual || 0)
-            const diff = actual - planned
 
             return (
               <div key={cost.id} className="cost-card">
@@ -427,9 +425,13 @@ export default function Costs() {
                     <h4>{cost.description}</h4>
                     <div className="cost-meta">
                       <span className="category-badge">{getCategoryLabel(cost.category)}</span>
-                      {location && (
+                      {location ? (
                         <span className="location-badge">
                           📍 #{location.sequence} {location.name}
+                        </span>
+                      ) : (
+                        <span className="location-badge general">
+                          🌍 General
                         </span>
                       )}
                       {cost.date && (
@@ -460,20 +462,10 @@ export default function Costs() {
                 </div>
 
                 <div className="cost-amounts">
-                  <div className="amount-item planned">
-                    <span className="label">Planned:</span>
-                    <span className="value">£{planned.toFixed(2)}</span>
-                  </div>
-                  <div className="amount-item actual">
-                    <span className="label">Actual:</span>
+                  <div className="amount-item actual-only">
+                    <span className="label">Amount:</span>
                     <span className="value">£{actual.toFixed(2)}</span>
                   </div>
-                  {diff !== 0 && (
-                    <div className={`amount-item diff ${diff > 0 ? 'over' : 'under'}`}>
-                      <span className="label">{diff > 0 ? 'Over' : 'Under'}:</span>
-                      <span className="value">£{Math.abs(diff).toFixed(2)}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             )

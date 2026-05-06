@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
 import api from '../config/api'
+import { useAuth } from '../context/AuthContext'
 import './Overview.css'
 
 export default function Overview() {
+  const { isAdmin } = useAuth()
+  const [trip, setTrip] = useState(null)
   const [progress, setProgress] = useState(null)
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [editingStartDate, setEditingStartDate] = useState(false)
+  const [startDate, setStartDate] = useState('')
 
   useEffect(() => {
     loadData()
@@ -15,6 +20,11 @@ export default function Overview() {
   const loadData = async () => {
     try {
       setLoading(true)
+      
+      // Fetch trip details
+      const tripRes = await api.get('/trips/1')
+      setTrip(tripRes.data.data)
+      setStartDate(tripRes.data.data.start_date || '')
       
       // Fetch progress data
       const progressRes = await api.get('/progress')
@@ -42,6 +52,19 @@ export default function Overview() {
       setError('Failed to load trip data')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUpdateStartDate = async () => {
+    try {
+      await api.put('/trips/1', { start_date: startDate })
+      await loadData()
+      setEditingStartDate(false)
+      // Notify Dashboard to refresh footer
+      window.dispatchEvent(new CustomEvent('tripUpdated'))
+    } catch (err) {
+      console.error('Failed to update start date:', err)
+      alert('Failed to update start date: ' + (err.response?.data?.error || err.message))
     }
   }
 
@@ -78,6 +101,40 @@ export default function Overview() {
         <p className="subtitle">Track your South American adventure</p>
       </div>
 
+      {/* Trip Info Card with Start Date */}
+      {trip && (
+        <div className="trip-info-card">
+          <h3>{trip.name}</h3>
+          <p className="trip-description">{trip.description}</p>
+          <div className="trip-dates">
+            <div className="date-field">
+              <label>Start Date:</label>
+              {editingStartDate && isAdmin() ? (
+                <div className="date-edit-group">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                  <button onClick={handleUpdateStartDate} className="btn-save">Save</button>
+                  <button onClick={() => {
+                    setStartDate(trip.start_date || '')
+                    setEditingStartDate(false)
+                  }} className="btn-cancel">Cancel</button>
+                </div>
+              ) : (
+                <div className="date-display">
+                  <span>{trip.start_date ? new Date(trip.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not set'}</span>
+                  {isAdmin() && (
+                    <button onClick={() => setEditingStartDate(true)} className="btn-edit">✏️</button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon">📍</div>
@@ -109,21 +166,23 @@ export default function Overview() {
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <div className="stat-value">
-              £{(stats?.costsSummary?.total_actual || 0).toFixed(0)} / £{(stats?.costsSummary?.total_planned || 0).toFixed(0)}
-            </div>
-            <div className="stat-label">Budget Spent</div>
-            <div className="progress-bar">
-              <div 
-                className={`progress-fill ${budgetPercentage > 100 ? 'over-budget' : ''}`}
-                style={{ width: `${Math.min(budgetPercentage, 100)}%` }}
-              ></div>
+        {isAdmin() && (
+          <div className="stat-card">
+            <div className="stat-icon">💰</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                £{(stats?.costsSummary?.total_actual || 0).toFixed(0)} / £{(stats?.costsSummary?.total_planned || 0).toFixed(0)}
+              </div>
+              <div className="stat-label">Budget Spent</div>
+              <div className="progress-bar">
+                <div 
+                  className={`progress-fill ${budgetPercentage > 100 ? 'over-budget' : ''}`}
+                  style={{ width: `${Math.min(budgetPercentage, 100)}%` }}
+                ></div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {stats?.currentLocation && (
@@ -149,7 +208,7 @@ export default function Overview() {
         </div>
       )}
 
-      {stats?.costsSummary?.by_category && stats.costsSummary.by_category.length > 0 && (
+      {isAdmin() && stats?.costsSummary?.by_category && stats.costsSummary.by_category.length > 0 && (
         <div className="costs-breakdown">
           <h3>💵 Cost Breakdown by Category</h3>
           <div className="costs-list">

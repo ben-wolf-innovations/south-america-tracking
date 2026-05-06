@@ -21,11 +21,24 @@ router.get('/', authenticateToken, (req, res) => {
       })
     }
 
+    // Get trip details to calculate current_day from start_date
+    const trip = get('SELECT * FROM trips WHERE id = ?', [trip_id])
+    
+    // Calculate current_day based on trip start_date
+    let current_day = 0
+    if (trip && trip.start_date) {
+      const startDate = new Date(trip.start_date)
+      const today = new Date()
+      const diffTime = today - startDate
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+      current_day = diffDays > 0 ? diffDays : 0
+    }
+
     // Get current location details if set
     let currentLocation = null
     if (progress.current_location_id) {
       currentLocation = get(
-        'SELECT * FROM locations WHERE id = ?',
+        'SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)',
         [progress.current_location_id]
       )
     }
@@ -34,6 +47,7 @@ router.get('/', authenticateToken, (req, res) => {
       success: true, 
       data: {
         ...progress,
+        current_day, // Override with calculated value
         current_location: currentLocation
       }
     })
@@ -144,7 +158,7 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
     }
 
     // Verify location exists
-    const location = get('SELECT * FROM locations WHERE id = ? AND trip_id = ?', [location_id, trip_id])
+    const location = get('SELECT * FROM locations WHERE id = ? AND trip_id = ? AND (deleted IS NULL OR deleted = 0)', [location_id, trip_id])
     if (!location) {
       return res.status(404).json({ 
         success: false, 
@@ -186,28 +200,32 @@ router.post('/recalculate', authenticateToken, requireAdmin, (req, res) => {
   try {
     const { trip_id = 1 } = req.query
 
-    // Get total days from locations
+    // Get total days from locations (non-deleted only)
     const daysResult = get(
-      'SELECT COALESCE(SUM(nights), 0) as total FROM locations WHERE trip_id = ?',
+      'SELECT COALESCE(SUM(nights), 0) as total FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
       [trip_id]
     )
     const totalDays = daysResult.total
 
-    // Get total locations
+    // Get total locations (non-deleted only)
     const locationsResult = get(
-      'SELECT COUNT(*) as total FROM locations WHERE trip_id = ?',
+      'SELECT COUNT(*) as total FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
       [trip_id]
     )
     const totalLocations = locationsResult.total
 
-    // Get locations visited
+    // Get locations visited (non-deleted only) - visited = departure date is in the past
     const visitedResult = get(
-      'SELECT COUNT(*) as total FROM locations WHERE trip_id = ? AND visited = 1',
+      `SELECT COUNT(*) as total FROM locations 
+       WHERE trip_id = ? 
+       AND departure_date IS NOT NULL 
+       AND date(departure_date) < date('now') 
+       AND (deleted IS NULL OR deleted = 0)`,
       [trip_id]
     )
     const locationsVisited = visitedResult.total
 
-    // Calculate total planned costs from locations
+    // Calculate total planned costs from locations (non-deleted only)
     const locationCostsPlanned = get(
       `SELECT 
         COALESCE(SUM(
@@ -216,11 +234,11 @@ router.post('/recalculate', authenticateToken, requireAdmin, (req, res) => {
           COALESCE(food_drink_cost_planned, 0) * nights +
           COALESCE(travel_cost_planned, 0)
         ), 0) as total
-       FROM locations WHERE trip_id = ?`,
+       FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
       [trip_id]
     )
 
-    // Calculate total actual costs from locations
+    // Calculate total actual costs from locations (non-deleted only)
     const locationCostsActual = get(
       `SELECT 
         COALESCE(SUM(
@@ -229,21 +247,17 @@ router.post('/recalculate', authenticateToken, requireAdmin, (req, res) => {
           COALESCE(food_drink_cost_actual, 0) * nights +
           COALESCE(travel_cost_actual, 0)
         ), 0) as total
-       FROM locations WHERE trip_id = ?`,
+       FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
       [trip_id]
     )
 
-    // Add costs from costs table
-    const costTablePlanned = get(
-      'SELECT COALESCE(SUM(amount_planned), 0) as total FROM costs WHERE trip_id = ?',
-      [trip_id]
-    )
+    // Add actual costs from costs table (non-deleted only, including "other" category)
     const costTableActual = get(
-      'SELECT COALESCE(SUM(amount_actual), 0) as total FROM costs WHERE trip_id = ?',
+      'SELECT COALESCE(SUM(amount_actual), 0) as total FROM costs WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
       [trip_id]
     )
 
-    const totalPlanned = locationCostsPlanned.total + costTablePlanned.total
+    const totalPlanned = locationCostsPlanned.total
     const totalSpent = locationCostsActual.total + costTableActual.total
 
     // Update progress

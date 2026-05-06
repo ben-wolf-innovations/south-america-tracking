@@ -28,7 +28,17 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41]
 })
 
-// Create custom blue icon for other locations
+// Create custom green icon for visited locations
+const greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+})
+
+// Create custom blue icon for planned locations
 const blueIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
   shadowUrl: markerShadow,
@@ -110,8 +120,13 @@ export default function Map() {
   return (
     <div className="map-page">
       <div className="map-header">
-        <h2>🗺️ Route Map</h2>
-        <p className="subtitle">{validLocations.length} locations across South America</p>
+        <div>
+          <h2>🗺️ Route Map</h2>
+          <p className="subtitle">{validLocations.length} locations across South America</p>
+        </div>
+        <button onClick={loadLocations} className="reload-button" title="Reload map data">
+          🔄 Reload Map
+        </button>
       </div>
 
       <div className="map-legend">
@@ -157,49 +172,79 @@ export default function Map() {
           {/* Location markers */}
           {validLocations.map((location) => {
             const isCurrent = location.is_current === 1
+            // Location is visited if departure date is in the past
+            const isVisited = location.departure_date && new Date(location.departure_date) < new Date()
+            
+            // Determine icon: red for current, green for visited, blue for planned
+            let markerIcon = blueIcon // Default: planned (not visited)
+            if (isCurrent) {
+              markerIcon = redIcon // Current location
+            } else if (isVisited) {
+              markerIcon = greenIcon // Visited (but not current)
+            }
+            
             return (
               <Marker
                 key={location.id}
                 position={[location.latitude, location.longitude]}
-                icon={isCurrent ? redIcon : blueIcon}
+                icon={markerIcon}
               >
                 <Popup>
                   <div className="location-popup">
                     <h3>{location.name}</h3>
                     <p className="country">{location.country}</p>
                     
-                    {location.is_current && (
+                    {isCurrent && (
                       <div className="current-badge">📍 Current Location</div>
                     )}
                     
-                    {location.nights > 0 && (
-                      <p className="detail">🛏️ {location.nights} night{location.nights > 1 ? 's' : ''}</p>
+                    {isVisited && !isCurrent && (
+                      <div className="visited-badge">✅ Visited</div>
                     )}
                     
-                    {location.accommodation_name && (
-                      <p className="detail">🏨 {location.accommodation_name}</p>
-                    )}
+                    <div className="popup-details">
+                      {location.nights > 0 && (
+                        <p className="detail">
+                          <strong>🛏️ Stay:</strong> {location.nights} night{location.nights > 1 ? 's' : ''}
+                        </p>
+                      )}
+                      
+                      {location.accommodation_name && (
+                        <p className="detail">
+                          <strong>🏨 Hotel:</strong> {location.accommodation_name}
+                        </p>
+                      )}
+                      
+                      {(location.arrival_date || location.departure_date) && (
+                        <p className="detail">
+                          <strong>📅 Dates:</strong>{' '}
+                          {location.arrival_date 
+                            ? new Date(location.arrival_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : 'TBD'
+                          }
+                          {' - '}
+                          {location.departure_date 
+                            ? new Date(location.departure_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : 'TBD'
+                          }
+                        </p>
+                      )}
+                      
+                      {location.activities && (
+                        <p className="detail activities">
+                          <strong>✨ Activities:</strong><br />
+                          {location.activities}
+                        </p>
+                      )}
+                    </div>
                     
-                    {location.arrival_date && (
-                      <p className="detail">
-                        📅 {new Date(location.arrival_date).toLocaleDateString()}
-                        {location.departure_date && 
-                          ` - ${new Date(location.departure_date).toLocaleDateString()}`
-                        }
-                      </p>
-                    )}
-                    
-                    {isAdmin() && !location.is_current && (
+                    {isAdmin() && !isCurrent && (
                       <button 
                         onClick={() => handleCheckIn(location.id)}
                         className="checkin-button"
                       >
                         📍 Check In Here
                       </button>
-                    )}
-                    
-                    {location.activities && (
-                      <p className="detail activities">✨ {location.activities}</p>
                     )}
                   </div>
                 </Popup>

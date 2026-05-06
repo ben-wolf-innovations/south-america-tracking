@@ -144,6 +144,42 @@
   resize: vertical;
 }
 
+.date-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-input-group input {
+  flex: 1;
+}
+
+.clear-date-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.clear-date-btn:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+.clear-date-btn:active {
+  transform: scale(0.95);
+}
+
 .form-actions {
   display: flex;
   gap: 12px;

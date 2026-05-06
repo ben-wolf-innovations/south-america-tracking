@@ -95,19 +95,23 @@ export function run(sql, params = []) {
     const stmt = database.prepare(sql)
     stmt.bind(params)
     stmt.step()
+    const changes = database.getRowsModified()
     stmt.free()
+    
+    // Get the last inserted ID immediately after the statement
+    let lastID = 0
+    const lastIdStmt = database.prepare('SELECT last_insert_rowid() as lastID')
+    if (lastIdStmt.step()) {
+      const result = lastIdStmt.getAsObject()
+      lastID = result.lastID
+    }
+    lastIdStmt.free()
     
     saveDatabase()  // Auto-save after writes
     
-    // Get the last inserted ID
-    const lastIdStmt = database.prepare('SELECT last_insert_rowid() as lastID')
-    lastIdStmt.step()
-    const result = lastIdStmt.getAsObject()
-    lastIdStmt.free()
-    
     return { 
-      changes: database.getRowsModified(),
-      lastID: result.lastID
+      changes: changes,
+      lastID: lastID
     }
   } catch (error) {
     console.error('SQL Error:', error.message)

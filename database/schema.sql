@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS locations (
     is_current BOOLEAN DEFAULT 0, -- Mark current location
     visited BOOLEAN DEFAULT 0, -- Mark if actually visited
     visited_date TEXT,
+    deleted BOOLEAN DEFAULT 0, -- Soft delete flag
     
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now')),
@@ -74,6 +75,7 @@ CREATE INDEX IF NOT EXISTS idx_locations_current ON locations(is_current);
 
 -- Costs table: detailed expense tracking
 -- Allows multiple cost entries per location and category
+-- Note: Planned/budgeted costs are tracked in the locations table
 CREATE TABLE IF NOT EXISTS costs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     trip_id INTEGER NOT NULL,
@@ -82,13 +84,13 @@ CREATE TABLE IF NOT EXISTS costs (
     category TEXT NOT NULL, -- 'accommodation', 'activities', 'food', 'travel', 'other'
     description TEXT,
     
-    amount_planned REAL DEFAULT 0,
     amount_actual REAL,
     currency TEXT DEFAULT 'GBP',
     
     date TEXT, -- ISO 8601 date when cost incurred
     
     notes TEXT,
+    deleted BOOLEAN DEFAULT 0, -- Soft delete flag
     created_at TEXT DEFAULT (datetime('now')),
     
     FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,

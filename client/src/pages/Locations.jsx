@@ -99,6 +99,13 @@ export default function Locations() {
     }))
   }
 
+  const clearDateField = (fieldName) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: ''
+    }))
+  }
+
   const handleAddLocation = async (e) => {
     e.preventDefault()
     try {
@@ -109,7 +116,13 @@ export default function Locations() {
           if (['nights', 'sequence'].includes(key)) {
             payload[key] = parseInt(formData[key]) || 0
           } else if (['latitude', 'longitude', 'accommodation_cost_planned', 'activities_cost_planned', 'food_drink_cost_planned', 'travel_cost_planned', 'travel_duration'].includes(key)) {
-            payload[key] = parseFloat(formData[key]) || 0
+            // Round cost values to 2 decimal places to avoid floating point precision issues
+            const costFields = ['accommodation_cost_planned', 'activities_cost_planned', 'food_drink_cost_planned', 'travel_cost_planned']
+            if (costFields.includes(key)) {
+              payload[key] = Math.round(parseFloat(formData[key]) * 100) / 100 || 0
+            } else {
+              payload[key] = parseFloat(formData[key]) || 0
+            }
           } else {
             payload[key] = formData[key]
           }
@@ -130,11 +143,22 @@ export default function Locations() {
     try {
       const payload = {}
       Object.keys(formData).forEach(key => {
-        if (formData[key] !== '' && formData[key] !== null && key !== 'sequence') {
+        // Always include date fields (even if empty, send as null to clear them)
+        if (key === 'arrival_date' || key === 'departure_date') {
+          payload[key] = formData[key] || null
+        }
+        // For other fields, only include if not empty
+        else if (formData[key] !== '' && formData[key] !== null && key !== 'sequence') {
           if (['nights'].includes(key)) {
             payload[key] = parseInt(formData[key]) || 0
           } else if (['latitude', 'longitude', 'accommodation_cost_planned', 'activities_cost_planned', 'food_drink_cost_planned', 'travel_cost_planned', 'travel_duration'].includes(key)) {
-            payload[key] = parseFloat(formData[key]) || 0
+            // Round cost values to 2 decimal places to avoid floating point precision issues
+            const costFields = ['accommodation_cost_planned', 'activities_cost_planned', 'food_drink_cost_planned', 'travel_cost_planned']
+            if (costFields.includes(key)) {
+              payload[key] = Math.round(parseFloat(formData[key]) * 100) / 100 || 0
+            } else {
+              payload[key] = parseFloat(formData[key]) || 0
+            }
           } else {
             payload[key] = formData[key]
           }
@@ -199,6 +223,14 @@ export default function Locations() {
 
       await api.put(`/locations/${locationId}/reorder`, { new_sequence: newSequence })
       await loadLocations()
+      
+      // Scroll to the moved location after reload
+      setTimeout(() => {
+        const element = document.getElementById(`location-${locationId}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 100)
     } catch (err) {
       console.error('Failed to reorder location:', err)
       alert('Failed to reorder location: ' + (err.response?.data?.error || err.message))
@@ -332,21 +364,45 @@ export default function Locations() {
               <div className="form-grid">
                 <div className="form-field">
                   <label>Arrival Date</label>
-                  <input
-                    type="date"
-                    name="arrival_date"
-                    value={formData.arrival_date}
-                    onChange={handleInputChange}
-                  />
+                  <div className="date-input-group">
+                    <input
+                      type="date"
+                      name="arrival_date"
+                      value={formData.arrival_date}
+                      onChange={handleInputChange}
+                    />
+                    {formData.arrival_date && (
+                      <button
+                        type="button"
+                        className="clear-date-btn"
+                        onClick={() => clearDateField('arrival_date')}
+                        title="Clear date"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="form-field">
                   <label>Departure Date</label>
-                  <input
-                    type="date"
-                    name="departure_date"
-                    value={formData.departure_date}
-                    onChange={handleInputChange}
-                  />
+                  <div className="date-input-group">
+                    <input
+                      type="date"
+                      name="departure_date"
+                      value={formData.departure_date}
+                      onChange={handleInputChange}
+                    />
+                    {formData.departure_date && (
+                      <button
+                        type="button"
+                        className="clear-date-btn"
+                        onClick={() => clearDateField('departure_date')}
+                        title="Clear date"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -435,7 +491,6 @@ export default function Locations() {
                 </div>
               </div>
             </div>
-            </div>
 
             <div className="form-section">
               <h4>Budget Planning</h4>
@@ -507,7 +562,7 @@ export default function Locations() {
           const isEditing = editingLocation?.id === location.id
           
           return (
-          <div key={location.id} className={`location-card ${isEditing ? 'editing' : ''}`}>
+          <div key={location.id} id={`location-${location.id}`} className={`location-card ${isEditing ? 'editing' : ''}`}>
             <div className="location-card-header">
               <div className="location-sequence">#{location.sequence}</div>
               <div className="location-main">
@@ -739,21 +794,45 @@ export default function Locations() {
                   <div className="form-grid">
                     <div className="form-field">
                       <label>Arrival Date</label>
-                      <input
-                        type="date"
-                        name="arrival_date"
-                        value={formData.arrival_date}
-                        onChange={handleInputChange}
-                      />
+                      <div className="date-input-group">
+                        <input
+                          type="date"
+                          name="arrival_date"
+                          value={formData.arrival_date}
+                          onChange={handleInputChange}
+                        />
+                        {formData.arrival_date && (
+                          <button
+                            type="button"
+                            className="clear-date-btn"
+                            onClick={() => clearDateField('arrival_date')}
+                            title="Clear date"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="form-field">
                       <label>Departure Date</label>
-                      <input
-                        type="date"
-                        name="departure_date"
-                        value={formData.departure_date}
-                        onChange={handleInputChange}
-                      />
+                      <div className="date-input-group">
+                        <input
+                          type="date"
+                          name="departure_date"
+                          value={formData.departure_date}
+                          onChange={handleInputChange}
+                        />
+                        {formData.departure_date && (
+                          <button
+                            type="button"
+                            className="clear-date-btn"
+                            onClick={() => clearDateField('departure_date')}
+                            title="Clear date"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

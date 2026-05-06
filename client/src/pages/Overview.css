@@ -206,6 +206,120 @@
   transition: width 0.6s ease;
 }
 
+/* Trip Info Card */
+.trip-info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.trip-info-card h3 {
+  font-size: 24px;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.trip-description {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.trip-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.date-field label {
+  font-weight: 600;
+  color: #475569;
+  min-width: 100px;
+}
+
+.date-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-display span {
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.btn-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 4px 8px;
+}
+
+.btn-edit:hover {
+  opacity: 1;
+}
+
+.date-edit-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.date-edit-group input[type="date"] {
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.date-edit-group input[type="date"]:focus {
+  border-color: var(--primary-color);
+}
+
+.btn-save {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #1e40af;
+}
+
+.btn-cancel {
+  background: #e2e8f0;
+  color: #64748b;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #cbd5e1;
+}
+
 @media (max-width: 768px) {
   .overview-header h2 {
     font-size: 26px;

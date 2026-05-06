@@ -1,10 +1,54 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import api from '../config/api'
 import './Dashboard.css'
 
 export default function Dashboard() {
   const { user, logout, isAdmin } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [footerStats, setFooterStats] = useState(null)
+
+  useEffect(() => {
+    loadFooterStats()
+  }, [])
+
+  // Reload footer stats when route changes (in case data was updated)
+  useEffect(() => {
+    loadFooterStats()
+  }, [location.pathname])
+
+  // Listen for trip update events
+  useEffect(() => {
+    const handleTripUpdate = () => {
+      loadFooterStats()
+    }
+    window.addEventListener('tripUpdated', handleTripUpdate)
+    return () => window.removeEventListener('tripUpdated', handleTripUpdate)
+  }, [])
+
+  const loadFooterStats = async () => {
+    try {
+      const [tripRes, locationsRes] = await Promise.all([
+        api.get('/trips/1'),
+        api.get('/locations')
+      ])
+
+      const trip = tripRes.data.data
+      const locations = locationsRes.data.data
+
+      setFooterStats({
+        startDate: trip.start_date,
+        endDate: trip.end_date,
+        totalLocations: locations.length,
+        totalDays: locations.reduce((sum, l) => sum + (l.nights || 0), 0),
+        countries: [...new Set(locations.map(l => l.country))].length
+      })
+    } catch (err) {
+      console.error('Failed to load footer stats:', err)
+    }
+  }
 
   const handleLogout = () => {
     logout()
@@ -38,20 +82,19 @@ export default function Dashboard() {
           <Link to="/map" className="nav-link">
             🗺️ Map
           </Link>
-          <Link to="/locations" className="nav-link">
-            📍 Locations
-          </Link>
-          <Link to="/costs" className="nav-link">
-            💰 Costs
-          </Link>
+          {isAdmin() && (
+            <Link to="/locations" className="nav-link">
+              📍 Locations
+            </Link>
+          )}
+          {isAdmin() && (
+            <Link to="/costs" className="nav-link">
+              💰 Costs
+            </Link>
+          )}
           <Link to="/blog" className="nav-link">
             📝 Blog
           </Link>
-          {isAdmin() && (
-            <Link to="/progress" className="nav-link">
-              🎯 Progress
-            </Link>
-          )}
         </div>
       </nav>
 
@@ -60,7 +103,16 @@ export default function Dashboard() {
       </main>
 
       <footer className="dashboard-footer">
-        <p>Sep 2026 - Dec 2026 | 5 Countries | 43 Locations | 103 Days</p>
+        {footerStats ? (
+          <p>
+            Nov 2026 - April 2027 | 
+            {' '}{footerStats.countries} Countries | 
+            {' '}{footerStats.totalLocations} Locations | 
+            {' '}{footerStats.totalDays} Days
+          </p>
+        ) : (
+          <p>Loading trip info...</p>
+        )}
       </footer>
     </div>
   )

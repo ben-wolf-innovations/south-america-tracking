@@ -7,6 +7,7 @@ const router = express.Router()
 /**
  * Helper function to sync cost changes back to location
  * Updates location's actual cost fields when accommodation, travel, activities, or food/drink costs are modified
+ * Recalculates based on non-deleted costs only
  */
 function syncCostToLocation(cost) {
   if (!cost.location_id) return // Only sync costs linked to locations
@@ -21,11 +22,19 @@ function syncCostToLocation(cost) {
   const fieldName = categoryFieldMap[cost.category]
   if (!fieldName) return // Only sync supported categories
 
+  // Sum all non-deleted costs for this category and location
+  const total = get(
+    `SELECT SUM(amount_actual) as total
+     FROM costs
+     WHERE location_id = ? AND category = ? AND (deleted IS NULL OR deleted = 0)`,
+    [cost.location_id, cost.category]
+  )
+
   run(
     `UPDATE locations 
      SET ${fieldName} = ? 
      WHERE id = ?`,
-    [cost.amount_actual || null, cost.location_id]
+    [total?.total || null, cost.location_id]
   )
 }
 
@@ -37,7 +46,7 @@ router.get('/', authenticateToken, (req, res) => {
   try {
     const { trip_id = 1, location_id, category } = req.query
     
-    let sql = 'SELECT * FROM costs WHERE trip_id = ?'
+    let sql = 'SELECT * FROM costs WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)'
     const params = [trip_id]
 
     if (location_id) {
@@ -68,29 +77,37 @@ router.get('/summary', authenticateToken, (req, res) => {
   try {
     const { trip_id = 1 } = req.query
 
+    // Get actual costs from costs table (non-deleted only)
     const summary = all(
       `SELECT 
         category,
         COUNT(*) as count,
-        SUM(amount_planned) as total_planned,
         SUM(amount_actual) as total_actual,
         currency
        FROM costs
-       WHERE trip_id = ?
+       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
        GROUP BY category, currency
        ORDER BY category`,
       [trip_id]
     )
 
-    // Also get location-based costs from locations table
-    const locationCosts = get(
+    // Get budgeted costs from locations table (non-deleted only)
+    const locationBudgets = get(
       `SELECT 
         SUM(accommodation_cost_planned) + SUM(activities_cost_planned) + 
-        SUM(food_drink_cost_planned * nights) + SUM(travel_cost_planned) as total_planned,
+        SUM(food_drink_cost_planned * nights) + SUM(travel_cost_planned) as total_planned
+       FROM locations
+       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
+      [trip_id]
+    )
+
+    // Get actual costs from locations table (synced from costs, non-deleted only)
+    const locationActuals = get(
+      `SELECT 
         SUM(COALESCE(accommodation_cost_actual, 0)) + SUM(COALESCE(activities_cost_actual, 0)) + 
         SUM(COALESCE(food_drink_cost_actual, 0) * nights) + SUM(COALESCE(travel_cost_actual, 0)) as total_actual
        FROM locations
-       WHERE trip_id = ?`,
+       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
       [trip_id]
     )
 
@@ -98,7 +115,8 @@ router.get('/summary', authenticateToken, (req, res) => {
       success: true, 
       data: {
         by_category: summary,
-        location_costs: locationCosts
+        location_budgets: locationBudgets,
+        location_actuals: locationActuals
       }
     })
   } catch (error) {
@@ -113,7 +131,7 @@ router.get('/summary', authenticateToken, (req, res) => {
  */
 router.get('/:id', authenticateToken, (req, res) => {
   try {
-    const cost = get('SELECT * FROM costs WHERE id = ?', [req.params.id])
+    const cost = get('SELECT * FROM costs WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [req.params.id])
     
     if (!cost) {
       return res.status(404).json({ success: false, error: 'Cost entry not found' })
@@ -139,7 +157,6 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       location_id,
       category,
       description,
-      amount_planned,
       amount_actual,
       currency = 'GBP',
       date,
@@ -163,40 +180,39 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
     }
 
     // Convert undefined and empty strings to null for SQL compatibility
-    console.log('Received data:', { location_id, amount_planned, amount_actual, date, notes })
-    
     const cleanedLocationId = location_id && location_id !== '' ? parseInt(location_id) : null
-    const cleanedAmountPlanned = amount_planned && amount_planned !== '' ? parseFloat(amount_planned) : 0
-    const cleanedAmountActual = amount_actual && amount_actual !== '' ? parseFloat(amount_actual) : null
+    // Round to 2 decimal places to avoid floating point precision issues
+    const cleanedAmountActual = amount_actual && amount_actual !== '' ? Math.round(parseFloat(amount_actual) * 100) / 100 : null
     const cleanedDate = date && date !== '' ? date : null
     const cleanedNotes = notes && notes !== '' ? notes : null
-    
-    console.log('Cleaned data:', { cleanedLocationId, cleanedAmountPlanned, cleanedAmountActual, cleanedDate, cleanedNotes })
     
     const sqlParams = [
       trip_id,
       cleanedLocationId,
       category,
       description,
-      cleanedAmountPlanned,
       cleanedAmountActual,
       currency,
       cleanedDate,
       cleanedNotes
     ]
     
-    console.log('SQL Parameters:', sqlParams)
-    console.log('SQL Parameters types:', sqlParams.map(p => typeof p))
-    
     const result = run(
       `INSERT INTO costs (
         trip_id, location_id, category, description,
-        amount_planned, amount_actual, currency, date, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        amount_actual, currency, date, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       sqlParams
     )
-
+    
     const newCost = get('SELECT * FROM costs WHERE id = ?', [result.lastID])
+    
+    if (!newCost) {
+      // Try to see all costs to debug
+      const allCosts = all('SELECT * FROM costs ORDER BY id DESC LIMIT 5')
+      console.log('Recent costs:', allCosts)
+      throw new Error(`Failed to retrieve created cost with ID ${result.lastID}`)
+    }
     
     // Sync to location if applicable
     syncCostToLocation(newCost)
@@ -218,7 +234,7 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     const updates = req.body
 
     // Check if cost exists
-    const existing = get('SELECT * FROM costs WHERE id = ?', [id])
+    const existing = get('SELECT * FROM costs WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
     if (!existing) {
       return res.status(404).json({ success: false, error: 'Cost entry not found' })
     }
@@ -226,7 +242,7 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     // Build dynamic UPDATE query
     const allowedFields = [
       'location_id', 'category', 'description',
-      'amount_planned', 'amount_actual', 'currency', 'date', 'notes'
+      'amount_actual', 'currency', 'date', 'notes'
     ]
 
     const fields = []
@@ -235,8 +251,13 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     for (const [key, value] of Object.entries(updates)) {
       if (allowedFields.includes(key)) {
         fields.push(`${key} = ?`)
-        // Convert undefined to null for SQL compatibility
-        values.push(value ?? null)
+        // Round monetary values to 2 decimal places to avoid floating point precision issues
+        if (key === 'amount_actual' && value != null && value !== '') {
+          values.push(Math.round(parseFloat(value) * 100) / 100)
+        } else {
+          // Convert undefined to null for SQL compatibility
+          values.push(value ?? null)
+        }
       }
     }
 
@@ -262,18 +283,22 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
 
 /**
  * DELETE /api/costs/:id
- * Delete a cost entry (admin only)
+ * Soft delete a cost entry (admin only)
  */
 router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
   try {
     const { id } = req.params
 
-    const existing = get('SELECT * FROM costs WHERE id = ?', [id])
+    const existing = get('SELECT * FROM costs WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
     if (!existing) {
       return res.status(404).json({ success: false, error: 'Cost entry not found' })
     }
 
-    run('DELETE FROM costs WHERE id = ?', [id])
+    // Soft delete: set deleted flag to 1
+    run('UPDATE costs SET deleted = 1 WHERE id = ?', [id])
+
+    // Resync the location's actual costs (recalculate without this cost)
+    syncCostToLocation(existing)
 
     res.json({ 
       success: true, 

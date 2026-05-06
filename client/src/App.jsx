@@ -10,9 +10,6 @@ import Costs from './pages/Costs'
 import Blog from './pages/Blog'
 import './App.css'
 
-// Placeholder components - will be implemented next
-const ProgressPage = () => <div style={{ padding: '40px' }}><h2>🎯 Progress</h2><p>Coming soon...</p></div>
-
 function App() {
   return (
     <AuthProvider>
@@ -26,14 +23,17 @@ function App() {
         }>
           <Route index element={<Overview />} />
           <Route path="map" element={<Map />} />
-          <Route path="locations" element={<Locations />} />
-          <Route path="costs" element={<Costs />} />
-          <Route path="blog" element={<Blog />} />
-          <Route path="progress" element={
+          <Route path="locations" element={
             <ProtectedRoute requireAdmin>
-              <ProgressPage />
+              <Locations />
             </ProtectedRoute>
           } />
+          <Route path="costs" element={
+            <ProtectedRoute requireAdmin>
+              <Costs />
+            </ProtectedRoute>
+          } />
+          <Route path="blog" element={<Blog />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

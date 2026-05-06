@@ -13,7 +13,7 @@ router.get('/', authenticateToken, (req, res) => {
     const tripId = req.query.trip_id || 1 // Default to trip 1
     const locations = all(
       `SELECT * FROM locations 
-       WHERE trip_id = ? 
+       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
        ORDER BY sequence ASC`,
       [tripId]
     )
@@ -31,7 +31,7 @@ router.get('/', authenticateToken, (req, res) => {
 router.get('/:id', authenticateToken, (req, res) => {
   try {
     const location = get(
-      'SELECT * FROM locations WHERE id = ?',
+      'SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)',
       [req.params.id]
     )
     
@@ -88,65 +88,51 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
-    transaction((db) => {
-      let finalSequence
+    let finalSequence
 
-      if (sequence !== undefined) {
-        // Insert at specific position - shift all subsequent locations
-        db.run(
-          'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ?',
-          [trip_id, sequence]
-        )
-        finalSequence = sequence
-      } else {
-        // Append to end
-        const maxSeqResult = db.exec(
-          'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ?',
-          [trip_id]
-        )
-        finalSequence = maxSeqResult.length > 0 && maxSeqResult[0].values.length > 0 
-          ? maxSeqResult[0].values[0][0] + 1 
-          : 1
-      }
-
-      // Insert the new location
-      db.run(
-        `INSERT INTO locations (
-          trip_id, sequence, name, country, latitude, longitude, nights,
-          arrival_date, departure_date, accommodation_name,
-          accommodation_cost_planned, accommodation_cost_actual,
-          accommodation_notes, accommodation_booking_ref,
-          activities, activities_cost_planned, activities_cost_actual,
-          food_drink_cost_planned, food_drink_cost_actual,
-          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          trip_id, finalSequence, name, country, latitude, longitude, nights,
-          arrival_date, departure_date, accommodation_name,
-          accommodation_cost_planned, accommodation_cost_actual,
-          accommodation_notes, accommodation_booking_ref,
-          activities, activities_cost_planned, activities_cost_actual,
-          food_drink_cost_planned, food_drink_cost_actual,
-          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
-        ]
+    if (sequence !== undefined && sequence > 0) {
+      // Insert at specific position - shift all subsequent locations
+      // To avoid UNIQUE constraint, shift existing items up by 1
+      run(
+        'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ? AND (deleted IS NULL OR deleted = 0)',
+        [trip_id, sequence]
       )
+      finalSequence = sequence
+    } else {
+      // Append to end
+      const maxSeqResult = get(
+        'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
+        [trip_id]
+      )
+      finalSequence = (maxSeqResult?.max_seq || 0) + 1
+    }
 
-      // Get the inserted location ID
-      const lastIdResult = db.exec('SELECT last_insert_rowid() as id')
-      const newId = lastIdResult[0].values[0][0]
+    // Insert the new location
+    const result = run(
+      `INSERT INTO locations (
+        trip_id, sequence, name, country, latitude, longitude, nights,
+        arrival_date, departure_date, accommodation_name,
+        accommodation_cost_planned, accommodation_cost_actual,
+        accommodation_notes, accommodation_booking_ref,
+        activities, activities_cost_planned, activities_cost_actual,
+        food_drink_cost_planned, food_drink_cost_actual,
+        travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        trip_id, finalSequence, name, country, latitude, longitude, nights,
+        arrival_date, departure_date, accommodation_name,
+        accommodation_cost_planned, accommodation_cost_actual,
+        accommodation_notes, accommodation_booking_ref,
+        activities, activities_cost_planned, activities_cost_actual,
+        food_drink_cost_planned, food_drink_cost_actual,
+        travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
+      ]
+    )
 
-      // Get the inserted location
-      const newLocationResult = db.exec('SELECT * FROM locations WHERE id = ?', [newId])
-      const columns = newLocationResult[0].columns
-      const values = newLocationResult[0].values[0]
-      
-      const newLocation = {}
-      columns.forEach((col, idx) => {
-        newLocation[col] = values[idx]
-      })
-      
-      res.status(201).json({ success: true, data: newLocation })
-    })
+    // Get the inserted location
+    const newLocation = get('SELECT * FROM locations WHERE id = ?', [result.lastID])
+    
+    res.status(201).json({ success: true, data: newLocation })
   } catch (error) {
     console.error('Error creating location:', error)
     res.status(500).json({ success: false, error: error.message })
@@ -163,7 +149,7 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     const updates = req.body
 
     // Check if location exists
-    const existing = get('SELECT * FROM locations WHERE id = ?', [id])
+    const existing = get('SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
     if (!existing) {
       return res.status(404).json({ success: false, error: 'Location not found' })
     }
@@ -186,7 +172,13 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     for (const [key, value] of Object.entries(updates)) {
       if (allowedFields.includes(key)) {
         fields.push(`${key} = ?`)
-        values.push(value)
+        // Round monetary cost fields to 2 decimal places to avoid floating point precision issues
+        const costFields = ['accommodation_cost_planned', 'accommodation_cost_actual', 'activities_cost_planned', 'activities_cost_actual', 'food_drink_cost_planned', 'food_drink_cost_actual', 'travel_cost_planned', 'travel_cost_actual']
+        if (costFields.includes(key) && value != null && value !== '') {
+          values.push(Math.round(parseFloat(value) * 100) / 100)
+        } else {
+          values.push(value)
+        }
       }
     }
 
@@ -228,56 +220,52 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
-    const location = get('SELECT * FROM locations WHERE id = ?', [id])
+    const location = get('SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
     if (!location) {
       return res.status(404).json({ success: false, error: 'Location not found' })
     }
 
-    transaction((db) => {
-      const oldSequence = location.sequence
-      const tripId = location.trip_id
+    const oldSequence = location.sequence
+    const tripId = location.trip_id
 
-      if (oldSequence === new_sequence) {
-        // No change needed
-        return res.json({ success: true, data: location })
-      }
+    if (oldSequence === new_sequence) {
+      // No change needed
+      return res.json({ success: true, data: location })
+    }
 
-      if (new_sequence > oldSequence) {
-        // Moving down: shift items between old and new position up
-        db.run(
-          `UPDATE locations 
-           SET sequence = sequence - 1 
-           WHERE trip_id = ? AND sequence > ? AND sequence <= ?`,
-          [tripId, oldSequence, new_sequence]
-        )
-      } else {
-        // Moving up: shift items between new and old position down
-        db.run(
-          `UPDATE locations 
-           SET sequence = sequence + 1 
-           WHERE trip_id = ? AND sequence >= ? AND sequence < ?`,
-          [tripId, new_sequence, oldSequence]
-        )
-      }
+    // To avoid UNIQUE constraint violations, we use a three-step process:
+    // 1. Move target to a temporary negative value
+    // 2. Shift other items
+    // 3. Move target to final position
+    
+    // Step 1: Move target to temporary negative sequence
+    run('UPDATE locations SET sequence = ? WHERE id = ?', [-1, id])
 
-      // Update the target location
-      db.run(
-        'UPDATE locations SET sequence = ? WHERE id = ?',
-        [new_sequence, id]
+    if (new_sequence > oldSequence) {
+      // Moving down: shift items between old and new position up
+      run(
+        `UPDATE locations 
+         SET sequence = sequence - 1 
+         WHERE trip_id = ? AND sequence > ? AND sequence <= ? AND id != ?`,
+        [tripId, oldSequence, new_sequence, id]
       )
+    } else {
+      // Moving up: shift items between new and old position down
+      run(
+        `UPDATE locations 
+         SET sequence = sequence + 1 
+         WHERE trip_id = ? AND sequence >= ? AND sequence < ? AND id != ?`,
+        [tripId, new_sequence, oldSequence, id]
+      )
+    }
 
-      // Fetch updated location
-      const updatedResult = db.exec('SELECT * FROM locations WHERE id = ?', [id])
-      const columns = updatedResult[0].columns
-      const values = updatedResult[0].values[0]
-      
-      const updated = {}
-      columns.forEach((col, idx) => {
-        updated[col] = values[idx]
-      })
-      
-      res.json({ success: true, data: updated })
-    })
+    // Step 3: Move target to final position
+    run('UPDATE locations SET sequence = ? WHERE id = ?', [new_sequence, id])
+
+    // Fetch updated location
+    const updated = get('SELECT * FROM locations WHERE id = ?', [id])
+    
+    res.json({ success: true, data: updated })
   } catch (error) {
     console.error('Error reordering location:', error)
     res.status(500).json({ success: false, error: error.message })
@@ -286,34 +274,24 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
 
 /**
  * DELETE /api/locations/:id
- * Delete a location and resequence remaining locations (admin only)
+ * Soft delete a location (admin only)
  */
 router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
   try {
     const { id } = req.params
 
-    const location = get('SELECT * FROM locations WHERE id = ?', [id])
+    const location = get('SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
     if (!location) {
       return res.status(404).json({ success: false, error: 'Location not found' })
     }
 
-    transaction((db) => {
-      // Delete the location
-      db.run('DELETE FROM locations WHERE id = ?', [id])
+    // Soft delete: set deleted flag to 1
+    run('UPDATE locations SET deleted = 1 WHERE id = ?', [id])
 
-      // Resequence remaining locations
-      db.run(
-        `UPDATE locations 
-         SET sequence = sequence - 1 
-         WHERE trip_id = ? AND sequence > ?`,
-        [location.trip_id, location.sequence]
-      )
-
-      res.json({ 
-        success: true, 
-        message: 'Location deleted successfully',
-        deleted_id: id 
-      })
+    res.json({ 
+      success: true, 
+      message: 'Location deleted successfully',
+      deleted_id: id 
     })
   } catch (error) {
     console.error('Error deleting location:', error)

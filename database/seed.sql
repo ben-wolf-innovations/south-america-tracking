@@ -2,8 +2,8 @@
 -- Based on actual itinerary CSV
 
 -- Insert main trip
-INSERT INTO trips (id, name, description, start_date, status) VALUES 
-(1, 'South America Adventure 2026', 'Epic 6-month journey across Peru, Ecuador, Bolivia, Chile, and Argentina', '2026-09-01', 'planning');
+INSERT INTO trips (id, name, description, start_date, end_date, status) VALUES 
+(1, 'South America Adventure 2026', 'Epic 6-month journey across Peru, Ecuador, Bolivia, Chile, and Argentina', '2026-11-01', '2027-04-30', 'planning');
 
 -- Insert locations based on CSV data
 -- Note: Some locations combined or simplified for initial seed
