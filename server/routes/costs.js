@@ -6,26 +6,27 @@ const router = express.Router()
 
 /**
  * Helper function to sync cost changes back to location
- * Updates location's cost fields when accommodation or travel costs are modified
+ * Updates location's actual cost fields when accommodation, travel, activities, or food/drink costs are modified
  */
 function syncCostToLocation(cost) {
   if (!cost.location_id) return // Only sync costs linked to locations
 
-  if (cost.category === 'accommodation') {
-    run(
-      `UPDATE locations 
-       SET accommodation_cost_planned = ?, accommodation_cost_actual = ? 
-       WHERE id = ?`,
-      [cost.amount_planned || 0, cost.amount_actual || null, cost.location_id]
-    )
-  } else if (cost.category === 'travel') {
-    run(
-      `UPDATE locations 
-       SET travel_cost_planned = ?, travel_cost_actual = ? 
-       WHERE id = ?`,
-      [cost.amount_planned || 0, cost.amount_actual || null, cost.location_id]
-    )
+  const categoryFieldMap = {
+    'accommodation': 'accommodation_cost_actual',
+    'travel': 'travel_cost_actual',
+    'activities': 'activities_cost_actual',
+    'food': 'food_drink_cost_actual'
   }
+
+  const fieldName = categoryFieldMap[cost.category]
+  if (!fieldName) return // Only sync supported categories
+
+  run(
+    `UPDATE locations 
+     SET ${fieldName} = ? 
+     WHERE id = ?`,
+    [cost.amount_actual || null, cost.location_id]
+  )
 }
 
 /**

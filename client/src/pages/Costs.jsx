@@ -36,7 +36,6 @@ export default function Costs() {
     location_id: '',
     category: '',
     description: '',
-    amount_planned: '',
     amount_actual: '',
     date: ''
   })
@@ -70,7 +69,6 @@ export default function Costs() {
       location_id: '',
       category: '',
       description: '',
-      amount_planned: '',
       amount_actual: '',
       date: ''
     })
@@ -92,7 +90,6 @@ export default function Costs() {
       const payload = {
         ...formData,
         location_id: formData.location_id ? parseInt(formData.location_id) : null,
-        amount_planned: formData.amount_planned ? parseFloat(formData.amount_planned) : 0,
         amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0
       }
 
@@ -111,7 +108,6 @@ export default function Costs() {
       const payload = {
         ...formData,
         location_id: formData.location_id ? parseInt(formData.location_id) : null,
-        amount_planned: formData.amount_planned ? parseFloat(formData.amount_planned) : 0,
         amount_actual: formData.amount_actual ? parseFloat(formData.amount_actual) : 0
       }
 
@@ -129,7 +125,6 @@ export default function Costs() {
       location_id: cost.location_id || '',
       category: cost.category || '',
       description: cost.description || '',
-      amount_planned: cost.amount_planned || '',
       amount_actual: cost.amount_actual || '',
       date: cost.date || ''
     })
@@ -309,25 +304,14 @@ export default function Costs() {
               </div>
 
               <div className="form-field">
-                <label>Planned Amount (£)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  name="amount_planned"
-                  value={formData.amount_planned}
-                  onChange={handleInputChange}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="form-field">
-                <label>Actual Amount (£)</label>
+                <label>Amount (£) *</label>
                 <input
                   type="number"
                   step="0.01"
                   name="amount_actual"
                   value={formData.amount_actual}
                   onChange={handleInputChange}
+                  required
                   placeholder="0.00"
                 />
               </div>
