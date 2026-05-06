@@ -46,7 +46,9 @@ router.post('/login', async (req, res) => {
 
     res.json({
       token,
-      accessLevel,
+      user: {
+        accessLevel
+      },
       expiresIn: JWT_EXPIRES_IN
     })
   } catch (error) {
