@@ -49,12 +49,20 @@ Optional:
    ```bash
    npm run install:all
    ```
+   Or install individually:
+   ```bash
+   npm install          # Root dependencies
+   cd client && npm install
+   cd ../server && npm install
+   ```
 
 3. **Set up environment variables**
    ```bash
    # Copy example files and customize
    cp client/.env.example client/.env
    cp server/.env.example server/.env
+   
+   # Edit the .env files with your preferred PINs and settings
    ```
 
 4. **Initialize the database** (coming soon)
@@ -69,6 +77,19 @@ Optional:
    ```
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3000
+
+## ✅ What's Implemented
+
+- ✅ Project structure and configuration
+- ✅ React frontend with Vite (mobile-responsive)
+- ✅ API client with auth interceptors
+- ✅ Express backend with middleware
+- ✅ Database abstraction layer (SQLite)
+- ✅ JWT authentication system
+- ⏳ Database schema and initialization (in progress)
+- ⏳ Route mapping (planned)
+- ⏳ Cost tracking (planned)
+- ⏳ Blog functionality (planned)
 
 ## 📁 Project Structure
 

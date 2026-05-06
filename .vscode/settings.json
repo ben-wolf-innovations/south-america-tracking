@@ -7,5 +7,8 @@
         "~/.copilot/skills": true,
         "~/.claude/skills": true,
         "~/.vscode/extensions/synapsevscode.synapse-1.23.0/copilot/skills": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        "npm install": true
     }
 }
