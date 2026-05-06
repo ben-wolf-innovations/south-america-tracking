@@ -92,9 +92,23 @@ export function closeDatabase() {
 export function run(sql, params = []) {
   const database = getDatabase()
   try {
-    database.run(sql, params)
+    const stmt = database.prepare(sql)
+    stmt.bind(params)
+    stmt.step()
+    stmt.free()
+    
     saveDatabase()  // Auto-save after writes
-    return { changes: database.getRowsModified() }
+    
+    // Get the last inserted ID
+    const lastIdStmt = database.prepare('SELECT last_insert_rowid() as lastID')
+    lastIdStmt.step()
+    const result = lastIdStmt.getAsObject()
+    lastIdStmt.free()
+    
+    return { 
+      changes: database.getRowsModified(),
+      lastID: result.lastID
+    }
   } catch (error) {
     console.error('SQL Error:', error.message)
     throw error

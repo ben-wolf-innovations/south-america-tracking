@@ -107,6 +107,8 @@ router.get('/:id', authenticateToken, (req, res) => {
  */
 router.post('/', authenticateToken, requireAdmin, (req, res) => {
   try {
+    console.log('Full request body:', JSON.stringify(req.body, null, 2))
+    
     const {
       trip_id = 1,
       location_id,
@@ -146,22 +148,27 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
     
     console.log('Cleaned data:', { cleanedLocationId, cleanedAmountPlanned, cleanedAmountActual, cleanedDate, cleanedNotes })
     
+    const sqlParams = [
+      trip_id,
+      cleanedLocationId,
+      category,
+      description,
+      cleanedAmountPlanned,
+      cleanedAmountActual,
+      currency,
+      cleanedDate,
+      cleanedNotes
+    ]
+    
+    console.log('SQL Parameters:', sqlParams)
+    console.log('SQL Parameters types:', sqlParams.map(p => typeof p))
+    
     const result = run(
       `INSERT INTO costs (
         trip_id, location_id, category, description,
         amount_planned, amount_actual, currency, date, notes
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        trip_id,
-        cleanedLocationId,
-        category,
-        description,
-        cleanedAmountPlanned,
-        cleanedAmountActual,
-        currency,
-        cleanedDate,
-        cleanedNotes
-      ]
+      sqlParams
     )
 
     const newCost = get('SELECT * FROM costs WHERE id = ?', [result.lastID])
