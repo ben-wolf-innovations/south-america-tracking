@@ -4,12 +4,11 @@ import api from '../config/api'
 import './Costs.css'
 
 const CATEGORIES = [
-  'Accommodation',
-  'Food & Drink',
-  'Transport',
-  'Activities',
-  'Shopping',
-  'Other'
+  'accommodation',
+  'activities',
+  'food',
+  'travel',
+  'other'
 ]
 
 export default function Costs() {
