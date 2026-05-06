@@ -1,0 +1,22 @@
+{
+  "name": "south-america-tracking",
+  "version": "1.0.0",
+  "description": "Web app for tracking 6-month South America trip with route mapping, cost tracking, and blog",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+  },
+  "keywords": [
+    "travel",
+    "tracking",
+    "south-america"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
