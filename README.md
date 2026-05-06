@@ -65,11 +65,11 @@ Optional:
    # Edit the .env files with your preferred PINs and settings
    ```
 
-4. **Initialize the database** (coming soon)
+4. **Initialize the database**
    ```bash
-   cd database
-   node init.js
+   node database/init.js
    ```
+   This will create the SQLite database with schema and load seed data from your CSV.
 
 5. **Start development servers**
    ```bash
@@ -86,10 +86,12 @@ Optional:
 - ✅ Express backend with middleware
 - ✅ Database abstraction layer (SQLite)
 - ✅ JWT authentication system
-- ⏳ Database schema and initialization (in progress)
-- ⏳ Route mapping (planned)
-- ⏳ Cost tracking (planned)
-- ⏳ Blog functionality (planned)
+- ✅ Database schema (38 locations from your itinerary)
+- ✅ Database initialization with seed data
+- ⏳ API endpoints for locations, costs, blog (next)
+- ⏳ Frontend components (route manager, map, blog)
+- ⏳ Route mapping with Leaflet
+- ⏳ Cost tracking dashboard
 
 ## 📁 Project Structure
 
@@ -139,7 +141,50 @@ Deployment to Azure will be configured closer to trip start date. Migration scri
 
 ## 📊 Database Schema
 
-(Coming soon - will document tables for trips, locations, accommodations, costs, blog, and progress tracking)
+The SQLite database consists of the following tables:
+
+**trips** - Overall trip information
+- id, name, description, start_date, end_date, status
+
+**locations** - Each stop on the journey
+- Sequence-based ordering (supports dynamic reordering)
+- Location details: name, country, lat/lng for mapping
+- Stay duration: nights, arrival_date, departure_date
+- Accommodation: name, planned/actual costs, booking reference
+- Activities: description, planned/actual costs
+- Daily costs: food & drink (planned/actual)
+- Travel: method, notes, planned/actual costs
+- Tracking: is_current, visited flags
+
+**costs** - Detailed expense tracking (optional granular tracking)
+- Links to locations and categories
+- Supports multiple currencies
+- Tracks planned vs actual amounts
+
+**blog_posts** - Travel journal
+- Title, rich text content
+- Published status and dates
+- Links to specific locations
+
+**progress** - Journey tracking
+- Current location and day
+- Locations visited vs total
+- Total spent vs planned budget
+
+**auth** - PIN-based authentication
+- Admin PIN (full edit access)
+- Family PIN (read-only view)
+
+**Views:**
+- `location_days_view` - Calculates cumulative day counter
+- `location_costs_view` - Aggregates all costs per location
+
+The schema supports:
+- ✅ Dynamic reordering of locations (sequence numbers)
+- ✅ Revisited locations (e.g., Buenos Aires appears 3 times)
+- ✅ Planned vs actual cost tracking across all categories
+- ✅ Running day counter auto-calculated from sequence
+- ✅ Map coordinates for route visualization
 
 ## 🗺️ Itinerary Overview
 
