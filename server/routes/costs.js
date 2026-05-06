@@ -135,7 +135,17 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
-    // Convert undefined to null for SQL compatibility
+    // Convert undefined and empty strings to null for SQL compatibility
+    console.log('Received data:', { location_id, amount_planned, amount_actual, date, notes })
+    
+    const cleanedLocationId = location_id && location_id !== '' ? parseInt(location_id) : null
+    const cleanedAmountPlanned = amount_planned && amount_planned !== '' ? parseFloat(amount_planned) : 0
+    const cleanedAmountActual = amount_actual && amount_actual !== '' ? parseFloat(amount_actual) : null
+    const cleanedDate = date && date !== '' ? date : null
+    const cleanedNotes = notes && notes !== '' ? notes : null
+    
+    console.log('Cleaned data:', { cleanedLocationId, cleanedAmountPlanned, cleanedAmountActual, cleanedDate, cleanedNotes })
+    
     const result = run(
       `INSERT INTO costs (
         trip_id, location_id, category, description,
@@ -143,14 +153,14 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         trip_id,
-        location_id ?? null,
+        cleanedLocationId,
         category,
         description,
-        amount_planned ?? 0,
-        amount_actual ?? null,
+        cleanedAmountPlanned,
+        cleanedAmountActual,
         currency,
-        date ?? null,
-        notes ?? null
+        cleanedDate,
+        cleanedNotes
       ]
     )
 
