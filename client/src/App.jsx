@@ -4,10 +4,10 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Dashboard from './components/Dashboard'
 import Login from './pages/Login'
 import Overview from './pages/Overview'
+import Map from './pages/Map'
 import './App.css'
 
 // Placeholder components - will be implemented next
-const MapPage = () => <div style={{ padding: '40px' }}><h2>🗺️ Map View</h2><p>Coming soon...</p></div>
 const LocationsPage = () => <div style={{ padding: '40px' }}><h2>📍 Locations</h2><p>Coming soon...</p></div>
 const CostsPage = () => <div style={{ padding: '40px' }}><h2>💰 Costs</h2><p>Coming soon...</p></div>
 const BlogPage = () => <div style={{ padding: '40px' }}><h2>📝 Blog</h2><p>Coming soon...</p></div>
@@ -25,7 +25,7 @@ function App() {
           </ProtectedRoute>
         }>
           <Route index element={<Overview />} />
-          <Route path="map" element={<MapPage />} />
+          <Route path="map" element={<Map />} />
           <Route path="locations" element={<LocationsPage />} />
           <Route path="costs" element={<CostsPage />} />
           <Route path="blog" element={<BlogPage />} />
