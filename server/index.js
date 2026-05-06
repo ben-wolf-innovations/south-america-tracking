@@ -5,6 +5,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { initDatabase } from './config/database.js'
 import authRoutes from './routes/auth.js'
+import locationsRoutes from './routes/locations.js'
+import costsRoutes from './routes/costs.js'
+import blogRoutes from './routes/blog.js'
+import progressRoutes from './routes/progress.js'
 
 // Load environment variables
 dotenv.config()
@@ -47,13 +51,20 @@ app.get('/api', (req, res) => {
     endpoints: {
       health: '/health',
       auth: '/api/auth',
-      api: '/api'
+      locations: '/api/locations',
+      costs: '/api/costs',
+      blog: '/api/blog',
+      progress: '/api/progress'
     }
   })
 })
 
 // Mount API routes
 app.use('/api/auth', authRoutes)
+app.use('/api/locations', locationsRoutes)
+app.use('/api/costs', costsRoutes)
+app.use('/api/blog', blogRoutes)
+app.use('/api/progress', progressRoutes)
 
 // 404 handler
 app.use((req, res) => {
