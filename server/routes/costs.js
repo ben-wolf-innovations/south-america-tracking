@@ -5,6 +5,30 @@ import { authenticateToken, requireAdmin } from '../middleware/auth.js'
 const router = express.Router()
 
 /**
+ * Helper function to sync cost changes back to location
+ * Updates location's cost fields when accommodation or travel costs are modified
+ */
+function syncCostToLocation(cost) {
+  if (!cost.location_id) return // Only sync costs linked to locations
+
+  if (cost.category === 'accommodation') {
+    run(
+      `UPDATE locations 
+       SET accommodation_cost_planned = ?, accommodation_cost_actual = ? 
+       WHERE id = ?`,
+      [cost.amount_planned || 0, cost.amount_actual || null, cost.location_id]
+    )
+  } else if (cost.category === 'travel') {
+    run(
+      `UPDATE locations 
+       SET travel_cost_planned = ?, travel_cost_actual = ? 
+       WHERE id = ?`,
+      [cost.amount_planned || 0, cost.amount_actual || null, cost.location_id]
+    )
+  }
+}
+
+/**
  * GET /api/costs
  * Get all costs, optionally filtered by trip_id or location_id
  */
@@ -172,6 +196,10 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
     )
 
     const newCost = get('SELECT * FROM costs WHERE id = ?', [result.lastID])
+    
+    // Sync to location if applicable
+    syncCostToLocation(newCost)
+    
     res.status(201).json({ success: true, data: newCost })
   } catch (error) {
     console.error('Error creating cost:', error)
@@ -220,6 +248,10 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     run(`UPDATE costs SET ${fields.join(', ')} WHERE id = ?`, values)
 
     const updated = get('SELECT * FROM costs WHERE id = ?', [id])
+    
+    // Sync to location if applicable
+    syncCostToLocation(updated)
+    
     res.json({ success: true, data: updated })
   } catch (error) {
     console.error('Error updating cost:', error)

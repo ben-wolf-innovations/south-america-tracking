@@ -5,6 +5,71 @@ import { authenticateToken, requireAdmin } from '../middleware/auth.js'
 const router = express.Router()
 
 /**
+ * Helper function to sync location costs with costs table
+ * Creates or updates cost entries for accommodation and travel
+ */
+function syncLocationCosts(locationId, tripId, costs) {
+  const { 
+    accommodation_cost_planned, 
+    accommodation_cost_actual,
+    travel_cost_planned,
+    travel_cost_actual
+  } = costs
+
+  // Sync accommodation costs
+  if (accommodation_cost_planned || accommodation_cost_actual) {
+    // Check if accommodation cost entry exists
+    const existingAccom = get(
+      `SELECT * FROM costs WHERE location_id = ? AND category = 'accommodation' LIMIT 1`,
+      [locationId]
+    )
+
+    if (existingAccom) {
+      // Update existing
+      run(
+        `UPDATE costs 
+         SET amount_planned = ?, amount_actual = ? 
+         WHERE id = ?`,
+        [accommodation_cost_planned || 0, accommodation_cost_actual || null, existingAccom.id]
+      )
+    } else {
+      // Create new
+      run(
+        `INSERT INTO costs (trip_id, location_id, category, description, amount_planned, amount_actual, currency)
+         VALUES (?, ?, 'accommodation', 'Accommodation cost', ?, ?, 'GBP')`,
+        [tripId, locationId, accommodation_cost_planned || 0, accommodation_cost_actual || null]
+      )
+    }
+  }
+
+  // Sync travel costs
+  if (travel_cost_planned || travel_cost_actual) {
+    // Check if travel cost entry exists
+    const existingTravel = get(
+      `SELECT * FROM costs WHERE location_id = ? AND category = 'travel' LIMIT 1`,
+      [locationId]
+    )
+
+    if (existingTravel) {
+      // Update existing
+      run(
+        `UPDATE costs 
+         SET amount_planned = ?, amount_actual = ? 
+         WHERE id = ?`,
+        [travel_cost_planned || 0, travel_cost_actual || null, existingTravel.id]
+      )
+    } else {
+      // Create new
+      run(
+        `INSERT INTO costs (trip_id, location_id, category, description, amount_planned, amount_actual, currency)
+         VALUES (?, ?, 'travel', 'Travel cost', ?, ?, 'GBP')`,
+        [tripId, locationId, travel_cost_planned || 0, travel_cost_actual || null]
+      )
+    }
+  }
+}
+
+/**
  * GET /api/locations
  * Get all locations for a trip, ordered by sequence
  */
@@ -135,6 +200,14 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       const lastIdResult = db.exec('SELECT last_insert_rowid() as id')
       const newId = lastIdResult[0].values[0][0]
 
+      // Sync costs to costs table
+      syncLocationCosts(newId, trip_id, {
+        accommodation_cost_planned,
+        accommodation_cost_actual,
+        travel_cost_planned,
+        travel_cost_actual
+      })
+
       // Get the inserted location
       const newLocationResult = db.exec('SELECT * FROM locations WHERE id = ?', [newId])
       const columns = newLocationResult[0].columns
@@ -203,6 +276,20 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
 
     // Fetch updated location
     const updated = get('SELECT * FROM locations WHERE id = ?', [id])
+    
+    // Sync costs to costs table if any cost fields were updated
+    if (updates.accommodation_cost_planned !== undefined || 
+        updates.accommodation_cost_actual !== undefined ||
+        updates.travel_cost_planned !== undefined ||
+        updates.travel_cost_actual !== undefined) {
+      syncLocationCosts(id, updated.trip_id, {
+        accommodation_cost_planned: updated.accommodation_cost_planned,
+        accommodation_cost_actual: updated.accommodation_cost_actual,
+        travel_cost_planned: updated.travel_cost_planned,
+        travel_cost_actual: updated.travel_cost_actual
+      })
+    }
+    
     res.json({ success: true, data: updated })
   } catch (error) {
     console.error('Error updating location:', error)

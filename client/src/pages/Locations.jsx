@@ -21,13 +21,15 @@ export default function Locations() {
     nights: 0,
     accommodation_name: '',
     accommodation_type: '',
-    accommodation_cost: '',
+    accommodation_cost_planned: '',
+    accommodation_cost_actual: '',
     arrival_date: '',
     departure_date: '',
     activities: '',
     travel_from: '',
     travel_method: '',
-    travel_cost: '',
+    travel_cost_planned: '',
+    travel_cost_actual: '',
     travel_duration: '',
     notes: '',
     sequence: ''
@@ -60,13 +62,15 @@ export default function Locations() {
       nights: 0,
       accommodation_name: '',
       accommodation_type: '',
-      accommodation_cost: '',
+      accommodation_cost_planned: '',
+      accommodation_cost_actual: '',
       arrival_date: '',
       departure_date: '',
       activities: '',
       travel_from: '',
       travel_method: '',
-      travel_cost: '',
+      travel_cost_planned: '',
+      travel_cost_actual: '',
       travel_duration: '',
       notes: '',
       sequence: ''
@@ -92,7 +96,7 @@ export default function Locations() {
         if (formData[key] !== '' && formData[key] !== null) {
           if (['nights', 'sequence'].includes(key)) {
             payload[key] = parseInt(formData[key]) || 0
-          } else if (['latitude', 'longitude', 'accommodation_cost', 'travel_cost', 'travel_duration'].includes(key)) {
+          } else if (['latitude', 'longitude', 'accommodation_cost_planned', 'accommodation_cost_actual', 'travel_cost_planned', 'travel_cost_actual', 'travel_duration'].includes(key)) {
             payload[key] = parseFloat(formData[key]) || 0
           } else {
             payload[key] = formData[key]
@@ -117,7 +121,7 @@ export default function Locations() {
         if (formData[key] !== '' && formData[key] !== null && key !== 'sequence') {
           if (['nights'].includes(key)) {
             payload[key] = parseInt(formData[key]) || 0
-          } else if (['latitude', 'longitude', 'accommodation_cost', 'travel_cost', 'travel_duration'].includes(key)) {
+          } else if (['latitude', 'longitude', 'accommodation_cost_planned', 'accommodation_cost_actual', 'travel_cost_planned', 'travel_cost_actual', 'travel_duration'].includes(key)) {
             payload[key] = parseFloat(formData[key]) || 0
           } else {
             payload[key] = formData[key]
@@ -143,13 +147,15 @@ export default function Locations() {
       nights: location.nights || 0,
       accommodation_name: location.accommodation_name || '',
       accommodation_type: location.accommodation_type || '',
-      accommodation_cost: location.accommodation_cost || '',
+      accommodation_cost_planned: location.accommodation_cost_planned || '',
+      accommodation_cost_actual: location.accommodation_cost_actual || '',
       arrival_date: location.arrival_date || '',
       departure_date: location.departure_date || '',
       activities: location.activities || '',
       travel_from: location.travel_from || '',
       travel_method: location.travel_method || '',
-      travel_cost: location.travel_cost || '',
+      travel_cost_planned: location.travel_cost_planned || '',
+      travel_cost_actual: location.travel_cost_actual || '',
       travel_duration: location.travel_duration || '',
       notes: location.notes || '',
       sequence: ''
@@ -357,14 +363,25 @@ export default function Locations() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Cost (£)</label>
+                  <label>Budgeted Cost (£)</label>
                   <input
                     type="number"
                     step="0.01"
-                    name="accommodation_cost"
-                    value={formData.accommodation_cost}
+                    name="accommodation_cost_planned"
+                    value={formData.accommodation_cost_planned}
                     onChange={handleInputChange}
                     placeholder="50.00"
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Actual Cost (£)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="accommodation_cost_actual"
+                    value={formData.accommodation_cost_actual}
+                    onChange={handleInputChange}
+                    placeholder="45.50"
                   />
                 </div>
               </div>
@@ -394,14 +411,25 @@ export default function Locations() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Cost (£)</label>
+                  <label>Budgeted Cost (£)</label>
                   <input
                     type="number"
                     step="0.01"
-                    name="travel_cost"
-                    value={formData.travel_cost}
+                    name="travel_cost_planned"
+                    value={formData.travel_cost_planned}
                     onChange={handleInputChange}
                     placeholder="25.00"
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Actual Cost (£)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="travel_cost_actual"
+                    value={formData.travel_cost_actual}
+                    onChange={handleInputChange}
+                    placeholder="22.50"
                   />
                 </div>
                 <div className="form-field">
@@ -543,10 +571,14 @@ export default function Locations() {
                     <span className="info-value">{location.accommodation_type}</span>
                   </div>
                 )}
-                {location.accommodation_cost && (
+                {(location.accommodation_cost_planned || location.accommodation_cost_actual) && (
                   <div className="info-item">
-                    <span className="info-label">💰 Cost:</span>
-                    <span className="info-value">£{parseFloat(location.accommodation_cost).toFixed(2)}</span>
+                    <span className="info-label">💰 Accom. Cost:</span>
+                    <span className="info-value">
+                      {location.accommodation_cost_planned && `£${parseFloat(location.accommodation_cost_planned).toFixed(2)} budgeted`}
+                      {location.accommodation_cost_planned && location.accommodation_cost_actual && ' / '}
+                      {location.accommodation_cost_actual && `£${parseFloat(location.accommodation_cost_actual).toFixed(2)} actual`}
+                    </span>
                   </div>
                 )}
                 {location.travel_from && (
@@ -561,10 +593,14 @@ export default function Locations() {
                     <span className="info-value">{location.travel_method}</span>
                   </div>
                 )}
-                {location.travel_cost && (
+                {(location.travel_cost_planned || location.travel_cost_actual) && (
                   <div className="info-item">
                     <span className="info-label">💸 Travel Cost:</span>
-                    <span className="info-value">£{parseFloat(location.travel_cost).toFixed(2)}</span>
+                    <span className="info-value">
+                      {location.travel_cost_planned && `£${parseFloat(location.travel_cost_planned).toFixed(2)} budgeted`}
+                      {location.travel_cost_planned && location.travel_cost_actual && ' / '}
+                      {location.travel_cost_actual && `£${parseFloat(location.travel_cost_actual).toFixed(2)} actual`}
+                    </span>
                   </div>
                 )}
                 {location.travel_duration && (
@@ -703,14 +739,25 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Cost (£)</label>
+                      <label>Budgeted Cost (£)</label>
                       <input
                         type="number"
                         step="0.01"
-                        name="accommodation_cost"
-                        value={formData.accommodation_cost}
+                        name="accommodation_cost_planned"
+                        value={formData.accommodation_cost_planned}
                         onChange={handleInputChange}
                         placeholder="50.00"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Actual Cost (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="accommodation_cost_actual"
+                        value={formData.accommodation_cost_actual}
+                        onChange={handleInputChange}
+                        placeholder="45.50"
                       />
                     </div>
                   </div>
@@ -740,14 +787,25 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Cost (£)</label>
+                      <label>Budgeted Cost (£)</label>
                       <input
                         type="number"
                         step="0.01"
-                        name="travel_cost"
-                        value={formData.travel_cost}
+                        name="travel_cost_planned"
+                        value={formData.travel_cost_planned}
                         onChange={handleInputChange}
                         placeholder="25.00"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Actual Cost (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="travel_cost_actual"
+                        value={formData.travel_cost_actual}
+                        onChange={handleInputChange}
+                        placeholder="22.50"
                       />
                     </div>
                     <div className="form-field">
