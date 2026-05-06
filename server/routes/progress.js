@@ -129,6 +129,56 @@ router.put('/', authenticateToken, requireAdmin, (req, res) => {
 })
 
 /**
+ * POST /api/progress/checkin
+ * Check in to a location (admin only)
+ */
+router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { location_id, trip_id = 1 } = req.body
+
+    if (!location_id) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'location_id is required' 
+      })
+    }
+
+    // Verify location exists
+    const location = get('SELECT * FROM locations WHERE id = ? AND trip_id = ?', [location_id, trip_id])
+    if (!location) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Location not found' 
+      })
+    }
+
+    // Clear all is_current flags
+    run('UPDATE locations SET is_current = 0 WHERE trip_id = ?', [trip_id])
+    
+    // Set new current location
+    run('UPDATE locations SET is_current = 1 WHERE id = ?', [location_id])
+    
+    // Update progress table
+    run(
+      'UPDATE progress SET current_location_id = ?, last_updated = ? WHERE trip_id = ?',
+      [location_id, new Date().toISOString(), trip_id]
+    )
+
+    // Get updated location
+    const updatedLocation = get('SELECT * FROM locations WHERE id = ?', [location_id])
+
+    res.json({ 
+      success: true, 
+      message: `Checked in to ${updatedLocation.name}`,
+      data: updatedLocation
+    })
+  } catch (error) {
+    console.error('Error checking in:', error)
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+/**
  * POST /api/progress/recalculate
  * Recalculate progress statistics from locations and costs (admin only)
  */

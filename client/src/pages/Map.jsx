@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
 import './Map.css'
 
@@ -17,7 +18,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 })
 
+// Create custom red icon for current location
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+})
+
+// Create custom blue icon for other locations
+const blueIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+})
+
 export default function Map() {
+  const { isAdmin } = useAuth()
   const [locations, setLocations] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -37,6 +59,22 @@ export default function Map() {
       setError('Failed to load map data')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCheckIn = async (locationId) => {
+    if (!isAdmin()) {
+      alert('Only admin can check in to locations')
+      return
+    }
+
+    try {
+      const response = await api.post('/progress/checkin', { location_id: locationId })
+      alert(response.data.message)
+      await loadLocations() // Reload to update markers
+    } catch (err) {
+      console.error('Failed to check in:', err)
+      alert('Failed to check in: ' + (err.response?.data?.error || err.message))
     }
   }
 
@@ -118,10 +156,12 @@ export default function Map() {
 
           {/* Location markers */}
           {validLocations.map((location) => {
+            const isCurrent = location.is_current === 1
             return (
               <Marker
                 key={location.id}
                 position={[location.latitude, location.longitude]}
+                icon={isCurrent ? redIcon : blueIcon}
               >
                 <Popup>
                   <div className="location-popup">
@@ -147,6 +187,15 @@ export default function Map() {
                           ` - ${new Date(location.departure_date).toLocaleDateString()}`
                         }
                       </p>
+                    )}
+                    
+                    {isAdmin() && !location.is_current && (
+                      <button 
+                        onClick={() => handleCheckIn(location.id)}
+                        className="checkin-button"
+                      >
+                        📍 Check In Here
+                      </button>
                     )}
                     
                     {location.activities && (
