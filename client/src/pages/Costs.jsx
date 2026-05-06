@@ -4,12 +4,17 @@ import api from '../config/api'
 import './Costs.css'
 
 const CATEGORIES = [
-  'accommodation',
-  'activities',
-  'food',
-  'travel',
-  'other'
+  { value: 'accommodation', label: 'Accommodation' },
+  { value: 'activities', label: 'Activities' },
+  { value: 'food', label: 'Food & Drink' },
+  { value: 'travel', label: 'Transport' },
+  { value: 'other', label: 'Other' }
 ]
+
+const getCategoryLabel = (value) => {
+  const category = CATEGORIES.find(cat => cat.value === value)
+  return category ? category.label : value
+}
 
 export default function Costs() {
   const { isAdmin } = useAuth()
@@ -33,7 +38,7 @@ export default function Costs() {
     description: '',
     amount_planned: '',
     amount_actual: '',
-    date_incurred: ''
+    date: ''
   })
 
   useEffect(() => {
@@ -67,7 +72,7 @@ export default function Costs() {
       description: '',
       amount_planned: '',
       amount_actual: '',
-      date_incurred: ''
+      date: ''
     })
     setShowAddForm(false)
     setEditingCost(null)
@@ -126,7 +131,7 @@ export default function Costs() {
       description: cost.description || '',
       amount_planned: cost.amount_planned || '',
       amount_actual: cost.amount_actual || '',
-      date_incurred: cost.date_incurred || ''
+      date: cost.date || ''
     })
     setEditingCost(cost)
     setShowAddForm(false)
@@ -270,7 +275,7 @@ export default function Costs() {
                 >
                   <option value="">Select category...</option>
                   {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat.value} value={cat.value}>{cat.label}</option>
                   ))}
                 </select>
               </div>
@@ -331,8 +336,8 @@ export default function Costs() {
                 <label>Date Incurred</label>
                 <input
                   type="date"
-                  name="date_incurred"
-                  value={formData.date_incurred}
+                  name="date"
+                  value={formData.date}
                   onChange={handleInputChange}
                 />
               </div>
@@ -377,7 +382,7 @@ export default function Costs() {
             >
               <option value="">All Categories</option>
               {CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
               ))}
             </select>
           </div>
@@ -423,15 +428,15 @@ export default function Costs() {
                   <div className="cost-main">
                     <h4>{cost.description}</h4>
                     <div className="cost-meta">
-                      <span className="category-badge">{cost.category}</span>
+                      <span className="category-badge">{getCategoryLabel(cost.category)}</span>
                       {location && (
                         <span className="location-badge">
                           📍 #{location.sequence} {location.name}
                         </span>
                       )}
-                      {cost.date_incurred && (
+                      {cost.date && (
                         <span className="date-badge">
-                          📅 {new Date(cost.date_incurred).toLocaleDateString()}
+                          📅 {new Date(cost.date).toLocaleDateString()}
                         </span>
                       )}
                     </div>
