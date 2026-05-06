@@ -372,11 +372,6 @@ export default function Locations() {
                     onChange={handleInputChange}
                     placeholder="50.00"
                   />
-                    name="accommodation_cost_actual"
-                    value={formData.accommodation_cost_actual}
-                    onChange={handleInputChange}
-                    placeholder="45.50"
-                  />
                 </div>
               </div>
             </div>
@@ -417,7 +412,6 @@ export default function Locations() {
                 </div>
                 <div className="form-field">
                   <label>Duration</label>
-                  <label>Duration</label>
                   <input
                     type="number"
                     step="0.1"
@@ -428,6 +422,7 @@ export default function Locations() {
                   />
                 </div>
               </div>
+            </div>
             </div>
 
             <div className="form-section">
@@ -767,7 +762,7 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Budgeted Cost (£)</label>
+                      <label>Budget (£)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -775,17 +770,6 @@ export default function Locations() {
                         value={formData.accommodation_cost_planned}
                         onChange={handleInputChange}
                         placeholder="50.00"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Actual Cost (£)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        name="accommodation_cost_actual"
-                        value={formData.accommodation_cost_actual}
-                        onChange={handleInputChange}
-                        placeholder="45.50"
                       />
                     </div>
                   </div>
@@ -815,7 +799,7 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Budgeted Cost (£)</label>
+                      <label>Budget (£)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -823,17 +807,6 @@ export default function Locations() {
                         value={formData.travel_cost_planned}
                         onChange={handleInputChange}
                         placeholder="25.00"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Actual Cost (£)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        name="travel_cost_actual"
-                        value={formData.travel_cost_actual}
-                        onChange={handleInputChange}
-                        placeholder="22.50"
                       />
                     </div>
                     <div className="form-field">
@@ -845,6 +818,34 @@ export default function Locations() {
                         value={formData.travel_duration}
                         onChange={handleInputChange}
                         placeholder="4.5"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h4>Budget Planning</h4>
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label>Activities Budget (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="activities_cost_planned"
+                        value={formData.activities_cost_planned}
+                        onChange={handleInputChange}
+                        placeholder="100.00"
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Food & Drink Budget (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="food_drink_cost_planned"
+                        value={formData.food_drink_cost_planned}
+                        onChange={handleInputChange}
+                        placeholder="150.00"
                       />
                     </div>
                   </div>
