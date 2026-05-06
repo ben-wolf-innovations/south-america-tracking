@@ -6,6 +6,7 @@ import './Locations.css'
 export default function Locations() {
   const { isAdmin } = useAuth()
   const [locations, setLocations] = useState([])
+  const [costs, setCosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -42,8 +43,12 @@ export default function Locations() {
   const loadLocations = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/locations')
-      setLocations(response.data.data)
+      const [locationsRes, costsRes] = await Promise.all([
+        api.get('/locations'),
+        api.get('/costs')
+      ])
+      setLocations(locationsRes.data.data)
+      setCosts(costsRes.data.data)
       setError(null)
     } catch (err) {
       console.error('Failed to load locations:', err)
@@ -51,6 +56,13 @@ export default function Locations() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Helper function to calculate "other" costs for a location
+  const getOtherCostsForLocation = (locationId) => {
+    return costs
+      .filter(cost => cost.location_id === locationId && cost.category === 'other')
+      .reduce((sum, cost) => sum + (parseFloat(cost.amount_actual) || 0), 0)
   }
 
   const resetForm = () => {
@@ -638,6 +650,14 @@ export default function Locations() {
                   </span>
                 </div>
               )}
+              {getOtherCostsForLocation(location.id) > 0 && (
+                <div className="info-item">
+                  <span className="info-label">📦 Other Costs:</span>
+                  <span className="info-value">
+                    £{getOtherCostsForLocation(location.id).toFixed(2)} actual
+                  </span>
+                </div>
+              )}
               {location.notes && (
                 <div className="location-notes">
                   <strong>📝 Notes:</strong> {location.notes}
@@ -772,6 +792,18 @@ export default function Locations() {
                         placeholder="50.00"
                       />
                     </div>
+                    <div className="form-field">
+                      <label>Actual Cost (£)</label>
+                      <input
+                        type="text"
+                        value={editingLocation?.accommodation_cost_actual 
+                          ? `£${parseFloat(editingLocation.accommodation_cost_actual).toFixed(2)}`
+                          : '£0.00'}
+                        disabled
+                        style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                      />
+                      <small style={{ color: '#666', fontSize: '0.85em' }}>Auto-calculated from Costs page</small>
+                    </div>
                   </div>
                 </div>
 
@@ -808,6 +840,18 @@ export default function Locations() {
                         onChange={handleInputChange}
                         placeholder="25.00"
                       />
+                    </div>
+                    <div className="form-field">
+                      <label>Actual Cost (£)</label>
+                      <input
+                        type="text"
+                        value={editingLocation?.travel_cost_actual 
+                          ? `£${parseFloat(editingLocation.travel_cost_actual).toFixed(2)}`
+                          : '£0.00'}
+                        disabled
+                        style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                      />
+                      <small style={{ color: '#666', fontSize: '0.85em' }}>Auto-calculated from Costs page</small>
                     </div>
                     <div className="form-field">
                       <label>Duration (hours)</label>
