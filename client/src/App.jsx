@@ -1,43 +1,44 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
+import Dashboard from './components/Dashboard'
+import Login from './pages/Login'
+import Overview from './pages/Overview'
 import './App.css'
+
+// Placeholder components - will be implemented next
+const MapPage = () => <div style={{ padding: '40px' }}><h2>🗺️ Map View</h2><p>Coming soon...</p></div>
+const LocationsPage = () => <div style={{ padding: '40px' }}><h2>📍 Locations</h2><p>Coming soon...</p></div>
+const CostsPage = () => <div style={{ padding: '40px' }}><h2>💰 Costs</h2><p>Coming soon...</p></div>
+const BlogPage = () => <div style={{ padding: '40px' }}><h2>📝 Blog</h2><p>Coming soon...</p></div>
+const ProgressPage = () => <div style={{ padding: '40px' }}><h2>🎯 Progress</h2><p>Coming soon...</p></div>
 
 function App() {
   return (
-    <Router>
-      <div className="app">
-        <header>
-          <h1>🌎 South America Trip Tracker</h1>
-        </header>
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  )
-}
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Overview />} />
+          <Route path="map" element={<MapPage />} />
+          <Route path="locations" element={<LocationsPage />} />
+          <Route path="costs" element={<CostsPage />} />
+          <Route path="blog" element={<BlogPage />} />
+          <Route path="progress" element={
+            <ProtectedRoute requireAdmin>
+              <ProgressPage />
+            </ProtectedRoute>
+          } />
+        </Route>
 
-function Home() {
-  return (
-    <div className="home">
-      <h2>Welcome to Your South America Adventure!</h2>
-      <p>Track your journey across Peru, Ecuador, Bolivia, Chile, and Argentina</p>
-      <div className="stats">
-        <div className="stat-card">
-          <h3>43</h3>
-          <p>Locations</p>
-        </div>
-        <div className="stat-card">
-          <h3>103</h3>
-          <p>Days</p>
-        </div>
-        <div className="stat-card">
-          <h3>5</h3>
-          <p>Countries</p>
-        </div>
-      </div>
-    </div>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AuthProvider>
   )
 }
 
