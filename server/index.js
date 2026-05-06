@@ -3,6 +3,8 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { initDatabase } from './config/database.js'
+import authRoutes from './routes/auth.js'
 
 // Load environment variables
 dotenv.config()
@@ -44,10 +46,14 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
+      auth: '/api/auth',
       api: '/api'
     }
   })
 })
+
+// Mount API routes
+app.use('/api/auth', authRoutes)
 
 // 404 handler
 app.use((req, res) => {
@@ -64,10 +70,24 @@ app.use((err, req, res, next) => {
 })
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`)
-  console.log(`🌎 API available at http://localhost:${PORT}/api`)
-})
+async function startServer() {
+  try {
+    // Initialize database
+    await initDatabase()
+    console.log('✅ Database initialized')
+
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`)
+      console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`)
+      console.log(`🌎 API available at http://localhost:${PORT}/api`)
+    })
+  } catch (error) {
+    console.error('❌ Failed to start server:', error)
+    process.exit(1)
+  }
+}
+
+startServer()
 
 export default app

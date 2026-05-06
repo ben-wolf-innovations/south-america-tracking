@@ -1,19 +1,23 @@
-import Database from 'better-sqlite3'
+import initSqlJs from 'sql.js'
+import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import fs from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'database', 'trip.db')
-
+let SQL = null
 let db = null
+const DB_PATH = path.join(__dirname, '..', '..', 'database', 'trip.db')
 
 /**
- * Initialize database connection
+ * Initialize SQL.js and load or create the database
  */
-export function initDatabase() {
+export async function initDatabase() {
+  if (!SQL) {
+    SQL = await initSqlJs()
+  }
+
   try {
     // Ensure database directory exists
     const dbDir = path.dirname(DB_PATH)
@@ -21,65 +25,123 @@ export function initDatabase() {
       fs.mkdirSync(dbDir, { recursive: true })
     }
 
-    // Open database connection
-    db = new Database(DB_PATH, { 
-      verbose: process.env.NODE_ENV === 'development' ? console.log : null 
-    })
-    
+    // Try to load existing database
+    if (fs.existsSync(DB_PATH)) {
+      const buffer = fs.readFileSync(DB_PATH)
+      db = new SQL.Database(buffer)
+      console.log('✅ Database loaded from:', DB_PATH)
+    } else {
+      // Create new empty database
+      db = new SQL.Database()
+      console.log('✅ New database created')
+    }
+
     // Enable foreign keys
-    db.pragma('foreign_keys = ON')
+    db.run('PRAGMA foreign_keys = ON')
     
-    console.log(`✅ Database connected: ${DB_PATH}`)
     return db
   } catch (error) {
-    console.error('❌ Database connection failed:', error)
+    console.error('❌ Database initialization error:', error)
     throw error
   }
 }
 
 /**
- * Get database instance
+ * Get the database instance
  */
 export function getDatabase() {
   if (!db) {
-    return initDatabase()
+    throw new Error('Database not initialized. Call initDatabase() first.')
   }
   return db
 }
 
 /**
- * Close database connection
+ * Save the database to disk
  */
-export function closeDatabase() {
-  if (db) {
-    db.close()
-    db = null
-    console.log('Database connection closed')
+export function saveDatabase() {
+  if (!db) {
+    throw new Error('Database not initialized')
+  }
+  
+  try {
+    const data = db.export()
+    const buffer = Buffer.from(data)
+    fs.writeFileSync(DB_PATH, buffer)
+  } catch (error) {
+    console.error('❌ Error saving database:', error)
+    throw error
   }
 }
 
 /**
- * Run a query (INSERT, UPDATE, DELETE)
+ * Close the database connection
+ */
+export function closeDatabase() {
+  if (db) {
+    saveDatabase()
+    db.close()
+    db = null
+    console.log('✅ Database closed')
+  }
+}
+
+/**
+ * Execute a SQL statement (for INSERT, UPDATE, DELETE)
  */
 export function run(sql, params = []) {
   const database = getDatabase()
-  return database.prepare(sql).run(params)
+  try {
+    database.run(sql, params)
+    saveDatabase()  // Auto-save after writes
+    return { changes: database.getRowsModified() }
+  } catch (error) {
+    console.error('SQL Error:', error.message)
+    throw error
+  }
 }
 
 /**
- * Get a single row
+ * Get a single row (for SELECT returning one result)
  */
 export function get(sql, params = []) {
   const database = getDatabase()
-  return database.prepare(sql).get(params)
+  try {
+    const stmt = database.prepare(sql)
+    stmt.bind(params)
+    
+    if (stmt.step()) {
+      const row = stmt.getAsObject()
+      stmt.free()
+      return row
+    }
+    stmt.free()
+    return null
+  } catch (error) {
+    console.error('SQL Error:', error.message)
+    throw error
+  }
 }
 
 /**
- * Get all rows
+ * Get all rows (for SELECT returning multiple results)
  */
 export function all(sql, params = []) {
   const database = getDatabase()
-  return database.prepare(sql).all(params)
+  try {
+    const stmt = database.prepare(sql)
+    stmt.bind(params)
+    
+    const results = []
+    while (stmt.step()) {
+      results.push(stmt.getAsObject())
+    }
+    stmt.free()
+    return results
+  } catch (error) {
+    console.error('SQL Error:', error.message)
+    throw error
+  }
 }
 
 /**
@@ -87,12 +149,21 @@ export function all(sql, params = []) {
  */
 export function transaction(callback) {
   const database = getDatabase()
-  return database.transaction(callback)()
+  try {
+    database.run('BEGIN TRANSACTION')
+    callback(database)
+    database.run('COMMIT')
+    saveDatabase()
+  } catch (error) {
+    database.run('ROLLBACK')
+    throw error
+  }
 }
 
 export default {
   initDatabase,
   getDatabase,
+  saveDatabase,
   closeDatabase,
   run,
   get,
