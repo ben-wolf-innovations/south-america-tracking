@@ -135,14 +135,22 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
+    // Convert undefined to null for SQL compatibility
     const result = run(
       `INSERT INTO costs (
         trip_id, location_id, category, description,
         amount_planned, amount_actual, currency, date, notes
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        trip_id, location_id, category, description,
-        amount_planned, amount_actual, currency, date, notes
+        trip_id,
+        location_id ?? null,
+        category,
+        description,
+        amount_planned ?? 0,
+        amount_actual ?? null,
+        currency,
+        date ?? null,
+        notes ?? null
       ]
     )
 
@@ -181,7 +189,8 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     for (const [key, value] of Object.entries(updates)) {
       if (allowedFields.includes(key)) {
         fields.push(`${key} = ?`)
-        values.push(value)
+        // Convert undefined to null for SQL compatibility
+        values.push(value ?? null)
       }
     }
 
