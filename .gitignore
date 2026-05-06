@@ -11,10 +11,11 @@ pnpm-debug.log*
 .env.*.local
 
 # Database
+# Note: trip.db is intentionally tracked in git for collaboration
 *.db
+!database/trip.db
 *.sqlite
 *.sqlite3
-database/*.db
 database/*.sqlite
 
 # Build outputs
