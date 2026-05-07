@@ -34,6 +34,14 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
+    // Prevent checking in to already visited locations
+    if (location.visited === 1) {
+      return res.status(400).json({
+        success: false,
+        error: `${location.name} (stop #${location.sequence}) has already been visited`
+      })
+    }
+
     // Check if all previous locations in sequence have been visited
     // Find the first unvisited location with a lower sequence number
     const firstUnvisitedPrevious = get(
@@ -188,6 +196,73 @@ router.post('/clear-visited', authenticateToken, requireAdmin, (req, res) => {
     })
   } catch (error) {
     console.error('Error clearing visited:', error)
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    })
+  }
+})
+
+/**
+ * POST /api/progress/undo-last-visited
+ * Undo the most recent check-in (admin only)
+ */
+router.post('/undo-last-visited', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const tripId = req.body.trip_id || 1
+    
+    // Find the most recently visited location (highest sequence number with visited = 1)
+    const lastVisited = get(
+      `SELECT * FROM locations 
+       WHERE trip_id = ? 
+       AND visited = 1 
+       AND (deleted IS NULL OR deleted = 0)
+       ORDER BY sequence DESC
+       LIMIT 1`,
+      [tripId]
+    )
+
+    if (!lastVisited) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'No visited locations found to undo' 
+      })
+    }
+
+    // Clear the visited and current flags for this location
+    run(
+      `UPDATE locations 
+       SET visited = 0, is_current = 0, visited_date = NULL 
+       WHERE id = ?`,
+      [lastVisited.id]
+    )
+
+    // If there were other visited locations, mark the previous one as current
+    const previousVisited = get(
+      `SELECT * FROM locations 
+       WHERE trip_id = ? 
+       AND visited = 1 
+       AND (deleted IS NULL OR deleted = 0)
+       ORDER BY sequence DESC
+       LIMIT 1`,
+      [tripId]
+    )
+
+    if (previousVisited) {
+      run(
+        `UPDATE locations 
+         SET is_current = 1 
+         WHERE id = ?`,
+        [previousVisited.id]
+      )
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Undone check-in to ${lastVisited.name} (stop #${lastVisited.sequence})` 
+    })
+  } catch (error) {
+    console.error('Error undoing last visited:', error)
     res.status(500).json({ 
       success: false, 
       error: error.message 

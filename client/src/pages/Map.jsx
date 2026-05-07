@@ -108,6 +108,26 @@ export default function Map() {
     }
   }
 
+  const handleUndoLastVisited = async () => {
+    if (!isAdmin()) {
+      alert('Only admin can undo check-ins')
+      return
+    }
+
+    if (!window.confirm('Are you sure you want to undo the last check-in?')) {
+      return
+    }
+
+    try {
+      const response = await api.post('/progress/undo-last-visited')
+      alert(response.data.message)
+      await loadLocations() // Reload to update markers
+    } catch (err) {
+      console.error('Failed to undo last visited:', err)
+      alert('Failed to undo: ' + (err.response?.data?.error || err.message))
+    }
+  }
+
   if (loading) {
     return (
       <div className="map-loading">
@@ -175,14 +195,24 @@ export default function Map() {
           <p className="subtitle">{locationsWithOffsets.length} locations across South America</p>
         </div>
         {isAdmin() && (
-          <button 
-            onClick={handleClearVisited} 
-            className="reload-button" 
-            style={{ background: 'linear-gradient(135deg, var(--danger-color), #dc2626)' }}
-            title="Clear all visited flags"
-          >
-            Clear All Visited
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={handleUndoLastVisited} 
+              className="reload-button" 
+              style={{ background: 'linear-gradient(135deg, var(--secondary-color), #ea580c)' }}
+              title="Undo the most recent check-in"
+            >
+              Undo Last Check-In
+            </button>
+            <button 
+              onClick={handleClearVisited} 
+              className="reload-button" 
+              style={{ background: 'linear-gradient(135deg, var(--danger-color), #dc2626)' }}
+              title="Clear all visited flags"
+            >
+              Clear All Visited
+            </button>
+          </div>
         )}
       </div>
 
