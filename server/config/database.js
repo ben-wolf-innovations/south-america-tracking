@@ -168,12 +168,16 @@ export function all(sql, params = []) {
 export function transaction(callback) {
   const database = getDatabase()
   try {
-    database.run('BEGIN TRANSACTION')
-    callback(database)
-    database.run('COMMIT')
+    database.exec('BEGIN TRANSACTION')
+    callback()
+    database.exec('COMMIT')
     saveDatabase()
   } catch (error) {
-    database.run('ROLLBACK')
+    try {
+      database.exec('ROLLBACK')
+    } catch (rollbackError) {
+      console.error('Rollback error:', rollbackError)
+    }
     throw error
   }
 }
