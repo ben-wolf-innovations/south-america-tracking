@@ -251,6 +251,219 @@
   transition: width 0.6s ease;
 }
 
+/* Overview Budget Section */
+.overview-budget-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 30px;
+}
+
+.overview-total-budget-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--primary-light);
+}
+
+.overview-total-budget-card .summary-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.overview-summary-amounts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.overview-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.overview-amount:last-child {
+  border-bottom: none;
+}
+
+.overview-amount .label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.overview-amount .value {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.overview-amount.planned .value {
+  color: var(--primary-color);
+}
+
+.overview-amount.actual .value {
+  color: var(--secondary-color);
+}
+
+.overview-amount .value.over {
+  color: var(--danger-color);
+}
+
+.overview-amount .value.under {
+  color: var(--success-color);
+}
+
+/* Category breakdown */
+.overview-category-breakdown h3,
+.overview-country-breakdown h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+}
+
+.overview-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.overview-category-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: all var(--transition);
+}
+
+.overview-category-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.overview-category-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+.overview-category-amounts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overview-amount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.overview-amount-row .planned-amount {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.overview-amount-row .actual-amount {
+  color: var(--secondary-color);
+  font-weight: 600;
+}
+
+/* Country breakdown */
+.overview-country-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.overview-country-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: all var(--transition);
+}
+
+.overview-country-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.overview-country-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.overview-country-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.overview-country-category-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.overview-country-category-name {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.overview-country-category-amounts {
+  display: flex;
+  gap: 8px;
+}
+
+.overview-country-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.country-total-label {
+  color: var(--text-primary);
+}
+
+.country-total-values {
+  display: flex;
+  gap: 8px;
+}
+
+.country-budgeted {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.country-actual {
+  color: var(--secondary-color);
+  font-weight: 600;
+  font-size: 12px;
+}
+
 /* Trip Info Card */
 .trip-info-card {
   background: white;
