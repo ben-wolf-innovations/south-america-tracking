@@ -15,6 +15,9 @@ export default function Blog() {
   const [editingPost, setEditingPost] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [previewPost, setPreviewPost] = useState(null)
+  const [comments, setComments] = useState([])
+  const [loadingComments, setLoadingComments] = useState(false)
+  const [commentForm, setCommentForm] = useState({ user_name: '', comment_text: '' })
 
   // Form state
   const [formData, setFormData] = useState({
@@ -48,6 +51,16 @@ export default function Blog() {
     loadData()
   }, [])
 
+  // Load comments when preview post changes
+  useEffect(() => {
+    if (previewPost) {
+      loadComments(previewPost.id)
+    } else {
+      setComments([])
+      setCommentForm({ user_name: '', comment_text: '' })
+    }
+  }, [previewPost])
+
   const loadData = async () => {
     try {
       setLoading(true)
@@ -63,6 +76,47 @@ export default function Blog() {
       setError('Failed to load blog posts')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadComments = async (postId) => {
+    try {
+      setLoadingComments(true)
+      const response = await api.get(`/blog/${postId}/comments`)
+      setComments(response.data.data)
+    } catch (err) {
+      console.error('Failed to load comments:', err)
+    } finally {
+      setLoadingComments(false)
+    }
+  }
+
+  const handleAddComment = async (e) => {
+    e.preventDefault()
+    if (!commentForm.user_name || !commentForm.comment_text) {
+      alert('Please enter your name and comment')
+      return
+    }
+
+    try {
+      const response = await api.post(`/blog/${previewPost.id}/comments`, commentForm)
+      setComments([...comments, response.data.data])
+      setCommentForm({ user_name: '', comment_text: '' })
+    } catch (err) {
+      console.error('Failed to add comment:', err)
+      alert('Failed to add comment. Please try again.')
+    }
+  }
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Delete this comment?')) return
+
+    try {
+      await api.delete(`/blog/${previewPost.id}/comments/${commentId}`)
+      setComments(comments.filter(c => c.id !== commentId))
+    } catch (err) {
+      console.error('Failed to delete comment:', err)
+      alert('Failed to delete comment. Please try again.')
     }
   }
 
@@ -303,6 +357,63 @@ export default function Blog() {
               className="preview-content"
               dangerouslySetInnerHTML={{ __html: previewPost.content }}
             />
+
+            {/* Comments Section */}
+            <div className="comments-section">
+              <h3>Comments ({comments.length})</h3>
+              
+              {/* Comment Form */}
+              <form onSubmit={handleAddComment} className="comment-form">
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={commentForm.user_name}
+                  onChange={(e) => setCommentForm({ ...commentForm, user_name: e.target.value })}
+                  className="comment-input"
+                  required
+                />
+                <textarea
+                  placeholder="Write a comment..."
+                  value={commentForm.comment_text}
+                  onChange={(e) => setCommentForm({ ...commentForm, comment_text: e.target.value })}
+                  className="comment-textarea"
+                  rows="3"
+                  required
+                />
+                <button type="submit" className="submit-comment-button">
+                  Add Comment
+                </button>
+              </form>
+
+              {/* Comments List */}
+              <div className="comments-list">
+                {loadingComments ? (
+                  <p className="loading-text">Loading comments...</p>
+                ) : comments.length === 0 ? (
+                  <p className="empty-comments">No comments yet. Be the first to comment!</p>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="comment-card">
+                      <div className="comment-header">
+                        <span className="comment-author">{comment.user_name}</span>
+                        <span className="comment-date">
+                          {new Date(comment.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="comment-text">{comment.comment_text}</p>
+                      {isAdmin() && (
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="delete-comment-button"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

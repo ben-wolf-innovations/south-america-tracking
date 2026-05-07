@@ -220,4 +220,103 @@ router.put('/:id/publish', authenticateToken, requireAdmin, (req, res) => {
   }
 })
 
+/**
+ * GET /api/blog/:id/comments
+ * Get all comments for a blog post
+ * Both admin and family users can view comments
+ */
+router.get('/:id/comments', authenticateToken, (req, res) => {
+  try {
+    const { id } = req.params
+
+    // Verify post exists
+    const post = get('SELECT * FROM blog_posts WHERE id = ?', [id])
+    if (!post) {
+      return res.status(404).json({ success: false, error: 'Blog post not found' })
+    }
+
+    const comments = all(
+      'SELECT * FROM blog_comments WHERE post_id = ? AND deleted = 0 ORDER BY created_at ASC',
+      [id]
+    )
+
+    res.json({ success: true, data: comments })
+  } catch (error) {
+    console.error('Error fetching comments:', error)
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+/**
+ * POST /api/blog/:id/comments
+ * Add a comment to a blog post
+ * Both admin and family users can comment
+ */
+router.post('/:id/comments', authenticateToken, (req, res) => {
+  try {
+    const { id } = req.params
+    const { comment_text, user_name } = req.body
+
+    // Validate required fields
+    if (!comment_text || !user_name) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Comment text and user name are required' 
+      })
+    }
+
+    // Verify post exists
+    const post = get('SELECT * FROM blog_posts WHERE id = ?', [id])
+    if (!post) {
+      return res.status(404).json({ success: false, error: 'Blog post not found' })
+    }
+
+    // Check if post is published (family users can only comment on published posts)
+    const isAdmin = req.user.accessLevel === 'admin'
+    if (!post.published && !isAdmin) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Cannot comment on unpublished posts' 
+      })
+    }
+
+    const result = run(
+      'INSERT INTO blog_comments (post_id, user_name, comment_text) VALUES (?, ?, ?)',
+      [id, user_name, comment_text]
+    )
+
+    const newComment = get('SELECT * FROM blog_comments WHERE id = ?', [result.lastID])
+    res.status(201).json({ success: true, data: newComment })
+  } catch (error) {
+    console.error('Error creating comment:', error)
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+/**
+ * DELETE /api/blog/:id/comments/:commentId
+ * Delete a comment (admin only)
+ */
+router.delete('/:id/comments/:commentId', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { id, commentId } = req.params
+
+    const existing = get('SELECT * FROM blog_comments WHERE id = ? AND post_id = ?', [commentId, id])
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Comment not found' })
+    }
+
+    run('UPDATE blog_comments SET deleted = 1 WHERE id = ?', [commentId])
+
+    res.json({ 
+      success: true, 
+      message: 'Comment deleted successfully',
+      deleted_id: commentId
+    })
+  } catch (error) {
+    console.error('Error deleting comment:', error)
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
 export default router
