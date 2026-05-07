@@ -78,7 +78,7 @@ router.get('/summary', authenticateToken, (req, res) => {
     const { trip_id = 1 } = req.query
 
     // Get actual costs from costs table (non-deleted only)
-    const summary = all(
+    const actualCosts = all(
       `SELECT 
         category,
         COUNT(*) as count,
@@ -91,10 +91,61 @@ router.get('/summary', authenticateToken, (req, res) => {
       [trip_id]
     )
 
+    // Get planned costs by category from locations table (non-deleted only)
+    // Note: accommodation costs are per night, so multiply by nights
+    const plannedCosts = get(
+      `SELECT 
+        SUM(accommodation_cost_planned * nights) as accommodation_planned,
+        SUM(activities_cost_planned) as activities_planned,
+        SUM(food_drink_cost_planned * nights) as food_planned,
+        SUM(travel_cost_planned) as travel_planned
+       FROM locations
+       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
+      [trip_id]
+    )
+
+    // Map planned costs to category structure
+    const categoryPlanned = {
+      'accommodation': plannedCosts?.accommodation_planned || 0,
+      'activities': plannedCosts?.activities_planned || 0,
+      'food': plannedCosts?.food_planned || 0,
+      'travel': plannedCosts?.travel_planned || 0
+    }
+
+    // Merge actual and planned by category
+    const categoriesMap = {}
+    
+    // Add actual costs
+    actualCosts.forEach(item => {
+      if (!categoriesMap[item.category]) {
+        categoriesMap[item.category] = {
+          category: item.category,
+          total_actual: 0,
+          total_planned: categoryPlanned[item.category] || 0,
+          currency: item.currency
+        }
+      }
+      categoriesMap[item.category].total_actual += parseFloat(item.total_actual || 0)
+    })
+
+    // Add categories with planned but no actual costs yet
+    Object.keys(categoryPlanned).forEach(category => {
+      if (!categoriesMap[category] && categoryPlanned[category] > 0) {
+        categoriesMap[category] = {
+          category: category,
+          total_actual: 0,
+          total_planned: categoryPlanned[category],
+          currency: 'GBP'
+        }
+      }
+    })
+
+    const summary = Object.values(categoriesMap)
+
     // Get budgeted costs from locations table (non-deleted only)
     const locationBudgets = get(
       `SELECT 
-        SUM(accommodation_cost_planned) + SUM(activities_cost_planned) + 
+        SUM(accommodation_cost_planned * nights) + SUM(activities_cost_planned) + 
         SUM(food_drink_cost_planned * nights) + SUM(travel_cost_planned) as total_planned
        FROM locations
        WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
@@ -104,7 +155,7 @@ router.get('/summary', authenticateToken, (req, res) => {
     // Get actual costs from locations table (synced from costs, non-deleted only)
     const locationActuals = get(
       `SELECT 
-        SUM(COALESCE(accommodation_cost_actual, 0)) + SUM(COALESCE(activities_cost_actual, 0)) + 
+        SUM(COALESCE(accommodation_cost_actual, 0) * nights) + SUM(COALESCE(activities_cost_actual, 0)) + 
         SUM(COALESCE(food_drink_cost_actual, 0) * nights) + SUM(COALESCE(travel_cost_actual, 0)) as total_actual
        FROM locations
        WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
