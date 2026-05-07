@@ -173,14 +173,15 @@
 
 .location-info .country {
   font-size: 18px;
-  opacity: 0.9;
+  opacity: 1;
   margin-bottom: 16px;
+  font-weight: 500;
 }
 
 .location-info .accommodation,
 .location-info .dates {
   font-size: 14px;
-  opacity: 0.85;
+  opacity: 0.95;
   margin: 8px 0;
 }
 
