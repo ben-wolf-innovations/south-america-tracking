@@ -85,11 +85,11 @@
 }
 
 .legend-icon.visited {
-  background: var(--success-color);
+  background: var(--secondary-color);
 }
 
 .legend-icon.planned {
-  background: var(--primary-color);
+  background: var(--accent-color);
 }
 
 .map-container {
