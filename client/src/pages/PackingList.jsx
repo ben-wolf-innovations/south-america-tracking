@@ -161,7 +161,7 @@ export default function PackingList() {
 
       {/* Tabs */}
       <div className="tabs">
-        {['Ben', 'El', 'Both'].map(tab => (
+        {['Ben', 'Elspeth', 'Both'].map(tab => (
           <button
             key={tab}
             className={`tab ${activeTab === tab ? 'active' : ''}`}

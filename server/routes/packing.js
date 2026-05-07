@@ -85,10 +85,10 @@ router.post('/', (req, res) => {
     }
     
     // Validate owner
-    if (!['Ben', 'El', 'Both'].includes(owner)) {
+    if (!['Ben', 'Elspeth', 'Both'].includes(owner)) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Owner must be "Ben", "El", or "Both"' 
+        error: 'Owner must be "Ben", "Elspeth", or "Both"' 
       })
     }
     
@@ -127,10 +127,10 @@ router.put('/:id', (req, res) => {
     const { owner, title, budget_amount, actual_amount, completed } = req.body
     
     // Validate owner if provided
-    if (owner && !['Ben', 'El', 'Both'].includes(owner)) {
+    if (owner && !['Ben', 'Elspeth', 'Both'].includes(owner)) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Owner must be "Ben", "El", or "Both"' 
+        error: 'Owner must be "Ben", "Elspeth", or "Both"' 
       })
     }
     
