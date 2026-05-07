@@ -114,6 +114,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       }
 
       // Insert the new location
+      // Convert undefined to null for sql.js compatibility
       const result = runInTransaction(
         `INSERT INTO locations (
           trip_id, sequence, name, country, latitude, longitude, nights,
@@ -125,13 +126,15 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
           travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          trip_id, finalSequence, name, country, latitude, longitude, nights,
-          arrival_date, departure_date, accommodation_name,
-          accommodation_cost_planned, accommodation_cost_actual,
-          accommodation_notes, accommodation_booking_ref,
-          activities, activities_cost_planned, activities_cost_actual,
-          food_drink_cost_planned, food_drink_cost_actual,
-          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
+          trip_id, finalSequence, name, country, 
+          latitude ?? null, longitude ?? null, nights,
+          arrival_date ?? null, departure_date ?? null, accommodation_name ?? null,
+          accommodation_cost_planned ?? null, accommodation_cost_actual ?? null,
+          accommodation_notes ?? null, accommodation_booking_ref ?? null,
+          activities ?? null, activities_cost_planned ?? null, activities_cost_actual ?? null,
+          food_drink_cost_planned ?? null, food_drink_cost_actual ?? null,
+          travel_method ?? null, travel_notes ?? null, 
+          travel_cost_planned ?? null, travel_cost_actual ?? null, notes ?? null
         ]
       )
 
