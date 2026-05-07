@@ -469,7 +469,7 @@ export default function Locations() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Budget (£)</label>
+                  <label>Budget (£ per night)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -506,7 +506,7 @@ export default function Locations() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Budget (£)</label>
+                  <label>Budget (£ total)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -534,7 +534,7 @@ export default function Locations() {
               <h4>Budget Planning</h4>
               <div className="form-grid">
                 <div className="form-field">
-                  <label>Activities Budget (£)</label>
+                  <label>Activities Budget (£ total)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -545,14 +545,14 @@ export default function Locations() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Food & Drink Budget (£)</label>
+                  <label>Food & Drink Budget (£ per day)</label>
                   <input
                     type="number"
                     step="0.01"
                     name="food_drink_cost_planned"
                     value={formData.food_drink_cost_planned}
                     onChange={handleInputChange}
-                    placeholder="150.00"
+                    placeholder="30.00"
                   />
                 </div>
               </div>
@@ -704,8 +704,8 @@ export default function Locations() {
                   <div className="info-item">
                     <span className="info-label">Accom. Cost:</span>
                     <span className="info-value">
-                      {location.accommodation_cost_planned ? `£${parseFloat(location.accommodation_cost_planned).toFixed(2)} budgeted` : ''}
-                      {location.accommodation_cost_actual && ` (£${parseFloat(location.accommodation_cost_actual).toFixed(2)} actual)`}
+                      {location.accommodation_cost_planned ? `£${parseFloat(location.accommodation_cost_planned).toFixed(2)}/night budgeted` : ''}
+                      {location.accommodation_cost_actual && ` (£${parseFloat(location.accommodation_cost_actual).toFixed(2)} total actual)`}
                     </span>
                   </div>
                 )}
@@ -916,7 +916,7 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Budget (£)</label>
+                      <label>Budget (£ per night)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -927,7 +927,7 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Actual Cost (£)</label>
+                      <label>Actual Cost (£ total for stay)</label>
                       <input
                         type="text"
                         value={editingLocation?.accommodation_cost_actual 
@@ -965,7 +965,7 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Budget (£)</label>
+                      <label>Budget (£ total)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -976,7 +976,7 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Actual Cost (£)</label>
+                      <label>Actual Cost (£ total)</label>
                       <input
                         type="text"
                         value={editingLocation?.travel_cost_actual 
@@ -1005,7 +1005,7 @@ export default function Locations() {
                   <h4>Budget Planning</h4>
                   <div className="form-grid">
                     <div className="form-field">
-                      <label>Activities Budget (£)</label>
+                      <label>Activities Budget (£ total)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -1016,14 +1016,14 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Food & Drink Budget (£)</label>
+                      <label>Food & Drink Budget (£ per day)</label>
                       <input
                         type="number"
                         step="0.01"
                         name="food_drink_cost_planned"
                         value={formData.food_drink_cost_planned}
                         onChange={handleInputChange}
-                        placeholder="150.00"
+                        placeholder="30.00"
                       />
                     </div>
                   </div>

@@ -93,12 +93,13 @@ router.get('/summary', authenticateToken, (req, res) => {
     )
 
     // Get planned costs by category from locations table (non-deleted only)
-    // Note: accommodation costs are per night, so multiply by nights
+    // Note: accommodation costs are per night (multiply by nights)
+    // Food/drink is daily allowance (multiply by nights + 1 for arrival and departure days)
     const plannedCosts = get(
       `SELECT 
         SUM(accommodation_cost_planned * nights) as accommodation_planned,
         SUM(activities_cost_planned) as activities_planned,
-        SUM(food_drink_cost_planned * nights) as food_planned,
+        SUM(food_drink_cost_planned * (nights + 1)) as food_planned,
         SUM(travel_cost_planned) as travel_planned
        FROM locations
        WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
@@ -152,7 +153,7 @@ router.get('/summary', authenticateToken, (req, res) => {
         country,
         SUM(COALESCE(accommodation_cost_planned, 0) * COALESCE(nights, 0)) as accommodation_planned,
         SUM(COALESCE(activities_cost_planned, 0)) as activities_planned,
-        SUM(COALESCE(food_drink_cost_planned, 0) * COALESCE(nights, 0)) as food_planned,
+        SUM(COALESCE(food_drink_cost_planned, 0) * (COALESCE(nights, 0) + 1)) as food_planned,
         SUM(COALESCE(travel_cost_planned, 0)) as travel_planned
        FROM locations
        WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
@@ -229,20 +230,23 @@ router.get('/summary', authenticateToken, (req, res) => {
     const byCountry = Object.values(countryMap)
 
     // Get budgeted costs from locations table (non-deleted only)
+    // Accommodation: per-night * nights, Food: daily allowance * (nights + 1)
     const locationBudgets = get(
       `SELECT 
         SUM(accommodation_cost_planned * nights) + SUM(activities_cost_planned) + 
-        SUM(food_drink_cost_planned * nights) + SUM(travel_cost_planned) as total_planned
+        SUM(food_drink_cost_planned * (nights + 1)) + SUM(travel_cost_planned) as total_planned
        FROM locations
        WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
       [trip_id]
     )
 
     // Get actual costs from locations table (synced from costs, non-deleted only)
+    // Note: accommodation_cost_actual and food_drink_cost_actual are already totals (not per-night)
+    // They are synced from costs table as SUM(amount_actual), so do NOT multiply by nights
     const locationActuals = get(
       `SELECT 
-        SUM(COALESCE(accommodation_cost_actual, 0) * nights) + SUM(COALESCE(activities_cost_actual, 0)) + 
-        SUM(COALESCE(food_drink_cost_actual, 0) * nights) + SUM(COALESCE(travel_cost_actual, 0)) as total_actual
+        SUM(COALESCE(accommodation_cost_actual, 0)) + SUM(COALESCE(activities_cost_actual, 0)) + 
+        SUM(COALESCE(food_drink_cost_actual, 0)) + SUM(COALESCE(travel_cost_actual, 0)) as total_actual
        FROM locations
        WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
       [trip_id]
