@@ -129,12 +129,42 @@ export default function Map() {
   // Filter locations with valid coordinates
   const validLocations = locations.filter(loc => loc.latitude && loc.longitude)
 
-  // Get route coordinates for polyline
+  // Add small offsets to markers at the same coordinates so they're all clickable
+  const locationsWithOffsets = validLocations.map((loc, index, arr) => {
+    // Find all locations at the same coordinates
+    const sameCoordLocations = arr.filter(l => 
+      Math.abs(l.latitude - loc.latitude) < 0.0001 && 
+      Math.abs(l.longitude - loc.longitude) < 0.0001
+    )
+    
+    if (sameCoordLocations.length > 1) {
+      // Find this location's index among duplicates
+      const duplicateIndex = sameCoordLocations.findIndex(l => l.id === loc.id)
+      
+      // Offset in a circle pattern (0.002 degrees ≈ 200m)
+      const offsetRadius = 0.002
+      const angle = (duplicateIndex / sameCoordLocations.length) * 2 * Math.PI
+      
+      return {
+        ...loc,
+        displayLatitude: loc.latitude + Math.cos(angle) * offsetRadius,
+        displayLongitude: loc.longitude + Math.sin(angle) * offsetRadius
+      }
+    }
+    
+    return {
+      ...loc,
+      displayLatitude: loc.latitude,
+      displayLongitude: loc.longitude
+    }
+  })
+
+  // Get route coordinates for polyline (use original coordinates, not offset)
   const routeCoordinates = validLocations.map(loc => [loc.latitude, loc.longitude])
 
   // Calculate center and bounds
-  const center = validLocations.length > 0
-    ? [validLocations[0].latitude, validLocations[0].longitude]
+  const center = locationsWithOffsets.length > 0
+    ? [locationsWithOffsets[0].latitude, locationsWithOffsets[0].longitude]
     : [-12.0464, -77.0428] // Lima as default
 
   return (
@@ -142,7 +172,7 @@ export default function Map() {
       <div className="map-header">
         <div>
           <h2>Route Map</h2>
-          <p className="subtitle">{validLocations.length} locations across South America</p>
+          <p className="subtitle">{locationsWithOffsets.length} locations across South America</p>
         </div>
         {isAdmin() && (
           <button 
@@ -197,7 +227,7 @@ export default function Map() {
           )}
 
           {/* Location markers */}
-          {validLocations.map((location) => {
+          {locationsWithOffsets.map((location) => {
             const isCurrent = location.is_current === 1
             const isVisited = location.visited === 1
             
@@ -212,7 +242,7 @@ export default function Map() {
             return (
               <Marker
                 key={location.id}
-                position={[location.latitude, location.longitude]}
+                position={[location.displayLatitude, location.displayLongitude]}
                 icon={markerIcon}
               >
                 <Popup>
