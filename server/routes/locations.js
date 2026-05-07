@@ -88,26 +88,29 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
+    // Determine sequence before transaction
+    let finalSequence
+    if (sequence !== undefined && sequence > 0) {
+      finalSequence = sequence
+    } else {
+      // Append to end
+      const maxSeqResult = get(
+        'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
+        [trip_id]
+      )
+      finalSequence = (maxSeqResult?.max_seq || 0) + 1
+    }
+
     let newLocationId
 
     // Use transaction to ensure atomicity
     transaction((runInTransaction) => {
-      let finalSequence
-
       if (sequence !== undefined && sequence > 0) {
         // Insert at specific position - shift all subsequent locations
         runInTransaction(
           'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ? AND (deleted IS NULL OR deleted = 0)',
           [trip_id, sequence]
         )
-        finalSequence = sequence
-      } else {
-        // Append to end
-        const maxSeqResult = get(
-          'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
-          [trip_id]
-        )
-        finalSequence = (maxSeqResult?.max_seq || 0) + 1
       }
 
       // Insert the new location
