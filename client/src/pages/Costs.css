@@ -81,11 +81,15 @@
 }
 
 .summary-amounts .amount.difference .value.over {
-  color: #ffeb3b;
+  color: #fef3c7;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .summary-amounts .amount.difference .value.under {
-  color: #4caf50;
+  color: #d1fae5;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Category Breakdown */
