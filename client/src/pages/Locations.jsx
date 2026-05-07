@@ -265,12 +265,26 @@ export default function Locations() {
     )
   }
 
+  // Calculate totals
+  const totalNights = locations.reduce((sum, loc) => sum + (parseInt(loc.nights) || 0), 0)
+  const totalLocations = locations.length
+
   return (
     <div className="locations-page">
       <div className="locations-header">
         <div>
           <h2>Locations</h2>
           <p className="subtitle">{locations.length} stops on your journey</p>
+        </div>
+        <div className="header-stats">
+          <div className="stat-card-small">
+            <div className="stat-label">Total Locations</div>
+            <div className="stat-value">{totalLocations}</div>
+          </div>
+          <div className="stat-card-small">
+            <div className="stat-label">Total Nights</div>
+            <div className="stat-value">{totalNights}</div>
+          </div>
         </div>
         {isAdmin() && !showAddForm && (
           <button
