@@ -28,9 +28,9 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41]
 })
 
-// Create custom orange icon for visited locations
-const orangeIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+// Create custom green icon for visited locations
+const greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
   shadowUrl: markerShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -38,9 +38,9 @@ const orangeIcon = new L.Icon({
   shadowSize: [41, 41]
 })
 
-// Create custom violet icon for planned locations
-const violetIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+// Create custom blue icon for planned locations
+const blueIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
   shadowUrl: markerShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -202,12 +202,12 @@ export default function Map() {
             // Location is visited if departure date is in the past
             const isVisited = location.departure_date && new Date(location.departure_date) < new Date()
             
-            // Determine icon: red for current, orange for visited, violet for planned
-            let markerIcon = violetIcon // Default: planned (not visited)
+            // Determine icon: red for current, green for visited, blue for planned
+            let markerIcon = blueIcon // Default: planned (not visited)
             if (isCurrent) {
               markerIcon = redIcon // Current location
             } else if (isVisited) {
-              markerIcon = orangeIcon // Visited (but not current)
+              markerIcon = greenIcon // Visited (but not current)
             }
             
             return (
