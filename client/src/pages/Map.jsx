@@ -217,7 +217,7 @@ export default function Map() {
               >
                 <Popup>
                   <div className="location-popup">
-                    <h3>{location.name}</h3>
+                    <h3>{location.name} <span style={{fontSize: '0.85em', color: '#666'}}>(Stop #{location.sequence})</span></h3>
                     <p className="country">{location.country}</p>
                     
                     {isCurrent && (
