@@ -12,6 +12,7 @@
         "npm install": true,
         "Move-Item": true,
         "Push-Location": true,
-        "Pop-Location": true
+        "Pop-Location": true,
+        "Get-Process": true
     }
 }

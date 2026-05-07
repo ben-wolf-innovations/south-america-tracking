@@ -134,7 +134,7 @@ export default function Overview() {
                 <div className="date-display">
                   <span>{trip.start_date ? new Date(trip.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not set'}</span>
                   {isAdmin() && (
-                    <button onClick={() => setEditingStartDate(true)} className="btn-edit">✏️</button>
+                    <button onClick={() => setEditingStartDate(true)} className="btn-edit">Edit</button>
                   )}
                 </div>
               )}
@@ -145,7 +145,7 @@ export default function Overview() {
 
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon">📍</div>
+          <div className="stat-icon locations-icon"></div>
           <div className="stat-content">
             <div className="stat-value">{stats?.visitedLocations || 0} / {stats?.totalLocations || 0}</div>
             <div className="stat-label">Locations Visited</div>
@@ -159,7 +159,7 @@ export default function Overview() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">🗓️</div>
+          <div className="stat-icon calendar-icon"></div>
           <div className="stat-content">
             <div className="stat-value">{daysElapsed} / {stats?.totalDays || 0}</div>
             <div className="stat-label">Days Elapsed</div>
@@ -167,7 +167,7 @@ export default function Overview() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">🌍</div>
+          <div className="stat-icon globe-icon"></div>
           <div className="stat-content">
             <div className="stat-value">{stats?.countries || 0}</div>
             <div className="stat-label">Countries</div>
@@ -176,7 +176,7 @@ export default function Overview() {
 
         {isAdmin() && (
           <div className="stat-card">
-            <div className="stat-icon">💰</div>
+            <div className="stat-icon money-icon"></div>
             <div className="stat-content">
               <div className="stat-value">
                 £{(stats?.costsSummary?.total_actual || 0).toFixed(0)} / £{(stats?.costsSummary?.total_planned || 0).toFixed(0)}
@@ -195,18 +195,18 @@ export default function Overview() {
 
       {stats?.currentLocation && (
         <div className="current-location-card">
-          <h3>📌 Current Location</h3>
+          <h3>Current Location</h3>
           <div className="location-info">
             <h4>{stats.currentLocation.name}</h4>
             <p className="country">{stats.currentLocation.country}</p>
             {stats.currentLocation.accommodation_name && (
               <p className="accommodation">
-                🏨 {stats.currentLocation.accommodation_name}
+                <strong>Hotel:</strong> {stats.currentLocation.accommodation_name}
               </p>
             )}
             {stats.currentLocation.arrival_date && (
               <p className="dates">
-                📅 {new Date(stats.currentLocation.arrival_date).toLocaleDateString()}
+                <strong>Dates:</strong> {new Date(stats.currentLocation.arrival_date).toLocaleDateString()}
                 {stats.currentLocation.departure_date && 
                   ` - ${new Date(stats.currentLocation.departure_date).toLocaleDateString()}`
                 }
@@ -218,7 +218,7 @@ export default function Overview() {
 
       {isAdmin() && stats?.costsSummary?.by_category && stats.costsSummary.by_category.length > 0 && (
         <div className="costs-breakdown">
-          <h3>💵 Cost Breakdown by Category</h3>
+          <h3>Cost Breakdown by Category</h3>
           <div className="costs-list">
             {stats.costsSummary.by_category.map((cat) => (
               <div key={cat.category} className="cost-item">

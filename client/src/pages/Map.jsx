@@ -121,11 +121,11 @@ export default function Map() {
     <div className="map-page">
       <div className="map-header">
         <div>
-          <h2>🗺️ Route Map</h2>
+          <h2>Route Map</h2>
           <p className="subtitle">{validLocations.length} locations across South America</p>
         </div>
         <button onClick={loadLocations} className="reload-button" title="Reload map data">
-          🔄 Reload Map
+          Reload Map
         </button>
       </div>
 
@@ -195,29 +195,29 @@ export default function Map() {
                     <p className="country">{location.country}</p>
                     
                     {isCurrent && (
-                      <div className="current-badge">📍 Current Location</div>
+                      <div className="current-badge">Current Location</div>
                     )}
                     
                     {isVisited && !isCurrent && (
-                      <div className="visited-badge">✅ Visited</div>
+                      <div className="visited-badge">Visited</div>
                     )}
                     
                     <div className="popup-details">
                       {location.nights > 0 && (
                         <p className="detail">
-                          <strong>🛏️ Stay:</strong> {location.nights} night{location.nights > 1 ? 's' : ''}
+                          <strong>Stay:</strong> {location.nights} night{location.nights > 1 ? 's' : ''}
                         </p>
                       )}
                       
                       {location.accommodation_name && (
                         <p className="detail">
-                          <strong>🏨 Hotel:</strong> {location.accommodation_name}
+                          <strong>Hotel:</strong> {location.accommodation_name}
                         </p>
                       )}
                       
                       {(location.arrival_date || location.departure_date) && (
                         <p className="detail">
-                          <strong>📅 Dates:</strong>{' '}
+                          <strong>Dates:</strong>{' '}
                           {location.arrival_date 
                             ? new Date(location.arrival_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
                             : 'TBD'
@@ -232,7 +232,7 @@ export default function Map() {
                       
                       {location.activities && (
                         <p className="detail activities">
-                          <strong>✨ Activities:</strong><br />
+                          <strong>Activities:</strong><br />
                           {location.activities}
                         </p>
                       )}
@@ -243,7 +243,7 @@ export default function Map() {
                         onClick={() => handleCheckIn(location.id)}
                         className="checkin-button"
                       >
-                        📍 Check In Here
+                        Check In Here
                       </button>
                     )}
                   </div>

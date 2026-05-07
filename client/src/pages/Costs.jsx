@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
 import './Costs.css'
@@ -26,6 +26,7 @@ export default function Costs() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const addFormRef = useRef(null)
   const [editingCost, setEditingCost] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   
@@ -200,15 +201,18 @@ export default function Costs() {
     <div className="costs-page">
       <div className="costs-header">
         <div>
-          <h2>💰 Cost Tracker</h2>
+          <h2>Cost Tracker</h2>
           <p className="subtitle">Plan and track your travel expenses</p>
         </div>
         {isAdmin() && !showAddForm && !editingCost && (
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={() => {
+              setShowAddForm(true)
+              setTimeout(() => addFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+            }}
             className="add-button"
           >
-            ➕ Add Cost
+            Add Cost
           </button>
         )}
       </div>
@@ -216,7 +220,7 @@ export default function Costs() {
       {/* Summary Cards */}
       <div className="summary-section">
         <div className="summary-card total">
-          <div className="summary-icon">💰</div>
+          <div className="summary-icon"></div>
           <div className="summary-content">
             <div className="summary-label">Total Budget</div>
             <div className="summary-amounts">
@@ -240,7 +244,7 @@ export default function Costs() {
         </div>
 
         <div className="category-breakdown">
-          <h3>📊 Actual Spending by Category</h3>
+          <h3>Actual Spending by Category</h3>
           <div className="category-grid">
             {summary.map(item => {
               const actual = parseFloat(item.total_actual || 0)
@@ -267,10 +271,10 @@ export default function Costs() {
 
       {/* Add/Edit Form */}
       {(showAddForm || editingCost) && (
-        <div className="cost-form-container">
+        <div className="cost-form-container" ref={addFormRef}>
           <div className="cost-form-header">
-            <h3>{editingCost ? '✏️ Edit Cost' : '➕ Add New Cost'}</h3>
-            <button onClick={resetForm} className="close-button">✕</button>
+            <h3>{editingCost ? 'Edit Cost' : 'Add New Cost'}</h3>
+            <button onClick={resetForm} className="close-button">&times;</button>
           </div>
           <form onSubmit={editingCost ? handleEditCost : handleAddCost} className="cost-form">
             <div className="form-grid">
@@ -355,7 +359,7 @@ export default function Costs() {
 
       {/* Filters */}
       <div className="filters-section">
-        <h3>🔍 Filter Costs</h3>
+        <h3>Filter Costs</h3>
         <div className="filters-grid">
           <div className="filter-field">
             <label>Location:</label>
@@ -406,9 +410,12 @@ export default function Costs() {
       <div className="costs-list">
         {filteredCosts.length === 0 ? (
           <div className="empty-state">
-            <p>📊 No costs found</p>
+            <p>No costs found</p>
             {isAdmin() && (
-              <button onClick={() => setShowAddForm(true)} className="add-button">
+              <button onClick={() => {
+                setShowAddForm(true)
+                setTimeout(() => addFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+              }} className="add-button">
                 Add Your First Cost
               </button>
             )}
@@ -427,16 +434,16 @@ export default function Costs() {
                       <span className="category-badge">{getCategoryLabel(cost.category)}</span>
                       {location ? (
                         <span className="location-badge">
-                          📍 #{location.sequence} {location.name}
+                          #{location.sequence} {location.name}
                         </span>
                       ) : (
                         <span className="location-badge general">
-                          🌍 General
+                          General
                         </span>
                       )}
                       {cost.date && (
                         <span className="date-badge">
-                          📅 {new Date(cost.date).toLocaleDateString()}
+                          {new Date(cost.date).toLocaleDateString()}
                         </span>
                       )}
                     </div>
@@ -448,14 +455,14 @@ export default function Costs() {
                         className="edit-button"
                         title="Edit"
                       >
-                        ✏️
+                        Edit
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(cost.id)}
                         className="delete-button"
                         title="Delete"
                       >
-                        🗑️
+                        Delete
                       </button>
                     </div>
                   )}
@@ -477,7 +484,7 @@ export default function Costs() {
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>⚠️ Delete Cost?</h3>
+            <h3>Delete Cost?</h3>
             <p>Are you sure you want to delete this cost entry? This action cannot be undone.</p>
             <div className="modal-actions">
               <button onClick={() => setDeleteConfirm(null)} className="cancel-button">

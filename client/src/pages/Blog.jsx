@@ -186,7 +186,7 @@ export default function Blog() {
     <div className="blog-page">
       <div className="blog-header">
         <div>
-          <h2>📝 Travel Blog</h2>
+          <h2>Travel Blog</h2>
           <p className="subtitle">Share your journey and experiences</p>
         </div>
         {isAdmin() && !showAddForm && !editingPost && !previewPost && (
@@ -194,7 +194,7 @@ export default function Blog() {
             onClick={() => setShowAddForm(true)}
             className="add-button"
           >
-            ➕ New Post
+            New Post
           </button>
         )}
       </div>
@@ -203,8 +203,8 @@ export default function Blog() {
       {(showAddForm || editingPost) && (
         <div className="blog-form-container">
           <div className="blog-form-header">
-            <h3>{editingPost ? '✏️ Edit Post' : '➕ New Blog Post'}</h3>
-            <button onClick={resetForm} className="close-button">✕</button>
+            <h3>{editingPost ? 'Edit Post' : 'New Blog Post'}</h3>
+            <button onClick={resetForm} className="close-button">&times;</button>
           </div>
           <form onSubmit={editingPost ? handleEditPost : handleAddPost} className="blog-form">
             <div className="form-row">
@@ -284,19 +284,19 @@ export default function Blog() {
           <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
             <div className="preview-header">
               <h2>{previewPost.title}</h2>
-              <button onClick={() => setPreviewPost(null)} className="close-button">✕</button>
+              <button onClick={() => setPreviewPost(null)} className="close-button">&times;</button>
             </div>
             <div className="preview-meta">
               {previewPost.location_name && (
                 <span className="location-badge">
-                  📍 {previewPost.location_name}, {previewPost.location_country}
+                  {previewPost.location_name}, {previewPost.location_country}
                 </span>
               )}
               <span className="date-badge">
-                📅 {new Date(previewPost.created_at).toLocaleDateString()}
+                {new Date(previewPost.created_at).toLocaleDateString()}
               </span>
               <span className={`status-badge ${previewPost.published ? 'published' : 'draft'}`}>
-                {previewPost.published ? '✓ Published' : '📝 Draft'}
+                {previewPost.published ? 'Published' : 'Draft'}
               </span>
             </div>
             <div 
@@ -311,7 +311,7 @@ export default function Blog() {
       <div className="blog-posts-list">
         {posts.length === 0 ? (
           <div className="empty-state">
-            <p>📝 No blog posts yet</p>
+            <p>No blog posts yet</p>
             {isAdmin() && (
               <button onClick={() => setShowAddForm(true)} className="add-button">
                 Write Your First Post
@@ -331,14 +331,14 @@ export default function Blog() {
                     <div className="blog-post-meta">
                       {location && (
                         <span className="location-badge">
-                          📍 #{location.sequence} {location.name}
+                          #{location.sequence} {location.name}
                         </span>
                       )}
                       <span className="date-badge">
-                        📅 {new Date(post.created_at).toLocaleDateString()}
+                        {new Date(post.created_at).toLocaleDateString()}
                       </span>
                       <span className={`status-badge ${isPublished ? 'published' : 'draft'}`}>
-                        {isPublished ? '✓ Published' : '📝 Draft'}
+                        {isPublished ? 'Published' : 'Draft'}
                       </span>
                     </div>
                   </div>
@@ -349,21 +349,21 @@ export default function Blog() {
                         className="publish-button"
                         title={isPublished ? 'Unpublish' : 'Publish'}
                       >
-                        {isPublished ? '👁️‍🗨️' : '📤'}
+                        {isPublished ? 'View' : 'Publish'}
                       </button>
                       <button
                         onClick={() => startEdit(post)}
                         className="edit-button"
                         title="Edit"
                       >
-                        ✏️
+                        Edit
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(post.id)}
                         className="delete-button"
                         title="Delete"
                       >
-                        🗑️
+                        Delete
                       </button>
                     </div>
                   )}
@@ -392,7 +392,7 @@ export default function Blog() {
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>⚠️ Delete Blog Post?</h3>
+            <h3>Delete Blog Post?</h3>
             <p>Are you sure you want to delete this blog post? This action cannot be undone.</p>
             <div className="modal-actions">
               <button onClick={() => setDeleteConfirm(null)} className="cancel-button">

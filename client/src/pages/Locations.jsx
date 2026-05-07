@@ -165,9 +165,15 @@ export default function Locations() {
         }
       })
 
-      await api.put(`/locations/${editingLocation.id}`, payload)
+      const locationId = editingLocation.id
+      await api.put(`/locations/${locationId}`, payload)
       await loadLocations()
       resetForm()
+      // Scroll back to the location card after saving
+      setTimeout(() => {
+        const el = document.getElementById(`location-${locationId}`)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
     } catch (err) {
       console.error('Failed to update location:', err)
       alert('Failed to update location: ' + (err.response?.data?.error || err.message))
@@ -263,7 +269,7 @@ export default function Locations() {
     <div className="locations-page">
       <div className="locations-header">
         <div>
-          <h2>📍 Locations</h2>
+          <h2>Locations</h2>
           <p className="subtitle">{locations.length} stops on your journey</p>
         </div>
         {isAdmin() && !showAddForm && (
@@ -271,7 +277,7 @@ export default function Locations() {
             onClick={() => setShowAddForm(true)}
             className="add-button"
           >
-            ➕ Add Location
+            Add Location
           </button>
         )}
       </div>
@@ -280,8 +286,8 @@ export default function Locations() {
       {showAddForm && (
         <div className="location-form-container">
           <div className="location-form-header">
-            <h3>➕ Add New Location</h3>
-            <button onClick={resetForm} className="close-button">✕</button>
+            <h3>Add New Location</h3>
+            <button onClick={resetForm} className="close-button">&times;</button>
           </div>
           <form onSubmit={handleAddLocation} className="location-form">
             <div className="form-section">
@@ -378,7 +384,7 @@ export default function Locations() {
                         onClick={() => clearDateField('arrival_date')}
                         title="Clear date"
                       >
-                        ✕
+                        &times;
                       </button>
                     )}
                   </div>
@@ -399,7 +405,7 @@ export default function Locations() {
                         onClick={() => clearDateField('departure_date')}
                         title="Clear date"
                       >
-                        ✕
+                        &times;
                       </button>
                     )}
                   </div>
@@ -570,7 +576,7 @@ export default function Locations() {
                   {location.name}
                   {location.is_current === 1 && <span className="current-badge">Current</span>}
                 </h3>
-                <p className="country">📍 {location.country}</p>
+                <p className="country">{location.country}</p>
               </div>
               {isAdmin() && !showAddForm && (
                 <div className="location-actions">
@@ -580,7 +586,7 @@ export default function Locations() {
                     className="reorder-button"
                     title="Move up"
                   >
-                    ⬆️
+                    ↑
                   </button>
                   <button
                     onClick={() => handleReorder(location.id, 'down')}
@@ -588,7 +594,7 @@ export default function Locations() {
                     className="reorder-button"
                     title="Move down"
                   >
-                    ⬇️
+                    ↓
                   </button>
                   {!isEditing && (
                     <button
@@ -596,7 +602,7 @@ export default function Locations() {
                       className="edit-button"
                       title="Edit"
                     >
-                      ✏️
+                      Edit
                     </button>
                   )}
                   <button
@@ -605,7 +611,7 @@ export default function Locations() {
                     title="Delete"
                     disabled={isEditing}
                   >
-                    🗑️
+                    Delete
                   </button>
                 </div>
               )}
@@ -617,25 +623,25 @@ export default function Locations() {
               <div className="location-info-grid">
                 {location.nights > 0 && (
                   <div className="info-item">
-                    <span className="info-label">🛏️ Nights:</span>
+                    <span className="info-label">Nights:</span>
                     <span className="info-value">{location.nights}</span>
                   </div>
                 )}
                 {location.arrival_date && (
                   <div className="info-item">
-                    <span className="info-label">📅 Arrival:</span>
+                    <span className="info-label">Arrival:</span>
                     <span className="info-value">{new Date(location.arrival_date).toLocaleDateString()}</span>
                   </div>
                 )}
                 {location.departure_date && (
                   <div className="info-item">
-                    <span className="info-label">📅 Departure:</span>
+                    <span className="info-label">Departure:</span>
                     <span className="info-value">{new Date(location.departure_date).toLocaleDateString()}</span>
                   </div>
                 )}
                 {location.accommodation_name && (
                   <div className="info-item">
-                    <span className="info-label">🏨 Accommodation:</span>
+                    <span className="info-label">Accommodation:</span>
                     <span className="info-value">{location.accommodation_name}</span>
                   </div>
                 )}
@@ -647,7 +653,7 @@ export default function Locations() {
                 )}
                 {(location.accommodation_cost_planned || location.accommodation_cost_actual) && (
                   <div className="info-item">
-                    <span className="info-label">💰 Accom. Cost:</span>
+                    <span className="info-label">Accom. Cost:</span>
                     <span className="info-value">
                       {location.accommodation_cost_planned ? `£${parseFloat(location.accommodation_cost_planned).toFixed(2)} budgeted` : ''}
                       {location.accommodation_cost_actual && ` (£${parseFloat(location.accommodation_cost_actual).toFixed(2)} actual)`}
@@ -656,7 +662,7 @@ export default function Locations() {
                 )}
                 {location.travel_from && (
                   <div className="info-item">
-                    <span className="info-label">🚌 From:</span>
+                    <span className="info-label">From:</span>
                     <span className="info-value">{location.travel_from}</span>
                   </div>
                 )}
@@ -668,7 +674,7 @@ export default function Locations() {
                 )}
                 {(location.travel_cost_planned || location.travel_cost_actual) && (
                   <div className="info-item">
-                    <span className="info-label">💸 Travel Cost:</span>
+                    <span className="info-label">Travel Cost:</span>
                     <span className="info-value">
                       {location.travel_cost_planned ? `£${parseFloat(location.travel_cost_planned).toFixed(2)} budgeted` : ''}
                       {location.travel_cost_actual && ` (£${parseFloat(location.travel_cost_actual).toFixed(2)} actual)`}
@@ -677,19 +683,19 @@ export default function Locations() {
                 )}
                 {location.travel_duration && (
                   <div className="info-item">
-                    <span className="info-label">⏱️ Duration:</span>
+                    <span className="info-label">Duration:</span>
                     <span className="info-value">{location.travel_duration}h</span>
                   </div>
                 )}
               </div>
               {location.activities && (
                 <div className="location-activities">
-                  <strong>✨ Activities:</strong> {location.activities}
+                  <strong>Activities:</strong> {location.activities}
                 </div>
               )}
               {(location.activities_cost_planned || location.activities_cost_actual) && (
                 <div className="info-item">
-                  <span className="info-label">🎯 Activities Budget:</span>
+                  <span className="info-label">Activities Budget:</span>
                   <span className="info-value">
                     {location.activities_cost_planned ? `£${parseFloat(location.activities_cost_planned).toFixed(2)} budgeted` : ''}
                     {location.activities_cost_actual && ` (£${parseFloat(location.activities_cost_actual).toFixed(2)} actual)`}
@@ -698,7 +704,7 @@ export default function Locations() {
               )}
               {(location.food_drink_cost_planned || location.food_drink_cost_actual) && (
                 <div className="info-item">
-                  <span className="info-label">🍽️ Food & Drink Budget:</span>
+                  <span className="info-label">Food & Drink Budget:</span>
                   <span className="info-value">
                     {location.food_drink_cost_planned ? `£${parseFloat(location.food_drink_cost_planned).toFixed(2)} budgeted` : ''}
                     {location.food_drink_cost_actual && ` (£${parseFloat(location.food_drink_cost_actual).toFixed(2)} actual)`}
@@ -715,7 +721,7 @@ export default function Locations() {
               )}
               {location.notes && (
                 <div className="location-notes">
-                  <strong>📝 Notes:</strong> {location.notes}
+                  <strong>Notes:</strong> {location.notes}
                 </div>
               )}
               <div className="location-coordinates">
@@ -808,7 +814,7 @@ export default function Locations() {
                             onClick={() => clearDateField('arrival_date')}
                             title="Clear date"
                           >
-                            ✕
+                            &times;
                           </button>
                         )}
                       </div>
@@ -829,7 +835,7 @@ export default function Locations() {
                             onClick={() => clearDateField('departure_date')}
                             title="Clear date"
                           >
-                            ✕
+                            &times;
                           </button>
                         )}
                       </div>
@@ -1018,7 +1024,7 @@ export default function Locations() {
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>⚠️ Delete Location?</h3>
+            <h3>Delete Location?</h3>
             <p>Are you sure you want to delete this location? This action cannot be undone.</p>
             <div className="modal-actions">
               <button onClick={() => setDeleteConfirm(null)} className="cancel-button">

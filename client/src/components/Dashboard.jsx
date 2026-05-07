@@ -77,23 +77,23 @@ export default function Dashboard() {
       <nav className="dashboard-nav">
         <div className="nav-content">
           <Link to="/" className="nav-link">
-            📊 Overview
+            Overview
           </Link>
           <Link to="/map" className="nav-link">
-            🗺️ Map
+            Map
           </Link>
           {isAdmin() && (
             <Link to="/locations" className="nav-link">
-              📍 Locations
+              Locations
             </Link>
           )}
           {isAdmin() && (
             <Link to="/costs" className="nav-link">
-              💰 Costs
+              Costs
             </Link>
           )}
           <Link to="/blog" className="nav-link">
-            📝 Blog
+            Blog
           </Link>
         </div>
       </nav>
