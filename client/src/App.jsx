@@ -8,6 +8,7 @@ import Map from './pages/Map'
 import Locations from './pages/Locations'
 import Costs from './pages/Costs'
 import Blog from './pages/Blog'
+import PackingList from './pages/PackingList'
 import './App.css'
 
 function App() {
@@ -31,6 +32,11 @@ function App() {
           <Route path="costs" element={
             <ProtectedRoute requireAdmin>
               <Costs />
+            </ProtectedRoute>
+          } />
+          <Route path="packing" element={
+            <ProtectedRoute requireAdmin>
+              <PackingList />
             </ProtectedRoute>
           } />
           <Route path="blog" element={<Blog />} />

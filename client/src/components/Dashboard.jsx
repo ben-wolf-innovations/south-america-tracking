@@ -92,6 +92,11 @@ export default function Dashboard() {
               Costs
             </Link>
           )}
+          {isAdmin() && (
+            <Link to="/packing" className="nav-link">
+              Packing
+            </Link>
+          )}
           <Link to="/blog" className="nav-link">
             Blog
           </Link>
