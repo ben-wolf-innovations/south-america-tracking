@@ -89,7 +89,7 @@
 }
 
 .legend-icon.planned {
-  background: var(--info-color);
+  background: #3b82f6;
 }
 
 .map-container {

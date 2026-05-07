@@ -199,8 +199,7 @@ export default function Map() {
           {/* Location markers */}
           {validLocations.map((location) => {
             const isCurrent = location.is_current === 1
-            // Location is visited if departure date is in the past
-            const isVisited = location.departure_date && new Date(location.departure_date) < new Date()
+            const isVisited = location.visited === 1
             
             // Determine icon: red for current, green for visited, blue for planned
             let markerIcon = blueIcon // Default: planned (not visited)
