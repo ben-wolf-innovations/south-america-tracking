@@ -14,39 +14,41 @@
 
 .locations-header h2 {
   font-size: 32px;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
+  font-weight: 700;
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .add-button {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .add-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 /* Form Container */
 .location-form-container {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 24px;
   margin-bottom: 32px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
 }
 
 .location-form-header {
@@ -55,29 +57,30 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .location-form-header h3 {
   margin: 0;
   font-size: 24px;
-  color: #1e293b;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .close-button {
   background: none;
   border: none;
   font-size: 24px;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s;
+  border-radius: var(--radius);
+  transition: all var(--transition);
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .location-form {
@@ -185,37 +188,38 @@
   gap: 12px;
   justify-content: flex-end;
   padding-top: 16px;
-  border-top: 2px solid #e2e8f0;
+  border-top: 2px solid var(--border-color);
 }
 
 .cancel-button,
 .submit-button {
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition);
   border: none;
 }
 
 .cancel-button {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 .cancel-button:hover {
-  background: #e2e8f0;
+  background: var(--border-color);
+  color: var(--text-primary);
 }
 
 .submit-button {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: white;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .submit-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 /* Locations List */
@@ -227,20 +231,22 @@
 
 .location-card {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s;
+  box-shadow: var(--shadow);
+  transition: all var(--transition);
+  border: 1px solid var(--border-light);
 }
 
 .location-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--primary-light);
 }
 
 .location-card.editing {
-  border: 3px solid #2563eb;
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+  border: 3px solid var(--primary-color);
+  box-shadow: var(--shadow-xl);
   transform: none;
 }
 

@@ -14,8 +14,9 @@
 
 .blog-header h2 {
   font-size: 2rem;
-  color: var(--text-color);
+  color: var(--text-primary);
   margin: 0;
+  font-weight: 700;
 }
 
 .blog-header .subtitle {
@@ -28,9 +29,10 @@
 .blog-form-container {
   background: white;
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   margin-bottom: 2rem;
+  border: 1px solid var(--border-light);
 }
 
 .blog-form-header {
@@ -43,7 +45,8 @@
 .blog-form-header h3 {
   margin: 0;
   font-size: 1.4rem;
-  color: var(--text-color);
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .blog-form {
@@ -70,24 +73,25 @@
 
 .form-field label {
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .form-field input[type="text"],
 .form-field select {
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   font-size: 0.95rem;
   font-family: inherit;
-  transition: border-color 0.2s;
+  transition: all var(--transition);
 }
 
 .form-field input:focus,
 .form-field select:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }
 
 /* React Quill Styles */
@@ -152,19 +156,22 @@
 .blog-post-card {
   background: white;
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.2s;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  transition: all var(--transition);
+  border-left: 4px solid var(--primary-color);
+  border: 1px solid var(--border-light);
   border-left: 4px solid var(--primary-color);
 }
 
 .blog-post-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .blog-post-card.draft {
-  border-left-color: #ff9800;
-  opacity: 0.85;
+  border-left-color: var(--secondary-color);
+  opacity: 0.9;
 }
 
 .blog-post-header {
@@ -177,7 +184,8 @@
 .blog-post-header h3 {
   margin: 0 0 0.75rem 0;
   font-size: 1.5rem;
-  color: var(--text-color);
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .blog-post-meta {
@@ -190,29 +198,29 @@
 .date-badge,
 .status-badge {
   padding: 0.3rem 0.75rem;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .location-badge {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--accent-color);
 }
 
 .date-badge {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--secondary-color);
 }
 
 .status-badge.published {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
 }
 
 .status-badge.draft {
-  background: #fff3e0;
-  color: #ef6c00;
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--secondary-color);
 }
 
 .blog-post-actions {
@@ -224,25 +232,28 @@
   width: 40px;
   height: 40px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition);
   background: transparent;
 }
 
 .publish-button:hover {
-  background: #e3f2fd;
+  background: rgba(20, 184, 166, 0.1);
+  color: var(--primary-color);
   transform: translateY(-2px);
 }
 
 .blog-post-actions .edit-button:hover {
-  background: #e3f2fd;
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--accent-color);
   transform: translateY(-2px);
 }
 
 .blog-post-actions .delete-button:hover {
-  background: #ffebee;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
   transform: translateY(-2px);
 }
 

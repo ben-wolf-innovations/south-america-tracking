@@ -14,8 +14,9 @@
 
 .costs-header h2 {
   font-size: 2rem;
-  color: var(--text-color);
+  color: var(--text-primary);
   margin: 0;
+  font-weight: 700;
 }
 
 .costs-header .subtitle {
@@ -30,15 +31,16 @@
 }
 
 .summary-card.total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
   color: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .summary-icon {
@@ -89,8 +91,9 @@
 /* Category Breakdown */
 .category-breakdown h3 {
   font-size: 1.3rem;
-  color: var(--text-color);
+  color: var(--text-primary);
   margin: 0 0 1rem 0;
+  font-weight: 700;
 }
 
 .category-grid {
@@ -102,15 +105,23 @@
 .category-summary-card {
   background: white;
   padding: 1.25rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-left: 4px solid var(--primary-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--secondary-color);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--secondary-color);
+  transition: all var(--transition);
+}
+
+.category-summary-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .category-name {
   font-weight: 600;
   font-size: 1.05rem;
-  color: var(--text-color);
+  color: var(--text-primary);
   margin-bottom: 0.75rem;
 }
 
@@ -122,7 +133,7 @@
 }
 
 .category-amounts .amount-row:not(:last-child) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .planned-amount {
@@ -140,20 +151,21 @@
 }
 
 .category-amounts .amount-row.diff.over {
-  color: #f44336;
+  color: var(--danger-color);
 }
 
 .category-amounts .amount-row.diff.under {
-  color: var(--secondary-color);
+  color: var(--success-color);
 }
 
 /* Form */
 .cost-form-container {
   background: white;
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   margin-bottom: 2rem;
+  border: 1px solid var(--border-light);
 }
 
 .cost-form-header {
@@ -166,7 +178,8 @@
 .cost-form-header h3 {
   margin: 0;
   font-size: 1.4rem;
-  color: var(--text-color);
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .cost-form {
@@ -193,7 +206,7 @@
 
 .form-field label {
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
