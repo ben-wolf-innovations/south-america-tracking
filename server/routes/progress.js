@@ -34,23 +34,25 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
-    // Check if this is the first location (sequence = 1)
-    if (location.sequence > 1) {
-      // Find the previous location by sequence
-      const previousLocation = get(
-        `SELECT * FROM locations 
-         WHERE trip_id = ? 
-         AND sequence = ? 
-         AND (deleted IS NULL OR deleted = 0)`,
-        [location.trip_id, location.sequence - 1]
-      )
+    // Check if all previous visits to this same location have been checked in
+    // This allows visiting the same place multiple times while enforcing order
+    const previousVisitsToSameLocation = get(
+      `SELECT * FROM locations 
+       WHERE trip_id = ? 
+       AND name = ? 
+       AND sequence < ? 
+       AND visited = 0
+       AND (deleted IS NULL OR deleted = 0)
+       ORDER BY sequence ASC
+       LIMIT 1`,
+      [location.trip_id, location.name, location.sequence]
+    )
 
-      if (previousLocation && !previousLocation.visited) {
-        return res.status(400).json({
-          success: false,
-          error: `You must check in to ${previousLocation.name} (stop #${previousLocation.sequence}) before checking in here`
-        })
-      }
+    if (previousVisitsToSameLocation) {
+      return res.status(400).json({
+        success: false,
+        error: `You must check in to ${previousVisitsToSameLocation.name} (stop #${previousVisitsToSameLocation.sequence}) before checking in here (stop #${location.sequence})`
+      })
     }
 
     // Use transaction to ensure atomicity
