@@ -183,16 +183,16 @@ export default function PackingList() {
         </div>
         <div className="summary-card">
           <div className="summary-label">Budget</div>
-          <div className="summary-value">${totalBudget.toFixed(2)}</div>
+          <div className="summary-value">£{totalBudget.toFixed(2)}</div>
         </div>
         <div className="summary-card">
           <div className="summary-label">Actual</div>
-          <div className="summary-value">${totalActual.toFixed(2)}</div>
+          <div className="summary-value">£{totalActual.toFixed(2)}</div>
         </div>
         <div className="summary-card">
           <div className="summary-label">Difference</div>
           <div className={`summary-value ${totalActual > totalBudget ? 'over-budget' : 'under-budget'}`}>
-            ${Math.abs(totalActual - totalBudget).toFixed(2)}
+            £{Math.abs(totalActual - totalBudget).toFixed(2)}
           </div>
         </div>
       </div>
@@ -219,7 +219,7 @@ export default function PackingList() {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Budget Amount ($)</label>
+                <label>Budget Amount (£)</label>
                 <input
                   type="number"
                   name="budget_amount"
@@ -232,7 +232,7 @@ export default function PackingList() {
               </div>
 
               <div className="form-group">
-                <label>Actual Amount ($)</label>
+                <label>Actual Amount (£)</label>
                 <input
                   type="number"
                   name="actual_amount"
@@ -286,16 +286,16 @@ export default function PackingList() {
               <div className="item-details">
                 <div className="detail-row">
                   <span className="detail-label">Budget:</span>
-                  <span className="detail-value">${parseFloat(item.budget_amount).toFixed(2)}</span>
+                  <span className="detail-value">£{parseFloat(item.budget_amount).toFixed(2)}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-label">Actual:</span>
-                  <span className="detail-value">${parseFloat(item.actual_amount).toFixed(2)}</span>
+                  <span className="detail-value">£{parseFloat(item.actual_amount).toFixed(2)}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-label">Difference:</span>
                   <span className={`detail-value ${parseFloat(item.actual_amount) > parseFloat(item.budget_amount) ? 'over-budget' : 'under-budget'}`}>
-                    ${Math.abs(parseFloat(item.actual_amount) - parseFloat(item.budget_amount)).toFixed(2)}
+                    £{Math.abs(parseFloat(item.actual_amount) - parseFloat(item.budget_amount)).toFixed(2)}
                   </span>
                 </div>
               </div>
