@@ -7,16 +7,45 @@ const router = express.Router()
 /**
  * GET /api/locations
  * Get all locations for a trip, ordered by sequence
+ * Includes estimated arrival/departure dates based on trip start date and cumulative nights
  */
 router.get('/', authenticateToken, (req, res) => {
   try {
     const tripId = req.query.trip_id || 1 // Default to trip 1
+    
+    // Get trip details for start date
+    const trip = get('SELECT * FROM trips WHERE id = ?', [tripId])
+    const startDate = trip?.start_date ? new Date(trip.start_date) : null
+    
     const locations = all(
       `SELECT * FROM locations 
        WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
        ORDER BY sequence ASC`,
       [tripId]
     )
+    
+    // Calculate estimated dates based on cumulative nights
+    if (startDate) {
+      let cumulativeDays = 0
+      
+      locations.forEach(location => {
+        // Calculate estimated arrival date (start date + cumulative days)
+        const estimatedArrival = new Date(startDate)
+        estimatedArrival.setDate(estimatedArrival.getDate() + cumulativeDays)
+        
+        // Calculate estimated departure date (arrival + nights)
+        const estimatedDeparture = new Date(estimatedArrival)
+        estimatedDeparture.setDate(estimatedDeparture.getDate() + (location.nights || 0))
+        
+        // Add estimated dates to location object
+        location.estimated_arrival_date = estimatedArrival.toISOString().split('T')[0]
+        location.estimated_departure_date = estimatedDeparture.toISOString().split('T')[0]
+        
+        // Add cumulative days to next location
+        cumulativeDays += (location.nights || 0)
+      })
+    }
+    
     res.json({ success: true, data: locations })
   } catch (error) {
     console.error('Error fetching locations:', error)

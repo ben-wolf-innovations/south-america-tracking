@@ -301,17 +301,22 @@ export default function Map() {
                         </p>
                       )}
                       
-                      {(location.arrival_date || location.departure_date) && (
+                      {/* Show dates: actual for visited, estimated for unvisited */}
+                      {(location.arrival_date || location.departure_date || location.estimated_arrival_date || location.estimated_departure_date) && (
                         <p className="detail">
-                          <strong>Dates:</strong>{' '}
-                          {location.arrival_date 
+                          <strong>{isVisited ? 'Dates' : 'Est. Dates'}:</strong>{' '}
+                          {(isVisited && location.arrival_date) 
                             ? new Date(location.arrival_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                            : 'TBD'
+                            : (location.estimated_arrival_date 
+                                ? new Date(location.estimated_arrival_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : 'TBD')
                           }
                           {' - '}
-                          {location.departure_date 
+                          {(isVisited && location.departure_date) 
                             ? new Date(location.departure_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                            : 'TBD'
+                            : (location.estimated_departure_date 
+                                ? new Date(location.estimated_departure_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : 'TBD')
                           }
                         </p>
                       )}

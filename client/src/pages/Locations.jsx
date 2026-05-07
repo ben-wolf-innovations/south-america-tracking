@@ -381,6 +381,24 @@ export default function Locations() {
 
             <div className="form-section">
               <h4>Dates</h4>
+              {editingLocation && (editingLocation.estimated_arrival_date || editingLocation.estimated_departure_date) && (
+                <p style={{ fontSize: '0.85em', color: '#666', marginBottom: '10px' }}>
+                  <strong>Estimated:</strong> {' '}
+                  {editingLocation.estimated_arrival_date && 
+                    new Date(editingLocation.estimated_arrival_date).toLocaleDateString('en-GB', { 
+                      day: 'numeric', month: 'short', year: 'numeric' 
+                    })
+                  }
+                  {' - '}
+                  {editingLocation.estimated_departure_date && 
+                    new Date(editingLocation.estimated_departure_date).toLocaleDateString('en-GB', { 
+                      day: 'numeric', month: 'short', year: 'numeric' 
+                    })
+                  }
+                  <br />
+                  <em>Leave blank to use estimated dates, or enter actual dates below</em>
+                </p>
+              )}
               <div className="form-grid">
                 <div className="form-field">
                   <label>Arrival Date</label>
@@ -641,16 +659,33 @@ export default function Locations() {
                     <span className="info-value">{location.nights}</span>
                   </div>
                 )}
-                {location.arrival_date && (
+                {/* Show actual dates if available, otherwise show estimated dates */}
+                {(location.arrival_date || location.estimated_arrival_date) && (
                   <div className="info-item">
-                    <span className="info-label">Arrival:</span>
-                    <span className="info-value">{new Date(location.arrival_date).toLocaleDateString()}</span>
+                    <span className="info-label">
+                      {location.arrival_date ? 'Arrival:' : 'Est. Arrival:'}
+                    </span>
+                    <span className="info-value">
+                      {new Date(location.arrival_date || location.estimated_arrival_date).toLocaleDateString('en-GB', { 
+                        day: 'numeric', 
+                        month: 'short', 
+                        year: 'numeric' 
+                      })}
+                    </span>
                   </div>
                 )}
-                {location.departure_date && (
+                {(location.departure_date || location.estimated_departure_date) && (
                   <div className="info-item">
-                    <span className="info-label">Departure:</span>
-                    <span className="info-value">{new Date(location.departure_date).toLocaleDateString()}</span>
+                    <span className="info-label">
+                      {location.departure_date ? 'Departure:' : 'Est. Departure:'}
+                    </span>
+                    <span className="info-value">
+                      {new Date(location.departure_date || location.estimated_departure_date).toLocaleDateString('en-GB', { 
+                        day: 'numeric', 
+                        month: 'short', 
+                        year: 'numeric' 
+                      })}
+                    </span>
                   </div>
                 )}
                 {location.accommodation_name && (
