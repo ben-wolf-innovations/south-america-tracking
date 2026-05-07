@@ -8,6 +8,7 @@ const router = express.Router()
  * POST /api/progress/checkin
  * Check in to a location (admin only)
  * Marks the location as current and visited, clears current status from other locations
+ * Enforces sequential check-ins based on location sequence
  */
 router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
   try {
@@ -31,6 +32,25 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
         success: false, 
         error: 'Location not found' 
       })
+    }
+
+    // Check if this is the first location (sequence = 1)
+    if (location.sequence > 1) {
+      // Find the previous location by sequence
+      const previousLocation = get(
+        `SELECT * FROM locations 
+         WHERE trip_id = ? 
+         AND sequence = ? 
+         AND (deleted IS NULL OR deleted = 0)`,
+        [location.trip_id, location.sequence - 1]
+      )
+
+      if (previousLocation && !previousLocation.visited) {
+        return res.status(400).json({
+          success: false,
+          error: `You must check in to ${previousLocation.name} (stop #${previousLocation.sequence}) before checking in here`
+        })
+      }
     }
 
     // Use transaction to ensure atomicity
@@ -139,6 +159,34 @@ router.get('/stats', authenticateToken, (req, res) => {
     })
   } catch (error) {
     console.error('Error getting progress stats:', error)
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    })
+  }
+})
+
+/**
+ * POST /api/progress/clear-visited
+ * Clear all visited flags (admin only)
+ */
+router.post('/clear-visited', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const tripId = req.body.trip_id || 1
+    
+    run(
+      `UPDATE locations 
+       SET visited = 0, is_current = 0, visited_date = NULL 
+       WHERE trip_id = ?`,
+      [tripId]
+    )
+
+    res.json({ 
+      success: true, 
+      message: 'All visited flags cleared successfully' 
+    })
+  } catch (error) {
+    console.error('Error clearing visited:', error)
     res.status(500).json({ 
       success: false, 
       error: error.message 

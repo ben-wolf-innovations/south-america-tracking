@@ -88,6 +88,26 @@ export default function Map() {
     }
   }
 
+  const handleClearVisited = async () => {
+    if (!isAdmin()) {
+      alert('Only admin can clear visited flags')
+      return
+    }
+
+    if (!window.confirm('Are you sure you want to clear all visited flags? This will reset your progress.')) {
+      return
+    }
+
+    try {
+      const response = await api.post('/progress/clear-visited')
+      alert(response.data.message)
+      await loadLocations() // Reload to update markers
+    } catch (err) {
+      console.error('Failed to clear visited:', err)
+      alert('Failed to clear visited: ' + (err.response?.data?.error || err.message))
+    }
+  }
+
   if (loading) {
     return (
       <div className="map-loading">
@@ -124,9 +144,21 @@ export default function Map() {
           <h2>Route Map</h2>
           <p className="subtitle">{validLocations.length} locations across South America</p>
         </div>
-        <button onClick={loadLocations} className="reload-button" title="Reload map data">
-          Reload Map
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {isAdmin() && (
+            <button 
+              onClick={handleClearVisited} 
+              className="reload-button" 
+              style={{ background: 'linear-gradient(135deg, var(--danger-color), #dc2626)' }}
+              title="Clear all visited flags"
+            >
+              Clear All Visited
+            </button>
+          )}
+          <button onClick={loadLocations} className="reload-button" title="Reload map data">
+            Reload Map
+          </button>
+        </div>
       </div>
 
       <div className="map-legend">
