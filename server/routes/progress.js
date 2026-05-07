@@ -34,24 +34,23 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
-    // Check if all previous visits to this same location have been checked in
-    // This allows visiting the same place multiple times while enforcing order
-    const previousVisitsToSameLocation = get(
+    // Check if all previous locations in sequence have been visited
+    // Find the first unvisited location with a lower sequence number
+    const firstUnvisitedPrevious = get(
       `SELECT * FROM locations 
        WHERE trip_id = ? 
-       AND name = ? 
        AND sequence < ? 
        AND visited = 0
        AND (deleted IS NULL OR deleted = 0)
        ORDER BY sequence ASC
        LIMIT 1`,
-      [location.trip_id, location.name, location.sequence]
+      [location.trip_id, location.sequence]
     )
 
-    if (previousVisitsToSameLocation) {
+    if (firstUnvisitedPrevious) {
       return res.status(400).json({
         success: false,
-        error: `You must check in to ${previousVisitsToSameLocation.name} (stop #${previousVisitsToSameLocation.sequence}) before checking in here (stop #${location.sequence})`
+        error: `You must check in to ${firstUnvisitedPrevious.name} (stop #${firstUnvisitedPrevious.sequence}) before checking in here (stop #${location.sequence})`
       })
     }
 
