@@ -176,6 +176,7 @@
   opacity: 1;
   margin-bottom: 16px;
   font-weight: 500;
+  color: white;
 }
 
 .location-info .accommodation,
@@ -183,6 +184,7 @@
   font-size: 14px;
   opacity: 0.95;
   margin: 8px 0;
+  color: white;
 }
 
 .costs-breakdown {
