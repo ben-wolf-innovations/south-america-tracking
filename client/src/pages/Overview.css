@@ -9,12 +9,13 @@
 
 .overview-header h2 {
   font-size: 32px;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
@@ -27,7 +28,7 @@
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #e2e8f0;
+  border: 4px solid var(--border-light);
   border-top-color: var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -42,11 +43,19 @@
   background: var(--primary-color);
   color: white;
   border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
+  padding: 12px 28px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
   margin-top: 20px;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.retry-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .stats-grid {
@@ -58,22 +67,51 @@
 
 .stat-card {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   display: flex;
   gap: 16px;
-  transition: all 0.3s ease;
+  transition: all var(--transition);
+  border: 1px solid var(--border-light);
 }
 
 .stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--primary-light);
 }
 
 .stat-icon {
-  font-size: 36px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.stat-icon.locations-icon {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+  color: white;
+}
+
+.stat-icon.calendar-icon {
+  background: linear-gradient(135deg, var(--secondary-light), var(--secondary-color));
+  color: white;
+}
+
+.stat-icon.globe-icon {
+  background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+  color: white;
+}
+
+.stat-icon.money-icon {
+  background: linear-gradient(135deg, var(--success-color), #059669);
+  color: white;
 }
 
 .stat-content {
@@ -83,42 +121,44 @@
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .progress-bar {
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 3px;
+  height: 8px;
+  background: var(--border-light);
+  border-radius: var(--radius);
   overflow: hidden;
   margin-top: 8px;
 }
 
 .progress-fill {
   height: 100%;
-  background: var(--secondary-color);
-  border-radius: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+  border-radius: var(--radius);
   transition: width 0.6s ease;
 }
 
 .progress-fill.over-budget {
-  background: #ef4444;
+  background: linear-gradient(90deg, var(--danger-color), #fca5a5);
 }
 
 .current-location-card {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
   color: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 30px;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: var(--shadow-xl);
   margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .current-location-card h3 {
@@ -146,15 +186,17 @@
 
 .costs-breakdown {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 30px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
 }
 
 .costs-breakdown h3 {
   margin: 0 0 24px 0;
   font-size: 20px;
-  color: #1e293b;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .costs-list {
@@ -165,7 +207,7 @@
 
 .cost-item {
   padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .cost-item:last-child {
@@ -182,27 +224,27 @@
 
 .cost-category {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   text-transform: capitalize;
 }
 
 .cost-amount {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
 }
 
 .cost-bar {
   height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
+  background: var(--border-light);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
 .cost-fill {
   height: 100%;
-  background: var(--secondary-color);
-  border-radius: 4px;
+  background: linear-gradient(90deg, var(--secondary-color), var(--secondary-light));
+  border-radius: var(--radius);
   transition: width 0.6s ease;
 }
 

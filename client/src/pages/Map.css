@@ -14,30 +14,31 @@
 
 .map-header h2 {
   font-size: 32px;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .reload-button {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .reload-button:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, var(--primary-dark), #0d9488);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .reload-button:active {
@@ -56,9 +57,10 @@
   margin-bottom: 20px;
   padding: 16px;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
   flex-wrap: wrap;
+  border: 1px solid var(--border-light);
 }
 
 .legend-item {
@@ -66,7 +68,8 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .legend-icon {
@@ -74,27 +77,28 @@
   height: 20px;
   border-radius: 50%;
   border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .legend-icon.current {
-  background: #ef4444;
+  background: var(--danger-color);
 }
 
 .legend-icon.visited {
-  background: #22c55e;
+  background: var(--success-color);
 }
 
 .legend-icon.planned {
-  background: #3b82f6;
+  background: var(--primary-color);
 }
 
 .map-container {
   height: 600px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   margin-bottom: 20px;
+  border: 1px solid var(--border-light);
 }
 
 .leaflet-map {
@@ -117,21 +121,22 @@
 .location-popup h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
-  color: #1e293b;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .location-popup .country {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 12px;
   font-weight: 600;
 }
 
 .location-popup .current-badge {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, var(--danger-color), #dc2626);
   color: white;
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   font-size: 12px;
   font-weight: 600;
   display: inline-block;
@@ -139,10 +144,10 @@
 }
 
 .location-popup .visited-badge {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, var(--success-color), #059669);
   color: white;
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   font-size: 12px;
   font-weight: 600;
   display: inline-block;
@@ -156,31 +161,34 @@
 .location-popup .popup-details .detail {
   margin: 8px 0;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
 .location-popup .popup-details .detail strong {
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .location-popup .checkin-button {
-  background: #2563eb;
+  background: var(--primary-color);
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   margin-top: 10px;
   width: 100%;
-  transition: background 0.2s;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .location-popup .checkin-button:hover {
-  background: #1d4ed8;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .location-popup .checkin-button:active {
