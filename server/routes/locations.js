@@ -7,7 +7,10 @@ const router = express.Router()
 /**
  * GET /api/locations
  * Get all locations for a trip, ordered by sequence
- * Includes estimated arrival/departure dates based on trip start date and cumulative nights
+ * Includes estimated arrival/departure dates based on:
+ * - Last visited location's actual dates (if available)
+ * - Or trip start date
+ * Calculates cumulative nights from that point forward
  */
 router.get('/', authenticateToken, (req, res) => {
   try {
@@ -15,7 +18,7 @@ router.get('/', authenticateToken, (req, res) => {
     
     // Get trip details for start date
     const trip = get('SELECT * FROM trips WHERE id = ?', [tripId])
-    const startDate = trip?.start_date ? new Date(trip.start_date) : null
+    const tripStartDate = trip?.start_date ? new Date(trip.start_date) : null
     
     const locations = all(
       `SELECT * FROM locations 
@@ -24,24 +27,63 @@ router.get('/', authenticateToken, (req, res) => {
       [tripId]
     )
     
-    // Calculate estimated dates based on cumulative nights
-    if (startDate) {
+    // Calculate estimated dates based on actual progress
+    if (tripStartDate && locations.length > 0) {
+      // Find the last visited location (highest sequence with visited = 1)
+      const lastVisited = locations
+        .filter(loc => loc.visited === 1)
+        .sort((a, b) => b.sequence - a.sequence)[0]
+      
+      let baseDate = null
+      let startFromSequence = 1
+      
+      if (lastVisited) {
+        // Use the last visited location's actual departure date as base
+        if (lastVisited.departure_date) {
+          baseDate = new Date(lastVisited.departure_date)
+        } else if (lastVisited.arrival_date) {
+          // If no departure date, calculate from arrival + nights
+          baseDate = new Date(lastVisited.arrival_date)
+          baseDate.setDate(baseDate.getDate() + (lastVisited.nights || 0))
+        } else {
+          // Fall back to trip start date
+          baseDate = new Date(tripStartDate)
+        }
+        startFromSequence = lastVisited.sequence + 1
+      } else {
+        // No visited locations, start from trip start date
+        baseDate = new Date(tripStartDate)
+      }
+      
+      // Calculate estimated dates for all locations
       let cumulativeDays = 0
       
       locations.forEach(location => {
-        // Calculate estimated arrival date (start date + cumulative days)
-        const estimatedArrival = new Date(startDate)
-        estimatedArrival.setDate(estimatedArrival.getDate() + cumulativeDays)
+        if (location.sequence < startFromSequence) {
+          // For already visited locations, calculate estimates from trip start for reference
+          const tempDate = new Date(tripStartDate)
+          tempDate.setDate(tempDate.getDate() + cumulativeDays)
+          location.estimated_arrival_date = tempDate.toISOString().split('T')[0]
+          
+          const tempDeparture = new Date(tempDate)
+          tempDeparture.setDate(tempDeparture.getDate() + (location.nights || 0))
+          location.estimated_departure_date = tempDeparture.toISOString().split('T')[0]
+        } else {
+          // For unvisited locations, calculate from the base date
+          const daysSinceBase = locations
+            .filter(loc => loc.sequence >= startFromSequence && loc.sequence < location.sequence)
+            .reduce((sum, loc) => sum + (loc.nights || 0), 0)
+          
+          const estimatedArrival = new Date(baseDate)
+          estimatedArrival.setDate(estimatedArrival.getDate() + daysSinceBase)
+          
+          const estimatedDeparture = new Date(estimatedArrival)
+          estimatedDeparture.setDate(estimatedDeparture.getDate() + (location.nights || 0))
+          
+          location.estimated_arrival_date = estimatedArrival.toISOString().split('T')[0]
+          location.estimated_departure_date = estimatedDeparture.toISOString().split('T')[0]
+        }
         
-        // Calculate estimated departure date (arrival + nights)
-        const estimatedDeparture = new Date(estimatedArrival)
-        estimatedDeparture.setDate(estimatedDeparture.getDate() + (location.nights || 0))
-        
-        // Add estimated dates to location object
-        location.estimated_arrival_date = estimatedArrival.toISOString().split('T')[0]
-        location.estimated_departure_date = estimatedDeparture.toISOString().split('T')[0]
-        
-        // Add cumulative days to next location
         cumulativeDays += (location.nights || 0)
       })
     }
