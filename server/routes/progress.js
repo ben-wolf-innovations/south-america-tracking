@@ -34,15 +34,15 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
     }
 
     // Use transaction to ensure atomicity
-    transaction(() => {
+    transaction((runInTransaction) => {
       // Clear is_current from all locations in the same trip
-      run(
+      runInTransaction(
         'UPDATE locations SET is_current = 0 WHERE trip_id = ?',
         [location.trip_id]
       )
 
       // Mark the specified location as current and visited
-      run(
+      runInTransaction(
         `UPDATE locations 
          SET is_current = 1, 
              visited = 1, 

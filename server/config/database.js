@@ -120,6 +120,32 @@ export function run(sql, params = []) {
 }
 
 /**
+ * Execute a SQL statement without auto-saving (for use in transactions)
+ */
+function runNoSave(sql, params = []) {
+  const database = getDatabase()
+  const stmt = database.prepare(sql)
+  stmt.bind(params)
+  stmt.step()
+  const changes = database.getRowsModified()
+  stmt.free()
+  
+  // Get the last inserted ID immediately after the statement
+  let lastID = 0
+  const lastIdStmt = database.prepare('SELECT last_insert_rowid() as lastID')
+  if (lastIdStmt.step()) {
+    const result = lastIdStmt.getAsObject()
+    lastID = result.lastID
+  }
+  lastIdStmt.free()
+  
+  return { 
+    changes: changes,
+    lastID: lastID
+  }
+}
+
+/**
  * Get a single row (for SELECT returning one result)
  */
 export function get(sql, params = []) {
@@ -164,12 +190,21 @@ export function all(sql, params = []) {
 
 /**
  * Execute a transaction
+ * Callback receives a runInTransaction function that executes statements without auto-saving
  */
 export function transaction(callback) {
   const database = getDatabase()
   try {
+    // Begin transaction using exec for simple statement execution
     database.exec('BEGIN TRANSACTION')
-    callback()
+    
+    // Provide a special run function for use inside transaction
+    const runInTransaction = (sql, params = []) => runNoSave(sql, params)
+    
+    // Execute the callback with the transaction-safe run function
+    callback(runInTransaction)
+    
+    // Commit and save
     database.exec('COMMIT')
     saveDatabase()
   } catch (error) {
