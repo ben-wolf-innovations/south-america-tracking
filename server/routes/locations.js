@@ -88,49 +88,55 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
-    let finalSequence
+    let newLocationId
 
-    if (sequence !== undefined && sequence > 0) {
-      // Insert at specific position - shift all subsequent locations
-      // To avoid UNIQUE constraint, shift existing items up by 1
-      run(
-        'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ? AND (deleted IS NULL OR deleted = 0)',
-        [trip_id, sequence]
+    // Use transaction to ensure atomicity
+    transaction((runInTransaction) => {
+      let finalSequence
+
+      if (sequence !== undefined && sequence > 0) {
+        // Insert at specific position - shift all subsequent locations
+        runInTransaction(
+          'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ? AND (deleted IS NULL OR deleted = 0)',
+          [trip_id, sequence]
+        )
+        finalSequence = sequence
+      } else {
+        // Append to end
+        const maxSeqResult = get(
+          'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
+          [trip_id]
+        )
+        finalSequence = (maxSeqResult?.max_seq || 0) + 1
+      }
+
+      // Insert the new location
+      const result = runInTransaction(
+        `INSERT INTO locations (
+          trip_id, sequence, name, country, latitude, longitude, nights,
+          arrival_date, departure_date, accommodation_name,
+          accommodation_cost_planned, accommodation_cost_actual,
+          accommodation_notes, accommodation_booking_ref,
+          activities, activities_cost_planned, activities_cost_actual,
+          food_drink_cost_planned, food_drink_cost_actual,
+          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          trip_id, finalSequence, name, country, latitude, longitude, nights,
+          arrival_date, departure_date, accommodation_name,
+          accommodation_cost_planned, accommodation_cost_actual,
+          accommodation_notes, accommodation_booking_ref,
+          activities, activities_cost_planned, activities_cost_actual,
+          food_drink_cost_planned, food_drink_cost_actual,
+          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
+        ]
       )
-      finalSequence = sequence
-    } else {
-      // Append to end
-      const maxSeqResult = get(
-        'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
-        [trip_id]
-      )
-      finalSequence = (maxSeqResult?.max_seq || 0) + 1
-    }
 
-    // Insert the new location
-    const result = run(
-      `INSERT INTO locations (
-        trip_id, sequence, name, country, latitude, longitude, nights,
-        arrival_date, departure_date, accommodation_name,
-        accommodation_cost_planned, accommodation_cost_actual,
-        accommodation_notes, accommodation_booking_ref,
-        activities, activities_cost_planned, activities_cost_actual,
-        food_drink_cost_planned, food_drink_cost_actual,
-        travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        trip_id, finalSequence, name, country, latitude, longitude, nights,
-        arrival_date, departure_date, accommodation_name,
-        accommodation_cost_planned, accommodation_cost_actual,
-        accommodation_notes, accommodation_booking_ref,
-        activities, activities_cost_planned, activities_cost_actual,
-        food_drink_cost_planned, food_drink_cost_actual,
-        travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
-      ]
-    )
+      newLocationId = result.lastID
+    })
 
-    // Get the inserted location
-    const newLocation = get('SELECT * FROM locations WHERE id = ?', [result.lastID])
+    // Get the inserted location (outside transaction)
+    const newLocation = get('SELECT * FROM locations WHERE id = ?', [newLocationId])
     
     res.status(201).json({ success: true, data: newLocation })
   } catch (error) {
@@ -233,36 +239,34 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
       return res.json({ success: true, data: location })
     }
 
-    // To avoid UNIQUE constraint violations, we use a three-step process:
-    // 1. Move target to a temporary negative value
-    // 2. Shift other items
-    // 3. Move target to final position
-    
-    // Step 1: Move target to temporary negative sequence
-    run('UPDATE locations SET sequence = ? WHERE id = ?', [-1, id])
+    // Use transaction to ensure atomic sequence updates
+    transaction((runInTransaction) => {
+      // Step 1: Move target to temporary negative sequence
+      runInTransaction('UPDATE locations SET sequence = ? WHERE id = ?', [-1, id])
 
-    if (new_sequence > oldSequence) {
-      // Moving down: shift items between old and new position up
-      run(
-        `UPDATE locations 
-         SET sequence = sequence - 1 
-         WHERE trip_id = ? AND sequence > ? AND sequence <= ? AND id != ?`,
-        [tripId, oldSequence, new_sequence, id]
-      )
-    } else {
-      // Moving up: shift items between new and old position down
-      run(
-        `UPDATE locations 
-         SET sequence = sequence + 1 
-         WHERE trip_id = ? AND sequence >= ? AND sequence < ? AND id != ?`,
-        [tripId, new_sequence, oldSequence, id]
-      )
-    }
+      if (new_sequence > oldSequence) {
+        // Moving down: shift items between old and new position up
+        runInTransaction(
+          `UPDATE locations 
+           SET sequence = sequence - 1 
+           WHERE trip_id = ? AND sequence > ? AND sequence <= ? AND id != ? AND (deleted IS NULL OR deleted = 0)`,
+          [tripId, oldSequence, new_sequence, id]
+        )
+      } else {
+        // Moving up: shift items between new and old position down
+        runInTransaction(
+          `UPDATE locations 
+           SET sequence = sequence + 1 
+           WHERE trip_id = ? AND sequence >= ? AND sequence < ? AND id != ? AND (deleted IS NULL OR deleted = 0)`,
+          [tripId, new_sequence, oldSequence, id]
+        )
+      }
 
-    // Step 3: Move target to final position
-    run('UPDATE locations SET sequence = ? WHERE id = ?', [new_sequence, id])
+      // Step 3: Move target to final position
+      runInTransaction('UPDATE locations SET sequence = ? WHERE id = ?', [new_sequence, id])
+    })
 
-    // Fetch updated location
+    // Fetch updated location (outside transaction)
     const updated = get('SELECT * FROM locations WHERE id = ?', [id])
     
     res.json({ success: true, data: updated })
@@ -275,6 +279,7 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
 /**
  * DELETE /api/locations/:id
  * Soft delete a location (admin only)
+ * Automatically adjusts sequences of remaining locations
  */
 router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
   try {
@@ -285,8 +290,20 @@ router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
       return res.status(404).json({ success: false, error: 'Location not found' })
     }
 
-    // Soft delete: set deleted flag to 1
-    run('UPDATE locations SET deleted = 1 WHERE id = ?', [id])
+    const deletedSequence = location.sequence
+    const tripId = location.trip_id
+
+    // Use transaction to delete and adjust sequences atomically
+    transaction((runInTransaction) => {
+      // Soft delete: set deleted flag to 1
+      runInTransaction('UPDATE locations SET deleted = 1 WHERE id = ?', [id])
+
+      // Shift down all locations with sequence > deleted location's sequence
+      runInTransaction(
+        'UPDATE locations SET sequence = sequence - 1 WHERE trip_id = ? AND sequence > ? AND (deleted IS NULL OR deleted = 0)',
+        [tripId, deletedSequence]
+      )
+    })
 
     res.json({ 
       success: true, 

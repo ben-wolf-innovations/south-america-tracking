@@ -76,6 +76,7 @@ router.get('/', authenticateToken, (req, res) => {
 router.get('/summary', authenticateToken, (req, res) => {
   try {
     const { trip_id = 1 } = req.query
+    const categoryKeys = ['accommodation', 'activities', 'food', 'travel', 'other']
 
     // Get actual costs from costs table (non-deleted only)
     const actualCosts = all(
@@ -120,11 +121,13 @@ router.get('/summary', authenticateToken, (req, res) => {
       if (!categoriesMap[item.category]) {
         categoriesMap[item.category] = {
           category: item.category,
+          count: 0,
           total_actual: 0,
           total_planned: categoryPlanned[item.category] || 0,
           currency: item.currency
         }
       }
+      categoriesMap[item.category].count += parseInt(item.count || 0, 10)
       categoriesMap[item.category].total_actual += parseFloat(item.total_actual || 0)
     })
 
@@ -133,6 +136,7 @@ router.get('/summary', authenticateToken, (req, res) => {
       if (!categoriesMap[category] && categoryPlanned[category] > 0) {
         categoriesMap[category] = {
           category: category,
+          count: 0,
           total_actual: 0,
           total_planned: categoryPlanned[category],
           currency: 'GBP'
@@ -141,6 +145,88 @@ router.get('/summary', authenticateToken, (req, res) => {
     })
 
     const summary = Object.values(categoriesMap)
+
+    // Build country-level budget vs actual breakdown for each category
+    const countryBudgets = all(
+      `SELECT
+        country,
+        SUM(COALESCE(accommodation_cost_planned, 0) * COALESCE(nights, 0)) as accommodation_planned,
+        SUM(COALESCE(activities_cost_planned, 0)) as activities_planned,
+        SUM(COALESCE(food_drink_cost_planned, 0) * COALESCE(nights, 0)) as food_planned,
+        SUM(COALESCE(travel_cost_planned, 0)) as travel_planned
+       FROM locations
+       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
+       GROUP BY country
+       ORDER BY country`,
+      [trip_id]
+    )
+
+    const countryActuals = all(
+      `SELECT
+        l.country as country,
+        c.category as category,
+        COUNT(*) as count,
+        SUM(c.amount_actual) as total_actual
+       FROM costs c
+       JOIN locations l ON c.location_id = l.id
+       WHERE c.trip_id = ?
+         AND l.trip_id = ?
+         AND (c.deleted IS NULL OR c.deleted = 0)
+         AND (l.deleted IS NULL OR l.deleted = 0)
+       GROUP BY l.country, c.category
+       ORDER BY l.country, c.category`,
+      [trip_id, trip_id]
+    )
+
+    const countryMap = {}
+
+    countryBudgets.forEach((countryRow) => {
+      const countryName = countryRow.country || 'Unknown'
+      const categories = {}
+
+      categoryKeys.forEach((key) => {
+        categories[key] = {
+          budgeted: 0,
+          actual: 0,
+          count: 0
+        }
+      })
+
+      categories.accommodation.budgeted = parseFloat(countryRow.accommodation_planned || 0)
+      categories.activities.budgeted = parseFloat(countryRow.activities_planned || 0)
+      categories.food.budgeted = parseFloat(countryRow.food_planned || 0)
+      categories.travel.budgeted = parseFloat(countryRow.travel_planned || 0)
+
+      countryMap[countryName] = {
+        country: countryName,
+        categories
+      }
+    })
+
+    countryActuals.forEach((item) => {
+      const countryName = item.country || 'Unknown'
+      if (!countryMap[countryName]) {
+        const categories = {}
+        categoryKeys.forEach((key) => {
+          categories[key] = {
+            budgeted: 0,
+            actual: 0,
+            count: 0
+          }
+        })
+
+        countryMap[countryName] = {
+          country: countryName,
+          categories
+        }
+      }
+
+      const categoryKey = categoryKeys.includes(item.category) ? item.category : 'other'
+      countryMap[countryName].categories[categoryKey].actual += parseFloat(item.total_actual || 0)
+      countryMap[countryName].categories[categoryKey].count += parseInt(item.count || 0, 10)
+    })
+
+    const byCountry = Object.values(countryMap)
 
     // Get budgeted costs from locations table (non-deleted only)
     const locationBudgets = get(
@@ -166,6 +252,7 @@ router.get('/summary', authenticateToken, (req, res) => {
       success: true, 
       data: {
         by_category: summary,
+        by_country: byCountry,
         location_budgets: locationBudgets,
         location_actuals: locationActuals
       }

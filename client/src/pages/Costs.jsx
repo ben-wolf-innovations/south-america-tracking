@@ -21,6 +21,7 @@ export default function Costs() {
   const [costs, setCosts] = useState([])
   const [locations, setLocations] = useState([])
   const [summary, setSummary] = useState([])
+  const [countrySummary, setCountrySummary] = useState([])
   const [locationBudgets, setLocationBudgets] = useState({ total_planned: 0 })
   const [locationActuals, setLocationActuals] = useState({ total_actual: 0 })
   const [loading, setLoading] = useState(true)
@@ -58,6 +59,7 @@ export default function Costs() {
       setCosts(costsRes.data.data)
       setLocations(locationsRes.data.data)
       setSummary(summaryRes.data.data.by_category || [])
+      setCountrySummary(summaryRes.data.data.by_country || [])
       setLocationBudgets(summaryRes.data.data.location_budgets || { total_planned: 0 })
       setLocationActuals(summaryRes.data.data.location_actuals || { total_actual: 0 })
       setError(null)
@@ -173,7 +175,17 @@ export default function Costs() {
 
   // Calculate totals
   const totalPlanned = parseFloat(locationBudgets.total_planned || 0)
-  const totalActual = summary.reduce((sum, item) => sum + parseFloat(item.total_actual || 0), 0)
+  const summaryMap = new Map(summary.map(item => [item.category, item]))
+  const categorySummary = CATEGORIES.map((category) => {
+    const data = summaryMap.get(category.value) || {}
+    return {
+      category: category.value,
+      total_planned: parseFloat(data.total_planned || 0),
+      total_actual: parseFloat(data.total_actual || 0),
+      count: parseInt(data.count || 0, 10)
+    }
+  })
+  const totalActual = categorySummary.reduce((sum, item) => sum + parseFloat(item.total_actual || 0), 0)
 
   if (loading) {
     return (
@@ -246,13 +258,17 @@ export default function Costs() {
         <div className="category-breakdown">
           <h3>Actual Spending by Category</h3>
           <div className="category-grid">
-            {summary.map(item => {
+            {categorySummary.map(item => {
               const actual = parseFloat(item.total_actual || 0)
               
               return (
                 <div key={item.category} className="category-summary-card">
                   <div className="category-name">{getCategoryLabel(item.category)}</div>
                   <div className="category-amounts">
+                    <div className="amount-row">
+                      <span>Budgeted:</span>
+                      <span className="planned-amount">£{parseFloat(item.total_planned || 0).toFixed(2)}</span>
+                    </div>
                     <div className="amount-row">
                       <span>Actual Spent:</span>
                       <span className="actual-amount">£{actual.toFixed(2)}</span>
@@ -261,6 +277,52 @@ export default function Costs() {
                       <span>Count:</span>
                       <span>{item.count} {item.count === 1 ? 'item' : 'items'}</span>
                     </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="country-breakdown">
+          <h3>Actual Spending by Country</h3>
+          <div className="country-grid">
+            {countrySummary.map((countryItem) => {
+              const countryTotals = CATEGORIES.reduce((acc, category) => {
+                const categoryData = countryItem.categories?.[category.value] || { budgeted: 0, actual: 0 }
+                acc.budgeted += parseFloat(categoryData.budgeted || 0)
+                acc.actual += parseFloat(categoryData.actual || 0)
+                return acc
+              }, { budgeted: 0, actual: 0 })
+
+              return (
+                <div key={countryItem.country} className="country-summary-card">
+                  <div className="country-name">{countryItem.country}</div>
+                  <div className="country-category-list">
+                    {CATEGORIES.map((category) => {
+                      const categoryData = countryItem.categories?.[category.value] || {
+                        budgeted: 0,
+                        actual: 0,
+                        count: 0
+                      }
+
+                      return (
+                        <div key={`${countryItem.country}-${category.value}`} className="country-category-row">
+                          <div className="country-category-name">{category.label}</div>
+                          <div className="country-category-amounts">
+                            <span className="country-budgeted">B: £{parseFloat(categoryData.budgeted || 0).toFixed(2)}</span>
+                            <span className="country-actual">A: £{parseFloat(categoryData.actual || 0).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="country-total-row">
+                    <span className="country-total-label">Total</span>
+                    <span className="country-total-values">
+                      <span className="country-budgeted">B: £{countryTotals.budgeted.toFixed(2)}</span>
+                      <span className="country-actual">A: £{countryTotals.actual.toFixed(2)}</span>
+                    </span>
                   </div>
                 </div>
               )
