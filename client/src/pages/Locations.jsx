@@ -143,10 +143,15 @@ export default function Locations() {
     e.preventDefault()
     try {
       const payload = {}
+      const textFields = ['notes', 'activities', 'accommodation_notes', 'travel_notes', 'accommodation_name', 'accommodation_type', 'travel_from', 'travel_method']
       Object.keys(formData).forEach(key => {
         // Always include date fields (even if empty, send as null to clear them)
         if (key === 'arrival_date' || key === 'departure_date') {
           payload[key] = formData[key] || null
+        }
+        // Always include text fields (even if empty, send empty string to clear them)
+        else if (textFields.includes(key)) {
+          payload[key] = formData[key] || ''
         }
         // For other fields, only include if not empty
         else if (formData[key] !== '' && formData[key] !== null && key !== 'sequence') {

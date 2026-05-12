@@ -395,8 +395,8 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
         if (key === 'amount_actual' && value != null && value !== '') {
           values.push(Math.round(parseFloat(value) * 100) / 100)
         } else {
-          // Convert undefined to null for SQL compatibility
-          values.push(value ?? null)
+          // Convert empty strings and undefined to null so cleared fields are properly removed
+          values.push(value === '' || value === undefined ? null : value)
         }
       }
     }

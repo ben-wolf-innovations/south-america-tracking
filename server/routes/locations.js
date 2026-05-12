@@ -260,7 +260,8 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
         if (costFields.includes(key) && value != null && value !== '') {
           values.push(Math.round(parseFloat(value) * 100) / 100)
         } else {
-          values.push(value)
+          // Convert empty strings to null so cleared fields are properly removed
+          values.push(value === '' ? null : value)
         }
       }
     }
