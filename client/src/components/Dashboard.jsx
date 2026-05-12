@@ -100,6 +100,9 @@ export default function Dashboard() {
           <Link to="/blog" className="nav-link">
             Blog
           </Link>
+          <Link to="/info" className="nav-link">
+            Useful Info
+          </Link>
         </div>
       </nav>
 

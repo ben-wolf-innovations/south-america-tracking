@@ -474,27 +474,37 @@
 .cost-actions {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .cost-actions button {
-  width: 40px;
-  height: 40px;
-  border: none;
+  padding: 0.35rem 0.85rem;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  background: transparent;
+  border: 1px solid transparent;
+}
+
+.cost-actions .edit-button {
+  background: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
 }
 
 .cost-actions .edit-button:hover {
-  background: #e3f2fd;
-  transform: translateY(-2px);
+  background: #bbdefb;
+}
+
+.cost-actions .delete-button {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #ffcdd2;
 }
 
 .cost-actions .delete-button:hover {
-  background: #ffebee;
-  transform: translateY(-2px);
+  background: #ffcdd2;
 }
 
 /* Cost Amounts */

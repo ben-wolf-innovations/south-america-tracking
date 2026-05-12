@@ -9,6 +9,7 @@ import Locations from './pages/Locations'
 import Costs from './pages/Costs'
 import Blog from './pages/Blog'
 import PackingList from './pages/PackingList'
+import UsefulInfo from './pages/UsefulInfo'
 import './App.css'
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="blog" element={<Blog />} />
+          <Route path="info" element={<UsefulInfo />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

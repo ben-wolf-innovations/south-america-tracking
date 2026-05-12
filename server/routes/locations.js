@@ -22,7 +22,7 @@ router.get('/', authenticateToken, (req, res) => {
     
     const locations = all(
       `SELECT * FROM locations 
-       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
+       WHERE trip_id = ?
        ORDER BY sequence ASC`,
       [tripId]
     )
@@ -102,7 +102,7 @@ router.get('/', authenticateToken, (req, res) => {
 router.get('/:id', authenticateToken, (req, res) => {
   try {
     const location = get(
-      'SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)',
+      'SELECT * FROM locations WHERE id = ?',
       [req.params.id]
     )
     
@@ -166,7 +166,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
     } else {
       // Append to end
       const maxSeqResult = get(
-        'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)',
+        'SELECT COALESCE(MAX(sequence), 0) as max_seq FROM locations WHERE trip_id = ?',
         [trip_id]
       )
       finalSequence = (maxSeqResult?.max_seq || 0) + 1
@@ -179,7 +179,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       if (sequence !== undefined && sequence > 0) {
         // Insert at specific position - shift all subsequent locations
         runInTransaction(
-          'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ? AND (deleted IS NULL OR deleted = 0)',
+          'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ?',
           [trip_id, sequence]
         )
       }
@@ -232,7 +232,7 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     const updates = req.body
 
     // Check if location exists
-    const existing = get('SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
+    const existing = get('SELECT * FROM locations WHERE id = ?', [id])
     if (!existing) {
       return res.status(404).json({ success: false, error: 'Location not found' })
     }
@@ -303,7 +303,7 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
-    const location = get('SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
+    const location = get('SELECT * FROM locations WHERE id = ?', [id])
     if (!location) {
       return res.status(404).json({ success: false, error: 'Location not found' })
     }
@@ -326,7 +326,7 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
         runInTransaction(
           `UPDATE locations 
            SET sequence = sequence - 1 
-           WHERE trip_id = ? AND sequence > ? AND sequence <= ? AND id != ? AND (deleted IS NULL OR deleted = 0)`,
+           WHERE trip_id = ? AND sequence > ? AND sequence <= ? AND id != ?`,
           [tripId, oldSequence, new_sequence, id]
         )
       } else {
@@ -334,7 +334,7 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
         runInTransaction(
           `UPDATE locations 
            SET sequence = sequence + 1 
-           WHERE trip_id = ? AND sequence >= ? AND sequence < ? AND id != ? AND (deleted IS NULL OR deleted = 0)`,
+           WHERE trip_id = ? AND sequence >= ? AND sequence < ? AND id != ?`,
           [tripId, new_sequence, oldSequence, id]
         )
       }
@@ -355,14 +355,14 @@ router.put('/:id/reorder', authenticateToken, requireAdmin, (req, res) => {
 
 /**
  * DELETE /api/locations/:id
- * Soft delete a location (admin only)
+ * Hard delete a location (admin only)
  * Automatically adjusts sequences of remaining locations
  */
 router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
   try {
     const { id } = req.params
 
-    const location = get('SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
+    const location = get('SELECT * FROM locations WHERE id = ?', [id])
     if (!location) {
       return res.status(404).json({ success: false, error: 'Location not found' })
     }
@@ -372,12 +372,12 @@ router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
 
     // Use transaction to delete and adjust sequences atomically
     transaction((runInTransaction) => {
-      // Soft delete: set deleted flag to 1
-      runInTransaction('UPDATE locations SET deleted = 1 WHERE id = ?', [id])
+      // Hard delete: permanently remove from database
+      runInTransaction('DELETE FROM locations WHERE id = ?', [id])
 
       // Shift down all locations with sequence > deleted location's sequence
       runInTransaction(
-        'UPDATE locations SET sequence = sequence - 1 WHERE trip_id = ? AND sequence > ? AND (deleted IS NULL OR deleted = 0)',
+        'UPDATE locations SET sequence = sequence - 1 WHERE trip_id = ? AND sequence > ?',
         [tripId, deletedSequence]
       )
     })

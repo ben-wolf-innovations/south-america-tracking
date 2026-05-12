@@ -738,20 +738,6 @@ export default function Locations() {
                   </div>
                 )}
               </div>
-              {location.activities && (
-                <div className="location-activities">
-                  <strong>Activities:</strong> {location.activities}
-                </div>
-              )}
-              {(location.activities_cost_planned || location.activities_cost_actual) && (
-                <div className="info-item">
-                  <span className="info-label">Activities Budget:</span>
-                  <span className="info-value">
-                    {location.activities_cost_planned ? `£${parseFloat(location.activities_cost_planned).toFixed(2)} budgeted` : ''}
-                    {location.activities_cost_actual && ` (£${parseFloat(location.activities_cost_actual).toFixed(2)} actual)`}
-                  </span>
-                </div>
-              )}
               {(location.food_drink_cost_planned || location.food_drink_cost_actual) && (
                 <div className="info-item">
                   <span className="info-label">Food & Drink Budget:</span>
@@ -772,6 +758,20 @@ export default function Locations() {
               {location.notes && (
                 <div className="location-notes">
                   <strong>Notes:</strong> {location.notes}
+                </div>
+              )}
+              {location.activities && (
+                <div className="location-activities">
+                  <strong>Activities:</strong> {location.activities}
+                </div>
+              )}
+              {(location.activities_cost_planned || location.activities_cost_actual) && (
+                <div className="info-item">
+                  <span className="info-label">Activities Budget:</span>
+                  <span className="info-value">
+                    {location.activities_cost_planned ? `£${parseFloat(location.activities_cost_planned).toFixed(2)} budgeted` : ''}
+                    {location.activities_cost_actual && ` (£${parseFloat(location.activities_cost_actual).toFixed(2)} actual)`}
+                  </span>
                 </div>
               )}
               <div className="location-coordinates">

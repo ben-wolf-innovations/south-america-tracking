@@ -22,11 +22,11 @@ function syncCostToLocation(cost) {
   const fieldName = categoryFieldMap[cost.category]
   if (!fieldName) return // Only sync supported categories
 
-  // Sum all non-deleted costs for this category and location
+  // Sum all costs for this category and location
   const total = get(
     `SELECT SUM(amount_actual) as total
      FROM costs
-     WHERE location_id = ? AND category = ? AND (deleted IS NULL OR deleted = 0)`,
+     WHERE location_id = ? AND category = ?`,
     [cost.location_id, cost.category]
   )
 
@@ -46,7 +46,7 @@ router.get('/', authenticateToken, (req, res) => {
   try {
     const { trip_id = 1, location_id, category } = req.query
     
-    let sql = 'SELECT * FROM costs WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)'
+    let sql = 'SELECT * FROM costs WHERE trip_id = ?'
     const params = [trip_id]
 
     if (location_id) {
@@ -86,9 +86,9 @@ router.get('/summary', authenticateToken, (req, res) => {
         SUM(amount_actual) as total_actual,
         currency
        FROM costs
-       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
+       WHERE trip_id = ?
        GROUP BY category, currency
-       ORDER BY category`,
+       ORDER BY category`,   
       [trip_id]
     )
 
@@ -102,7 +102,7 @@ router.get('/summary', authenticateToken, (req, res) => {
         SUM(food_drink_cost_planned * (nights + 1)) as food_planned,
         SUM(travel_cost_planned) as travel_planned
        FROM locations
-       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
+       WHERE trip_id = ?`,  
       [trip_id]
     )
 
@@ -156,7 +156,7 @@ router.get('/summary', authenticateToken, (req, res) => {
         SUM(COALESCE(food_drink_cost_planned, 0) * (COALESCE(nights, 0) + 1)) as food_planned,
         SUM(COALESCE(travel_cost_planned, 0)) as travel_planned
        FROM locations
-       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)
+       WHERE trip_id = ?
        GROUP BY country
        ORDER BY country`,
       [trip_id]
@@ -172,8 +172,6 @@ router.get('/summary', authenticateToken, (req, res) => {
        JOIN locations l ON c.location_id = l.id
        WHERE c.trip_id = ?
          AND l.trip_id = ?
-         AND (c.deleted IS NULL OR c.deleted = 0)
-         AND (l.deleted IS NULL OR l.deleted = 0)
        GROUP BY l.country, c.category
        ORDER BY l.country, c.category`,
       [trip_id, trip_id]
@@ -236,11 +234,11 @@ router.get('/summary', authenticateToken, (req, res) => {
         SUM(accommodation_cost_planned * nights) + SUM(activities_cost_planned) + 
         SUM(food_drink_cost_planned * (nights + 1)) + SUM(travel_cost_planned) as total_planned
        FROM locations
-       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
+       WHERE trip_id = ?`,
       [trip_id]
     )
 
-    // Get actual costs from locations table (synced from costs, non-deleted only)
+    // Get actual costs from locations table (synced from costs)
     // Note: accommodation_cost_actual and food_drink_cost_actual are already totals (not per-night)
     // They are synced from costs table as SUM(amount_actual), so do NOT multiply by nights
     const locationActuals = get(
@@ -248,7 +246,7 @@ router.get('/summary', authenticateToken, (req, res) => {
         SUM(COALESCE(accommodation_cost_actual, 0)) + SUM(COALESCE(activities_cost_actual, 0)) + 
         SUM(COALESCE(food_drink_cost_actual, 0)) + SUM(COALESCE(travel_cost_actual, 0)) as total_actual
        FROM locations
-       WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
+       WHERE trip_id = ?`,
       [trip_id]
     )
 
@@ -273,7 +271,7 @@ router.get('/summary', authenticateToken, (req, res) => {
  */
 router.get('/:id', authenticateToken, (req, res) => {
   try {
-    const cost = get('SELECT * FROM costs WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [req.params.id])
+    const cost = get('SELECT * FROM costs WHERE id = ?', [req.params.id])
     
     if (!cost) {
       return res.status(404).json({ success: false, error: 'Cost entry not found' })
@@ -376,7 +374,7 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
     const updates = req.body
 
     // Check if cost exists
-    const existing = get('SELECT * FROM costs WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
+    const existing = get('SELECT * FROM costs WHERE id = ?', [id])
     if (!existing) {
       return res.status(404).json({ success: false, error: 'Cost entry not found' })
     }
@@ -425,19 +423,19 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
 
 /**
  * DELETE /api/costs/:id
- * Soft delete a cost entry (admin only)
+ * Hard delete a cost entry (admin only)
  */
 router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
   try {
     const { id } = req.params
 
-    const existing = get('SELECT * FROM costs WHERE id = ? AND (deleted IS NULL OR deleted = 0)', [id])
+    const existing = get('SELECT * FROM costs WHERE id = ?', [id])
     if (!existing) {
       return res.status(404).json({ success: false, error: 'Cost entry not found' })
     }
 
-    // Soft delete: set deleted flag to 1
-    run('UPDATE costs SET deleted = 1 WHERE id = ?', [id])
+    // Hard delete: permanently remove from database
+    run('DELETE FROM costs WHERE id = ?', [id])
 
     // Resync the location's actual costs (recalculate without this cost)
     syncCostToLocation(existing)

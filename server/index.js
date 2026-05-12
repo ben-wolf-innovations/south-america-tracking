@@ -11,6 +11,7 @@ import costsRoutes from './routes/costs.js'
 import blogRoutes from './routes/blog.js'
 import progressRoutes from './routes/progress.js'
 import packingRoutes from './routes/packing.js'
+import infoRoutes from './routes/info.js'
 
 // Load environment variables  
 dotenv.config()
@@ -71,6 +72,7 @@ app.use('/api/costs', costsRoutes)
 app.use('/api/blog', blogRoutes)
 app.use('/api/progress', progressRoutes)
 app.use('/api/packing', packingRoutes)
+app.use('/api/info', infoRoutes)
 
 // 404 handler
 app.use((req, res) => {
