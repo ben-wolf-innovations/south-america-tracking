@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
 import './PackingList.css'
@@ -11,6 +11,7 @@ export default function PackingList() {
   const [error, setError] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const formRef = useRef(null)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -86,6 +87,11 @@ export default function PackingList() {
       actual_amount: item.actual_amount
     })
     setShowAddForm(true)
+    
+    // Scroll to form after state updates
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const handleDelete = async (itemId) => {
@@ -201,7 +207,7 @@ export default function PackingList() {
 
       {/* Add/Edit Form */}
       {showAddForm && (
-        <div className="form-card">
+        <div className="form-card" ref={formRef}>
           <div className="form-header">
             <h3>{editingItem ? 'Edit Item' : `Add Item for ${activeTab}`}</h3>
             <button onClick={resetForm} className="close-button">✕</button>

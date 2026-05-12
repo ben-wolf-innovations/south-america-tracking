@@ -209,17 +209,21 @@ router.delete('/:id', (req, res) => {
   try {
     const { id } = req.params
     
+    console.log(`🗑️  Deleting packing item ${id}`)
+    
     run(
       'UPDATE packing_items SET deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [id]
     )
+    
+    console.log(`✅ Packing item ${id} deleted successfully`)
     
     res.json({ 
       success: true, 
       message: 'Packing item deleted successfully' 
     })
   } catch (error) {
-    console.error('Error deleting packing item:', error)
+    console.error('❌ Error deleting packing item:', error)
     res.status(500).json({ 
       success: false, 
       error: error.message 
