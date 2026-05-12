@@ -15,6 +15,8 @@ router.post('/login', async (req, res) => {
   try {
     const { pin } = req.body
 
+    console.log('Login attempt with PIN:', pin)
+
     if (!pin) {
       return res.status(400).json({ error: 'PIN is required' })
     }
@@ -23,17 +25,23 @@ router.post('/login', async (req, res) => {
     const adminAuth = get('SELECT * FROM auth WHERE access_level = ?', ['admin'])
     const familyAuth = get('SELECT * FROM auth WHERE access_level = ?', ['family'])
 
+    console.log('Admin auth found:', !!adminAuth)
+    console.log('Family auth found:', !!familyAuth)
+
     let accessLevel = null
 
     // Check against admin PIN
     if (adminAuth && await bcrypt.compare(pin, adminAuth.pin_hash)) {
       accessLevel = 'admin'
+      console.log('✅ Admin PIN matched')
     }
     // Check against family PIN
     else if (familyAuth && await bcrypt.compare(pin, familyAuth.pin_hash)) {
       accessLevel = 'family'
+      console.log('✅ Family PIN matched')
     }
     else {
+      console.log('❌ PIN did not match any stored hashes')
       return res.status(401).json({ error: 'Invalid PIN' })
     }
 
