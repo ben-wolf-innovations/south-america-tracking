@@ -139,9 +139,11 @@ export default function PackingList() {
   // Filter items by active tab
   const filteredItems = items.filter(item => item.owner === activeTab)
 
-  // Calculate totals for current tab
-  const totalBudget = filteredItems.reduce((sum, item) => sum + parseFloat(item.budget_amount || 0), 0)
-  const totalActual = filteredItems.reduce((sum, item) => sum + parseFloat(item.actual_amount || 0), 0)
+  // Calculate totals for current tab (using integer cents to avoid floating point errors)
+  const totalBudgetCents = filteredItems.reduce((sum, item) => sum + Math.round(parseFloat(item.budget_amount || 0) * 100), 0)
+  const totalActualCents = filteredItems.reduce((sum, item) => sum + Math.round(parseFloat(item.actual_amount || 0) * 100), 0)
+  const totalBudget = totalBudgetCents / 100
+  const totalActual = totalActualCents / 100
   const completedCount = filteredItems.filter(item => item.completed).length
   const totalItems = filteredItems.length
 
@@ -295,7 +297,7 @@ export default function PackingList() {
                 <div className="detail-row">
                   <span className="detail-label">Difference:</span>
                   <span className={`detail-value ${parseFloat(item.actual_amount) > parseFloat(item.budget_amount) ? 'over-budget' : 'under-budget'}`}>
-                    £{Math.abs(parseFloat(item.actual_amount) - parseFloat(item.budget_amount)).toFixed(2)}
+                    £{(Math.abs(Math.round(parseFloat(item.actual_amount || 0) * 100) - Math.round(parseFloat(item.budget_amount || 0) * 100)) / 100).toFixed(2)}
                   </span>
                 </div>
               </div>

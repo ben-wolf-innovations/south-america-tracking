@@ -92,10 +92,14 @@ router.post('/', (req, res) => {
       })
     }
     
+    // Round monetary values to 2 decimals to avoid floating point errors
+    const roundedBudget = Math.round(parseFloat(budget_amount || 0) * 100) / 100
+    const roundedActual = Math.round(parseFloat(actual_amount || 0) * 100) / 100
+    
     const result = run(
       `INSERT INTO packing_items (trip_id, owner, title, budget_amount, actual_amount, completed)
        VALUES (?, ?, ?, ?, ?, 0)`,
-      [tripId, owner, title, budget_amount || 0, actual_amount || 0]
+      [tripId, owner, title, roundedBudget, roundedActual]
     )
     
     const newItem = get(
@@ -148,11 +152,13 @@ router.put('/:id', (req, res) => {
     }
     if (budget_amount !== undefined) {
       updates.push('budget_amount = ?')
-      values.push(budget_amount)
+      // Round monetary values to 2 decimals to avoid floating point errors
+      values.push(Math.round(parseFloat(budget_amount) * 100) / 100)
     }
     if (actual_amount !== undefined) {
       updates.push('actual_amount = ?')
-      values.push(actual_amount)
+      // Round monetary values to 2 decimals to avoid floating point errors
+      values.push(Math.round(parseFloat(actual_amount) * 100) / 100)
     }
     if (completed !== undefined) {
       updates.push('completed = ?')

@@ -58,11 +58,12 @@ export default function Locations() {
     }
   }
 
-  // Helper function to calculate "other" costs for a location
+  // Helper function to calculate "other" costs for a location (using integer cents to avoid floating point errors)
   const getOtherCostsForLocation = (locationId) => {
-    return costs
+    const totalCents = costs
       .filter(cost => cost.location_id === locationId && cost.category === 'other')
-      .reduce((sum, cost) => sum + (parseFloat(cost.amount_actual) || 0), 0)
+      .reduce((sum, cost) => sum + Math.round(parseFloat(cost.amount_actual || 0) * 100), 0)
+    return totalCents / 100
   }
 
   const resetForm = () => {
@@ -755,7 +756,7 @@ export default function Locations() {
                 <div className="info-item">
                   <span className="info-label">Food & Drink Budget:</span>
                   <span className="info-value">
-                    {location.food_drink_cost_planned ? `£${parseFloat(location.food_drink_cost_planned).toFixed(2)} budgeted` : ''}
+                    {location.food_drink_cost_planned ? `£${parseFloat(location.food_drink_cost_planned).toFixed(2)}/day budgeted` : ''}
                     {location.food_drink_cost_actual && ` (£${parseFloat(location.food_drink_cost_actual).toFixed(2)} actual)`}
                   </span>
                 </div>

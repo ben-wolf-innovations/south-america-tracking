@@ -173,7 +173,7 @@ export default function Costs() {
     return true
   })
 
-  // Calculate totals
+  // Calculate totals (using integer cents to avoid floating point errors)
   const totalPlanned = parseFloat(locationBudgets.total_planned || 0)
   const summaryMap = new Map(summary.map(item => [item.category, item]))
   const categorySummary = CATEGORIES.map((category) => {
@@ -185,7 +185,8 @@ export default function Costs() {
       count: parseInt(data.count || 0, 10)
     }
   })
-  const totalActual = categorySummary.reduce((sum, item) => sum + parseFloat(item.total_actual || 0), 0)
+  const totalActualCents = categorySummary.reduce((sum, item) => sum + Math.round(parseFloat(item.total_actual || 0) * 100), 0)
+  const totalActual = totalActualCents / 100
 
   if (loading) {
     return (

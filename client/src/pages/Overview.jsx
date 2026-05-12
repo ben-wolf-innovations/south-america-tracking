@@ -290,10 +290,15 @@ export default function Overview() {
               {countrySummary.map(countryItem => {
                 const totals = CATEGORIES.reduce((acc, cat) => {
                   const d = countryItem.categories?.[cat.value] || { budgeted: 0, actual: 0 }
-                  acc.budgeted += parseFloat(d.budgeted || 0)
-                  acc.actual += parseFloat(d.actual || 0)
+                  acc.budgetedCents += Math.round(parseFloat(d.budgeted || 0) * 100)
+                  acc.actualCents += Math.round(parseFloat(d.actual || 0) * 100)
                   return acc
-                }, { budgeted: 0, actual: 0 })
+                }, { budgetedCents: 0, actualCents: 0 })
+                
+                const totalsFormatted = {
+                  budgeted: totals.budgetedCents / 100,
+                  actual: totals.actualCents / 100
+                }
 
                 return (
                   <div key={countryItem.country} className="overview-country-card">
@@ -315,8 +320,8 @@ export default function Overview() {
                     <div className="overview-country-total-row">
                       <span className="country-total-label">Total</span>
                       <span className="country-total-values">
-                        <span className="country-budgeted">B: £{totals.budgeted.toFixed(2)}</span>
-                        <span className="country-actual">A: £{totals.actual.toFixed(2)}</span>
+                        <span className="country-budgeted">B: £{totalsFormatted.budgeted.toFixed(2)}</span>
+                        <span className="country-actual">A: £{totalsFormatted.actual.toFixed(2)}</span>
                       </span>
                     </div>
                   </div>
