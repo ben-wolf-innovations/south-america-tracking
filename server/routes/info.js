@@ -52,6 +52,207 @@ const PAYMENT_INFO = {
   },
 }
 
+const EMERGENCY_CONTACTS = {
+  Peru: {
+    police: '105',
+    ambulance: '116',
+    fire: '116',
+    ukEmbassy: '+51 1 617 3000 (Lima)'
+  },
+  Ecuador: {
+    police: '911',
+    ambulance: '911',
+    fire: '911',
+    ukEmbassy: '+593 2 297 0800 (Quito)'
+  },
+  Bolivia: {
+    police: '110',
+    ambulance: '118',
+    fire: '119',
+    ukEmbassy: '+591 2 243 3424 (La Paz)'
+  },
+  Chile: {
+    police: '133',
+    ambulance: '131',
+    fire: '132',
+    ukEmbassy: '+56 2 2370 4100 (Santiago)'
+  },
+  Argentina: {
+    police: '911',
+    ambulance: '107',
+    fire: '100',
+    ukEmbassy: '+54 11 4808 2200 (Buenos Aires)'
+  },
+  Uruguay: {
+    police: '911',
+    ambulance: '105',
+    fire: '104',
+    ukEmbassy: '+598 2 622 3630 (Montevideo)'
+  },
+}
+
+const TIME_ZONES = {
+  Peru: { timezone: 'PET (UTC-5)', offset: -5 },
+  Ecuador: { timezone: 'ECT (UTC-5)', offset: -5 },
+  Bolivia: { timezone: 'BOT (UTC-4)', offset: -4 },
+  Chile: { timezone: 'CLT (UTC-3/4)*', offset: -3, note: 'Daylight saving varies' },
+  Argentina: { timezone: 'ART (UTC-3)', offset: -3 },
+  Uruguay: { timezone: 'UYT (UTC-3)', offset: -3 },
+}
+
+const TIPPING_CUSTOMS = {
+  Peru: {
+    restaurant: '10% (often included)',
+    hotel: '5-10 PEN per bag',
+    taxi: 'Round up',
+    guide: '50-100 PEN per day'
+  },
+  Ecuador: {
+    restaurant: '10% (usually included)',
+    hotel: '$1-2 per bag',
+    taxi: 'Round up',
+    guide: '$10-20 per day'
+  },
+  Bolivia: {
+    restaurant: '5-10% (rarely included)',
+    hotel: '5-10 BOB per bag',
+    taxi: 'Not expected',
+    guide: '50-100 BOB per day'
+  },
+  Chile: {
+    restaurant: '10% (gratuity law)',
+    hotel: '1,000 CLP per bag',
+    taxi: 'Round up',
+    guide: '10,000-20,000 CLP per day'
+  },
+  Argentina: {
+    restaurant: '10% (rarely included)',
+    hotel: '50-100 ARS per bag',
+    taxi: 'Round up',
+    guide: '500-1,000 ARS per day'
+  },
+  Uruguay: {
+    restaurant: '10% (optional)',
+    hotel: '50-100 UYU per bag',
+    taxi: 'Round up',
+    guide: '300-500 UYU per day'
+  },
+}
+
+const POWER_PLUGS = {
+  Peru: { voltage: '220V', frequency: '60Hz', plugs: 'A, B, C' },
+  Ecuador: { voltage: '120V', frequency: '60Hz', plugs: 'A, B' },
+  Bolivia: { voltage: '230V', frequency: '50Hz', plugs: 'A, C' },
+  Chile: { voltage: '220V', frequency: '50Hz', plugs: 'C, L' },
+  Argentina: { voltage: '220V', frequency: '50Hz', plugs: 'C, I' },
+  Uruguay: { voltage: '230V', frequency: '50Hz', plugs: 'C, F, L' },
+}
+
+const CONNECTIVITY_INFO = {
+  Peru: {
+    mainProviders: 'Claro, Movistar, Entel',
+    simAvailability: 'Widely available',
+    uberAvailable: 'Yes (Lima, Cusco, Arequipa)',
+    notes: 'WhatsApp widely used'
+  },
+  Ecuador: {
+    mainProviders: 'Claro, Movistar, CNT',
+    simAvailability: 'Easy to get',
+    uberAvailable: 'Yes (Quito, Guayaquil)',
+    notes: 'Good 4G in cities'
+  },
+  Bolivia: {
+    mainProviders: 'Entel, Tigo, Viva',
+    simAvailability: 'Available in cities',
+    uberAvailable: 'Limited',
+    notes: 'Patchy coverage outside cities'
+  },
+  Chile: {
+    mainProviders: 'Entel, Movistar, Claro',
+    simAvailability: 'Very easy',
+    uberAvailable: 'Yes (Santiago, Valparaiso)',
+    notes: 'Excellent coverage'
+  },
+  Argentina: {
+    mainProviders: 'Personal, Movistar, Claro',
+    simAvailability: 'Easy (need ID)',
+    uberAvailable: 'Yes (Buenos Aires, major cities)',
+    notes: 'Good 4G in populated areas'
+  },
+  Uruguay: {
+    mainProviders: 'Antel, Movistar, Claro',
+    simAvailability: 'Easy to get',
+    uberAvailable: 'Yes (Montevideo)',
+    notes: 'Very good coverage'
+  },
+}
+
+const VISA_INFO = {
+  Peru: {
+    ukVisaFree: '183 days',
+    entry: 'Passport valid 6 months',
+    notes: 'Free tourist card on arrival'
+  },
+  Ecuador: {
+    ukVisaFree: '90 days',
+    entry: 'Passport valid 6 months',
+    notes: 'Free entry stamp'
+  },
+  Bolivia: {
+    ukVisaFree: '90 days',
+    entry: 'Passport valid 6 months',
+    notes: 'Free entry stamp'
+  },
+  Chile: {
+    ukVisaFree: '90 days',
+    entry: 'Passport valid 6 months',
+    notes: 'Free entry (PDI form)'
+  },
+  Argentina: {
+    ukVisaFree: '90 days',
+    entry: 'Passport valid 6 months',
+    notes: 'Free entry stamp'
+  },
+  Uruguay: {
+    ukVisaFree: '90 days',
+    entry: 'Passport valid 6 months',
+    notes: 'Free entry stamp'
+  },
+}
+
+const LOCAL_APPS = {
+  Peru: {
+    transport: 'Beat, Cabify, InDrive',
+    payment: 'Yape, Plin',
+    other: 'Rappi (delivery)'
+  },
+  Ecuador: {
+    transport: 'Uber, Cabify, inDriver',
+    payment: 'Limited (cash common)',
+    other: 'Rappi, Glovo'
+  },
+  Bolivia: {
+    transport: 'PideTaxi, inDriver',
+    payment: 'Limited (cash preferred)',
+    other: 'Very limited'
+  },
+  Chile: {
+    transport: 'Uber, Cabify, DiDi',
+    payment: 'Mach, Mercado Pago',
+    other: 'Rappi, Cornershop'
+  },
+  Argentina: {
+    transport: 'Uber, Cabify, DiDi',
+    payment: 'Mercado Pago (essential)',
+    other: 'Rappi, PedidosYa'
+  },
+  Uruguay: {
+    transport: 'Uber, Cabify',
+    payment: 'Mercado Pago, Prex',
+    other: 'PedidosYa'
+  },
+}
+
 /**
  * GET /api/info/exchange-rates
  * Returns live GBP → South American currency rates.
@@ -92,12 +293,54 @@ router.get('/exchange-rates', authenticateToken, async (req, res) => {
       ...info
     }))
 
+    const emergencyContacts = Object.entries(EMERGENCY_CONTACTS).map(([country, info]) => ({
+      country,
+      ...info
+    }))
+
+    const timeZones = Object.entries(TIME_ZONES).map(([country, info]) => ({
+      country,
+      ...info
+    }))
+
+    const tippingCustoms = Object.entries(TIPPING_CUSTOMS).map(([country, info]) => ({
+      country,
+      ...info
+    }))
+
+    const powerPlugs = Object.entries(POWER_PLUGS).map(([country, info]) => ({
+      country,
+      ...info
+    }))
+
+    const connectivityInfo = Object.entries(CONNECTIVITY_INFO).map(([country, info]) => ({
+      country,
+      ...info
+    }))
+
+    const visaInfo = Object.entries(VISA_INFO).map(([country, info]) => ({
+      country,
+      ...info
+    }))
+
+    const localApps = Object.entries(LOCAL_APPS).map(([country, info]) => ({
+      country,
+      ...info
+    }))
+
     res.json({
       success: true,
       data: {
         base: 'GBP',
         rates,
         payment_info: paymentInfo,
+        emergency_contacts: emergencyContacts,
+        time_zones: timeZones,
+        tipping_customs: tippingCustoms,
+        power_plugs: powerPlugs,
+        connectivity_info: connectivityInfo,
+        visa_info: visaInfo,
+        local_apps: localApps,
         last_updated: ratesCache.time_last_update_utc,
         next_update: ratesCache.time_next_update_utc,
         cached_at: new Date(ratesCachedAt).toISOString(),

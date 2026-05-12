@@ -272,6 +272,59 @@
   color: var(--primary-color);
 }
 
+/* Emergency Section */
+.emergency-section {
+  border-left: 4px solid #f44336;
+}
+
+.embassy-cell {
+  font-size: 0.82rem;
+  color: #666;
+}
+
+/* Compact Grid (for time zones, power plugs) */
+.compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.compact-card {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: box-shadow 0.2s;
+}
+
+.compact-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.compact-country {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.compact-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.4rem;
+}
+
+.compact-note {
+  font-size: 0.8rem;
+  color: #777;
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .useful-info-page {
@@ -279,6 +332,10 @@
   }
 
   .rates-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .compact-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -296,6 +353,10 @@
   }
 
   .payment-table th {
+    font-size: 0.75rem;
+  }
+
+  .embassy-cell {
     font-size: 0.75rem;
   }
 }
