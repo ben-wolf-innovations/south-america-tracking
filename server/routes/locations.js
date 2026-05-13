@@ -147,6 +147,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       travel_notes,
       travel_cost_planned,
       travel_cost_actual,
+      travel_duration,
       notes,
       sequence // Optional: if provided, insert at this position
     } = req.body
@@ -194,8 +195,8 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
           accommodation_notes, accommodation_booking_ref,
           activities, activities_cost_planned, activities_cost_actual,
           food_drink_cost_planned, food_drink_cost_actual,
-          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, travel_duration, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           trip_id, finalSequence, name, country, 
           latitude ?? null, longitude ?? null, nights,
@@ -205,7 +206,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
           activities ?? null, activities_cost_planned ?? null, activities_cost_actual ?? null,
           food_drink_cost_planned ?? null, food_drink_cost_actual ?? null,
           travel_method ?? null, travel_notes ?? null, 
-          travel_cost_planned ?? null, travel_cost_actual ?? null, notes ?? null
+          travel_cost_planned ?? null, travel_cost_actual ?? null, travel_duration ?? null, notes ?? null
         ]
       )
 
@@ -245,7 +246,7 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
       'accommodation_notes', 'accommodation_booking_ref',
       'activities', 'activities_cost_planned', 'activities_cost_actual',
       'food_drink_cost_planned', 'food_drink_cost_actual',
-      'travel_method', 'travel_notes', 'travel_cost_planned', 'travel_cost_actual',
+      'travel_method', 'travel_notes', 'travel_cost_planned', 'travel_cost_actual', 'travel_duration',
       'notes', 'is_current', 'visited', 'visited_date'
     ]
 
