@@ -138,6 +138,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       accommodation_cost_actual,
       accommodation_notes,
       accommodation_booking_ref,
+      accommodation_booked,
       activities,
       activities_cost_planned,
       activities_cost_actual,
@@ -148,6 +149,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
       travel_cost_planned,
       travel_cost_actual,
       travel_duration,
+      transport_booked,
       notes,
       sequence // Optional: if provided, insert at this position
     } = req.body
@@ -192,21 +194,21 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
           trip_id, sequence, name, country, latitude, longitude, nights,
           arrival_date, departure_date, accommodation_name,
           accommodation_cost_planned, accommodation_cost_actual,
-          accommodation_notes, accommodation_booking_ref,
+          accommodation_notes, accommodation_booking_ref, accommodation_booked,
           activities, activities_cost_planned, activities_cost_actual,
           food_drink_cost_planned, food_drink_cost_actual,
-          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, travel_duration, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          travel_method, travel_notes, travel_cost_planned, travel_cost_actual, travel_duration, transport_booked, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           trip_id, finalSequence, name, country, 
           latitude ?? null, longitude ?? null, nights,
           arrival_date ?? null, departure_date ?? null, accommodation_name ?? null,
           accommodation_cost_planned ?? null, accommodation_cost_actual ?? null,
-          accommodation_notes ?? null, accommodation_booking_ref ?? null,
+          accommodation_notes ?? null, accommodation_booking_ref ?? null, accommodation_booked ? 1 : 0,
           activities ?? null, activities_cost_planned ?? null, activities_cost_actual ?? null,
           food_drink_cost_planned ?? null, food_drink_cost_actual ?? null,
           travel_method ?? null, travel_notes ?? null, 
-          travel_cost_planned ?? null, travel_cost_actual ?? null, travel_duration ?? null, notes ?? null
+          travel_cost_planned ?? null, travel_cost_actual ?? null, travel_duration ?? null, transport_booked ? 1 : 0, notes ?? null
         ]
       )
 
@@ -243,10 +245,10 @@ router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
       'name', 'country', 'latitude', 'longitude', 'nights',
       'arrival_date', 'departure_date', 'accommodation_name',
       'accommodation_cost_planned', 'accommodation_cost_actual',
-      'accommodation_notes', 'accommodation_booking_ref',
+      'accommodation_notes', 'accommodation_booking_ref', 'accommodation_booked',
       'activities', 'activities_cost_planned', 'activities_cost_actual',
       'food_drink_cost_planned', 'food_drink_cost_actual',
-      'travel_method', 'travel_notes', 'travel_cost_planned', 'travel_cost_actual', 'travel_duration',
+      'travel_method', 'travel_notes', 'travel_cost_planned', 'travel_cost_actual', 'travel_duration', 'transport_booked',
       'notes', 'is_current', 'visited', 'visited_date'
     ]
 

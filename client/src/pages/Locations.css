@@ -509,6 +509,41 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
+/* Booking Status Badges */
+.status-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.booked {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+/* Checkbox Labels */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  height: auto;
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  user-select: none;
+}
+
 /* Loading & Error */
 .loading,
 .error {

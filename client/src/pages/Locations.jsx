@@ -23,6 +23,7 @@ export default function Locations() {
     accommodation_name: '',
     accommodation_type: '',
     accommodation_cost_planned: '',
+    accommodation_booked: false,
     arrival_date: '',
     departure_date: '',
     activities: '',
@@ -32,6 +33,7 @@ export default function Locations() {
     travel_method: '',
     travel_cost_planned: '',
     travel_duration: '',
+    transport_booked: false,
     notes: '',
     sequence: ''
   })
@@ -76,6 +78,7 @@ export default function Locations() {
       accommodation_name: '',
       accommodation_type: '',
       accommodation_cost_planned: '',
+      accommodation_booked: false,
       arrival_date: '',
       departure_date: '',
       activities: '',
@@ -85,6 +88,7 @@ export default function Locations() {
       travel_method: '',
       travel_cost_planned: '',
       travel_duration: '',
+      transport_booked: false,
       notes: '',
       sequence: ''
     })
@@ -196,6 +200,7 @@ export default function Locations() {
       accommodation_name: location.accommodation_name || '',
       accommodation_type: location.accommodation_type || '',
       accommodation_cost_planned: location.accommodation_cost_planned || '',
+      accommodation_booked: location.accommodation_booked === 1,
       arrival_date: location.arrival_date || '',
       departure_date: location.departure_date || '',
       activities: location.activities || '',
@@ -205,6 +210,7 @@ export default function Locations() {
       travel_method: location.travel_method || '',
       travel_cost_planned: location.travel_cost_planned || '',
       travel_duration: location.travel_duration || '',
+      transport_booked: location.transport_booked === 1,
       notes: location.notes || '',
       sequence: ''
     })
@@ -485,6 +491,17 @@ export default function Locations() {
                     placeholder="50.00"
                   />
                 </div>
+                <div className="form-field">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="accommodation_booked"
+                      checked={formData.accommodation_booked}
+                      onChange={(e) => setFormData(prev => ({ ...prev, accommodation_booked: e.target.checked }))}
+                    />
+                    <span>Accommodation Booked</span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -532,6 +549,17 @@ export default function Locations() {
                     onChange={handleInputChange}
                     placeholder="4.5 hours"
                   />
+                </div>
+                <div className="form-field">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="transport_booked"
+                      checked={formData.transport_booked}
+                      onChange={(e) => setFormData(prev => ({ ...prev, transport_booked: e.target.checked }))}
+                    />
+                    <span>Transport Booked</span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -697,7 +725,10 @@ export default function Locations() {
                 {location.accommodation_name && (
                   <div className="info-item">
                     <span className="info-label">Accommodation:</span>
-                    <span className="info-value">{location.accommodation_name}</span>
+                    <span className="info-value">
+                      {location.accommodation_name}
+                      {location.accommodation_booked === 1 && <span className="status-badge booked">Booked</span>}
+                    </span>
                   </div>
                 )}
                 {location.accommodation_type && (
@@ -724,7 +755,10 @@ export default function Locations() {
                 {location.travel_method && (
                   <div className="info-item">
                     <span className="info-label">Method:</span>
-                    <span className="info-value">{location.travel_method}</span>
+                    <span className="info-value">
+                      {location.travel_method}
+                      {location.transport_booked === 1 && <span className="status-badge booked">Booked</span>}
+                    </span>
                   </div>
                 )}
                 {(location.travel_cost_planned || location.travel_cost_actual) && (
@@ -944,6 +978,17 @@ export default function Locations() {
                       />
                       <small style={{ color: '#666', fontSize: '0.85em' }}>Auto-calculated from Costs page</small>
                     </div>
+                    <div className="form-field">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="accommodation_booked"
+                          checked={formData.accommodation_booked}
+                          onChange={(e) => setFormData(prev => ({ ...prev, accommodation_booked: e.target.checked }))}
+                        />
+                        <span>Accommodation Booked</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -1003,6 +1048,17 @@ export default function Locations() {
                         onChange={handleInputChange}
                         placeholder="4.5"
                       />
+                    </div>
+                    <div className="form-field">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="transport_booked"
+                          checked={formData.transport_booked}
+                          onChange={(e) => setFormData(prev => ({ ...prev, transport_booked: e.target.checked }))}
+                        />
+                        <span>Transport Booked</span>
+                      </label>
                     </div>
                   </div>
                 </div>
