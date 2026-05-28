@@ -1,0 +1,31 @@
+# Azure Functions
+local.settings.json
+*.local.json
+__blobstorage__
+__queuestorage__
+__azurite_db*__.json
+.python_packages
+lib
+
+# Node.js
+node_modules
+*.log
+npm-debug.log*
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist
+.output
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db

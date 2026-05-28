@@ -5,21 +5,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd server && npm run dev",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\"",
+    "dev:api": "cd api && npm start",
     "dev:client": "cd client && npm run dev",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
-    "init:db": "node database/init.js"
+    "install:all": "npm install && cd client && npm install && cd ../api && npm install",
+    "test:db": "cd api && npm test"
   },
-  "dependencies": {
-    "better-sqlite3": "^11.0.0",
-    "bcrypt": "^5.1.1",
-    "dotenv": "^16.4.5"
-  },
+  "dependencies": {},
   "keywords": [
     "travel",
     "tracking",
-    "south-america"
+    "south-america",
+    "azure-functions"
   ],
   "author": "",
   "license": "MIT",

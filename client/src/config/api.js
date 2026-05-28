@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+// Azure Functions default port is 7071 (changed from Express port 3000)
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api'
 
 // Create axios instance with default config
 const api = axios.create({

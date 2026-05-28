@@ -9,6 +9,11 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+local.settings.json
+*.local.json
+
+# Production environment file should be tracked
+!.env.production
 
 # Database
 # Note: trip.db is intentionally tracked in git for collaboration

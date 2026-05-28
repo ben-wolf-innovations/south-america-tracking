@@ -1,0 +1,23 @@
+{
+  "name": "south-america-trip-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API for South America trip tracker",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "func start",
+    "test": "node scripts/test-database.js",
+    "upload-db": "node scripts/upload-database.js"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "@azure/storage-blob": "^12.17.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "sql.js": "^1.10.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "azure-functions-core-tools": "^4.0.5455"
+  }
+}

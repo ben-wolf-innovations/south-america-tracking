@@ -18,8 +18,8 @@ This app helps manage and share our South America adventure, covering 38 locatio
 
 **Tech Stack:**
 - Frontend: React 18.3.1 + Vite 5.3.4 (fast, modern)
-- Backend: Node.js v24.15.0 + Express 4.19.2
-- Database: SQLite with sql.js (pure JS, ARM64 compatible)
+- Backend: Azure Functions v4 (Node.js) - migrated from Express for free Azure hosting
+- Database: SQLite with sql.js stored in Azure Blob Storage
 - Maps: Leaflet.js with react-leaflet and OpenStreetMap tiles
 - Authentication: JWT with PIN-based access (2 levels)
 
@@ -52,22 +52,38 @@ Perfect for collaborating on React components and making UI changes.
    cd south-america-tracking
    ```
 
-2. Install dependencies and start servers
+2. Install dependencies
    ```bash
    npm install
-   npm run dev
+   cd client && npm install
+   cd ../api && npm install
+   cd ..
+   ```
+
+3. Configure Azure Functions backend
+   ```bash
+   cd api
+   cp local.settings.json.example local.settings.json
+   # Edit local.settings.json with your Azure Storage connection string
+   npm run upload-db  # Upload database to Azure Blob Storage
+   ```
+
+4. Start the servers
+   ```bash
+   # Terminal 1 - Azure Functions backend
+   cd api && npm start
+   
+   # Terminal 2 - React frontend
+   cd client && npm run dev
    ```
    
    The app will start with:
    - Frontend: http://localhost:5173
-   - Backend API: http://localhost:3000
-   - Database already included with all 38 locations and seed data
+   - Backend API: http://localhost:7071/api
 
-3. Login credentials:
+5. Login credentials:
    - Admin PIN: 1234 (full edit access)
    - Family PIN: 5678 (read-only view)
-
-Note: The database file (`database/trip.db`) is included with all seed data, so no initialization needed.
 
 ---
 
@@ -141,15 +157,17 @@ See [SHARING.md](SHARING.md) for complete step-by-step instructions. The process
 
 ## What's Implemented
 
-### Backend
-- Express server with CORS, JSON middleware, request logging
-- SQLite database with sql.js (pure JavaScript, ARM64 compatible)
+### Backend (Azure Functions v4)
+- Serverless HTTP triggers with Azure Functions
+- SQLite database in Azure Blob Storage (automatic persistence)
 - JWT authentication with PIN-based access (admin + family levels)
 - Database abstraction layer for transactions and queries
-- Complete RESTful API for all operations
+- Complete RESTful API with 30 endpoints across 8 function modules
 - One-way cost sync (locations = budget, costs = actual)
 - Estimated date calculations based on last visited location
 - Strict sequential check-in validation
+- Live exchange rates from external API (30-minute cache)
+- Role-based blog post filtering
 
 ### Frontend - Core Pages
 - React 18 + Vite with mobile-first responsive design
@@ -198,32 +216,37 @@ south-america-tracking/
 │   │   │   ├── Map.jsx          # Interactive Leaflet map with check-in
 │   │   │   ├── Locations.jsx    # Location CRUD and management
 │   │   │   ├── Costs.jsx        # Cost tracking and budget breakdown
-│   │   │   └── Blog.jsx         # Travel blog with rich text editor
-│   │   ├── context/            # State management (AuthContext)
-│   │   ├── config/             # API configuration
+│   │   │   └── Blog.jsx         # Travel blog with (updated for Azure Functions)
 │   │   └── App.css             # Global design system
-│   ├── Dockerfile
 │   ├── vite.config.js
 │   └── package.json
-├── server/                     # Express backend
-│   ├── routes/                 # API endpoints
-│   │   ├── auth.js            # Authentication (PIN-based JWT)
-│   │   ├── trips.js           # Trip management
-│   │   ├── locations.js       # Location CRUD with sequence management
-│   │   ├── costs.js           # Cost CRUD and summary calculations
-│   │   ├── progress.js        # Check-in and progress tracking
-│   │   └── blog.js            # Blog post management
-│   ├── middleware/            # Auth and validation
-│   ├── config/                # Database configuration
-│   ├── server.js              # Express app setup
-│   ├── Dockerfile
+├── api/                        # Azure Functions v4 backend
+│   ├── src/
+│   │   ├── functions/          # HTTP trigger functions
+│   │   │   ├── auth.js         # Authentication (PIN-based JWT)
+│   │   │   ├── trips.js        # Trip management
+│   │   │   ├── locations.js    # Location CRUD with sequence management
+│   │   │   ├── costs.js        # Cost CRUD and summary calculations
+│   │   │   ├── packing.js      # Packing list with soft delete
+│   │   │   ├── progress.js     # Check-in and progress tracking
+│   │   │   ├── info.js         # Travel info and exchange rates
+│   │   │   └── blog.js         # Blog post management with role filtering
+│   │   ├── shared/             # Shared utilities
+│   │   │   ├── database.js     # Azure Blob Storage SQLite wrapper
+│   │   │   └── auth.js         # JWT authentication middleware
+│   │   └── index.js            # Functions entry point
+│   ├── scripts/                # Utility scripts
+│   │   ├── upload-database.js  # Upload DB to Azure Blob
+│   │   └── test-database.js    # Test connection
+│   ├── host.json               # Azure Functions host config
+│   ├── local.settings.json     # Local environment variables
 │   └── package.json
-├── database/                  # SQLite database
-│   ├── trip.db               # Main database (included in repo)
-│   ├── schema.sql            # Database schema
-│   ├── seed.sql              # Seed data (38 locations)
-│   └── init.js               # Initialization script
-├── docker-compose.yml         # Docker orchestration
+├── database/                   # Original SQLite database (for migration)
+│   ├── trip.db                # Main database (now in Azure Blob Storage)
+│   ├── schema.sql             # Database schema
+│   └── seed.sql               # Seed data (56 locations)
+├── server/                     # Legacy Express server (deprecated)
+├── package.json                # Root script
 ├── package.json               # Root scripts
 ├── SHARING.md                 # Network sharing instructions
 └── README.md
