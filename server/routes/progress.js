@@ -1,5 +1,5 @@
 import express from 'express'
-import { get, run, transaction } from '../config/database.js'
+import { get, all, run, transaction } from '../config/database.js'
 import { authenticateToken, requireAdmin } from '../middleware/auth.js'
 
 const router = express.Router()
@@ -62,6 +62,67 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
       })
     }
 
+    // Calculate estimated dates if actual dates are not set
+    let arrivalDate = location.arrival_date
+    let departureDate = location.departure_date
+
+    // If dates aren't set, calculate estimated dates based on trip progress
+    if (!arrivalDate || !departureDate) {
+      const trip = get('SELECT * FROM trips WHERE id = ?', [location.trip_id])
+      const tripStartDate = trip?.start_date ? new Date(trip.start_date) : null
+
+      if (tripStartDate) {
+        // Find last visited location before this one
+        const lastVisited = get(
+          `SELECT * FROM locations 
+           WHERE trip_id = ? 
+           AND sequence < ?
+           AND visited = 1
+           ORDER BY sequence DESC
+           LIMIT 1`,
+          [location.trip_id, location.sequence]
+        )
+
+        let baseDate = null
+        let startFromSequence = 1
+
+        if (lastVisited) {
+          if (lastVisited.departure_date) {
+            baseDate = new Date(lastVisited.departure_date)
+          } else if (lastVisited.arrival_date) {
+            baseDate = new Date(lastVisited.arrival_date)
+            baseDate.setDate(baseDate.getDate() + (lastVisited.nights || 0))
+          } else {
+            baseDate = new Date(tripStartDate)
+          }
+          startFromSequence = lastVisited.sequence + 1
+        } else {
+          baseDate = new Date(tripStartDate)
+        }
+
+        // Calculate days between last visited and this location
+        const intermediateLocations = all(
+          `SELECT * FROM locations 
+           WHERE trip_id = ? 
+           AND sequence >= ? 
+           AND sequence < ?
+           ORDER BY sequence ASC`,
+          [location.trip_id, startFromSequence, location.sequence]
+        )
+
+        const daysSinceBase = intermediateLocations.reduce((sum, loc) => sum + (loc.nights || 0), 0)
+
+        const estimatedArrival = new Date(baseDate)
+        estimatedArrival.setDate(estimatedArrival.getDate() + daysSinceBase)
+
+        const estimatedDeparture = new Date(estimatedArrival)
+        estimatedDeparture.setDate(estimatedDeparture.getDate() + (location.nights || 0))
+
+        if (!arrivalDate) arrivalDate = estimatedArrival.toISOString().split('T')[0]
+        if (!departureDate) departureDate = estimatedDeparture.toISOString().split('T')[0]
+      }
+    }
+
     // Use transaction to ensure atomicity
     transaction((runInTransaction) => {
       // Clear is_current from all locations in the same trip
@@ -71,13 +132,16 @@ router.post('/checkin', authenticateToken, requireAdmin, (req, res) => {
       )
 
       // Mark the specified location as current and visited
+      // Set actual dates (either existing or calculated from estimates)
       runInTransaction(
         `UPDATE locations 
          SET is_current = 1, 
              visited = 1, 
-             visited_date = ? 
+             visited_date = ?,
+             arrival_date = ?,
+             departure_date = ?
          WHERE id = ?`,
-        [new Date().toISOString().split('T')[0], location_id]
+        [new Date().toISOString().split('T')[0], arrivalDate, departureDate, location_id]
       )
     })
 
@@ -185,7 +249,7 @@ router.post('/clear-visited', authenticateToken, requireAdmin, (req, res) => {
     
     run(
       `UPDATE locations 
-       SET visited = 0, is_current = 0, visited_date = NULL 
+       SET visited = 0, is_current = 0, visited_date = NULL, arrival_date = NULL, departure_date = NULL 
        WHERE trip_id = ?`,
       [tripId]
     )
@@ -230,9 +294,10 @@ router.post('/undo-last-visited', authenticateToken, requireAdmin, (req, res) =>
     }
 
     // Clear the visited and current flags for this location
+    // Also clear actual dates so estimated dates show again
     run(
       `UPDATE locations 
-       SET visited = 0, is_current = 0, visited_date = NULL 
+       SET visited = 0, is_current = 0, visited_date = NULL, arrival_date = NULL, departure_date = NULL 
        WHERE id = ?`,
       [lastVisited.id]
     )

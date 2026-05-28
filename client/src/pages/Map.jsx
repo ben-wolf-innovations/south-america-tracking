@@ -150,6 +150,7 @@ export default function Map() {
   const validLocations = locations.filter(loc => loc.latitude && loc.longitude)
 
   // Add small offsets to markers at the same coordinates so they're all clickable
+  // Also ensure the current/most recent location appears on top (rendered last)
   const locationsWithOffsets = validLocations.map((loc, index, arr) => {
     // Find all locations at the same coordinates
     const sameCoordLocations = arr.filter(l => 
@@ -158,33 +159,114 @@ export default function Map() {
     )
     
     if (sameCoordLocations.length > 1) {
-      // Find this location's index among duplicates
-      const duplicateIndex = sameCoordLocations.findIndex(l => l.id === loc.id)
+      // Sort by priority: current location > visited (by sequence desc) > planned (by sequence)
+      // This ensures the most relevant location gets the highest render order
+      const sortedLocations = [...sameCoordLocations].sort((a, b) => {
+        // Current location has lowest priority number (renders last = on top)
+        if (a.is_current === 1 && b.is_current !== 1) return -1
+        if (b.is_current === 1 && a.is_current !== 1) return 1
+        
+        // Among visited or planned, higher sequence = more recent = lower priority number
+        if (a.visited === 1 && b.visited === 1) return b.sequence - a.sequence
+        if (a.visited === 1 && b.visited !== 1) return -1
+        if (b.visited === 1 && a.visited !== 1) return 1
+        
+        // For planned locations, higher sequence is next in journey
+        return b.sequence - a.sequence
+      })
+      
+      // Find this location's index in the sorted array (for offset positioning)
+      const duplicateIndex = sortedLocations.findIndex(l => l.id === loc.id)
       
       // Offset in a circle pattern (0.002 degrees ≈ 200m)
       const offsetRadius = 0.002
-      const angle = (duplicateIndex / sameCoordLocations.length) * 2 * Math.PI
+      const angle = (duplicateIndex / sortedLocations.length) * 2 * Math.PI
       
       return {
         ...loc,
         displayLatitude: loc.latitude + Math.cos(angle) * offsetRadius,
-        displayLongitude: loc.longitude + Math.sin(angle) * offsetRadius
+        displayLongitude: loc.longitude + Math.sin(angle) * offsetRadius,
+        renderOrder: duplicateIndex // Store for sorting later
       }
     }
     
     return {
       ...loc,
       displayLatitude: loc.latitude,
-      displayLongitude: loc.longitude
+      displayLongitude: loc.longitude,
+      renderOrder: 0
     }
+  })
+
+  // Sort by render order so current/most recent locations render last (appear on top)
+  // Render order: planned (oldest first) -> visited (oldest first) -> current
+  const sortedLocations = [...locationsWithOffsets].sort((a, b) => {
+    // Group by coordinates first
+    const sameCoords = Math.abs(a.latitude - b.latitude) < 0.0001 && 
+                       Math.abs(a.longitude - b.longitude) < 0.0001
+    
+    if (sameCoords) {
+      const aIsCurrent = a.is_current === 1
+      const bIsCurrent = b.is_current === 1
+      const aIsVisited = a.visited === 1
+      const bIsVisited = b.visited === 1
+      
+      // Current location always renders last (on top)
+      if (aIsCurrent && !bIsCurrent) return 1
+      if (bIsCurrent && !aIsCurrent) return -1
+      
+      // Among visited, higher sequence renders last (most recent on top)
+      if (aIsVisited && bIsVisited) return a.sequence - b.sequence
+      
+      // Visited renders after planned (visited on top of planned)
+      if (aIsVisited && !bIsVisited) return 1
+      if (bIsVisited && !aIsVisited) return -1
+      
+      // Among planned, lower sequence renders last (next location on top)
+      return b.sequence - a.sequence
+    }
+    
+    // Different coordinates: maintain original order
+    return 0
   })
 
   // Get route coordinates for polyline (use original coordinates, not offset)
   const routeCoordinates = validLocations.map(loc => [loc.latitude, loc.longitude])
 
+  // Create route segments with colors based on visited status
+  const routeSegments = []
+  for (let i = 0; i < validLocations.length - 1; i++) {
+    const fromLoc = validLocations[i]
+    const toLoc = validLocations[i + 1]
+    
+    // Determine segment color
+    let segmentColor = '#2563eb' // Default blue for planned
+    let segmentOpacity = 0.7
+    
+    if (toLoc.is_current === 1) {
+      // Segment leading to current location = red
+      segmentColor = '#ef4444'
+      segmentOpacity = 0.9
+    } else if (fromLoc.visited === 1 && toLoc.visited === 1) {
+      // Both visited = green
+      segmentColor = '#10b981'
+      segmentOpacity = 0.8
+    } else if (fromLoc.visited === 1 || toLoc.visited === 1) {
+      // One visited, one planned = transition (could be yellow/orange)
+      segmentColor = '#f59e0b'
+      segmentOpacity = 0.8
+    }
+    
+    routeSegments.push({
+      positions: [[fromLoc.latitude, fromLoc.longitude], [toLoc.latitude, toLoc.longitude]],
+      color: segmentColor,
+      opacity: segmentOpacity
+    })
+  }
+
   // Calculate center and bounds
-  const center = locationsWithOffsets.length > 0
-    ? [locationsWithOffsets[0].latitude, locationsWithOffsets[0].longitude]
+  const center = sortedLocations.length > 0
+    ? [sortedLocations[0].latitude, sortedLocations[0].longitude]
     : [-12.0464, -77.0428] // Lima as default
 
   return (
@@ -192,7 +274,7 @@ export default function Map() {
       <div className="map-header">
         <div>
           <h2>Route Map</h2>
-          <p className="subtitle">{locationsWithOffsets.length} locations across South America</p>
+          <p className="subtitle">{sortedLocations.length} locations across South America</p>
         </div>
         {isAdmin() && (
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -226,6 +308,10 @@ export default function Map() {
           <span>Visited</span>
         </div>
         <div className="legend-item">
+          <div className="legend-icon next-journey"></div>
+          <span>Next Journey</span>
+        </div>
+        <div className="legend-item">
           <div className="legend-icon planned"></div>
           <span>Planned</span>
         </div>
@@ -243,21 +329,22 @@ export default function Map() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* Route polyline */}
-          {routeCoordinates.length > 1 && (
+          {/* Route polyline segments with colored paths */}
+          {routeSegments.map((segment, index) => (
             <Polyline
-              positions={routeCoordinates}
+              key={`segment-${index}`}
+              positions={segment.positions}
               pathOptions={{
-                color: '#2563eb',
+                color: segment.color,
                 weight: 3,
-                opacity: 0.7,
+                opacity: segment.opacity,
                 dashArray: '10, 10'
               }}
             />
-          )}
+          ))}
 
           {/* Location markers */}
-          {locationsWithOffsets.map((location) => {
+          {sortedLocations.map((location) => {
             const isCurrent = location.is_current === 1
             const isVisited = location.visited === 1
             
