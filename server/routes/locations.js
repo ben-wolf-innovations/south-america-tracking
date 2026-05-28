@@ -198,7 +198,7 @@ router.post('/', authenticateToken, requireAdmin, (req, res) => {
           activities, activities_cost_planned, activities_cost_actual,
           food_drink_cost_planned, food_drink_cost_actual,
           travel_method, travel_notes, travel_cost_planned, travel_cost_actual, travel_duration, transport_booked, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           trip_id, finalSequence, name, country, 
           latitude ?? null, longitude ?? null, nights,
