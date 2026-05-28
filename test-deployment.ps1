@@ -1,7 +1,7 @@
 # Test Azure Deployment
 # Run this script after deploying to verify everything works
 
-$apiUrl = "https://south-america-trip-api.azurewebsites.net"
+$baseUrl = "https://south-america-trip-api-b5b0b2bgc0cxhmb7.uksouth-01.azurewebsites.net"
 
 Write-Host "🧪 Testing Azure Function App Deployment" -ForegroundColor Cyan
 Write-Host "API URL: $apiUrl" -ForegroundColor Gray
