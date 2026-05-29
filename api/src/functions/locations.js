@@ -278,6 +278,80 @@ app.http('updateLocation', {
 })
 
 /**
+ * PUT /api/locations/:id/reorder
+ * Reorder location by changing its sequence (admin only)
+ */
+app.http('reorderLocation', {
+  methods: ['PUT'],
+  authLevel: 'anonymous',
+  route: 'locations/{id}/reorder',
+  handler: requireAdmin(async (request, context) => {
+    try {
+      const id = request.params.id
+      const body = await request.json()
+      const newSequence = body.new_sequence
+      
+      if (!newSequence || typeof newSequence !== 'number') {
+        return {
+          status: 400,
+          jsonBody: { success: false, error: 'new_sequence is required and must be a number' }
+        }
+      }
+      
+      const location = await get('SELECT * FROM locations WHERE id = ?', [id])
+      if (!location) {
+        return {
+          status: 404,
+          jsonBody: { success: false, error: 'Location not found' }
+        }
+      }
+      
+      const oldSequence = location.sequence
+      
+      if (oldSequence === newSequence) {
+        return {
+          status: 200,
+          jsonBody: { success: true, message: 'Location sequence unchanged' }
+        }
+      }
+      
+      await transaction(async (runInTransaction) => {
+        if (newSequence < oldSequence) {
+          // Moving up: shift down locations between new and old positions
+          runInTransaction(
+            'UPDATE locations SET sequence = sequence + 1 WHERE trip_id = ? AND sequence >= ? AND sequence < ?',
+            [location.trip_id, newSequence, oldSequence]
+          )
+        } else {
+          // Moving down: shift up locations between old and new positions
+          runInTransaction(
+            'UPDATE locations SET sequence = sequence - 1 WHERE trip_id = ? AND sequence > ? AND sequence <= ?',
+            [location.trip_id, oldSequence, newSequence]
+          )
+        }
+        
+        // Update the location's sequence
+        runInTransaction(
+          'UPDATE locations SET sequence = ? WHERE id = ?',
+          [newSequence, id]
+        )
+      })
+
+      return {
+        status: 200,
+        jsonBody: { success: true, message: 'Location reordered' }
+      }
+    } catch (error) {
+      context.error('Error reordering location:', error)
+      return {
+        status: 500,
+        jsonBody: { success: false, error: error.message }
+      }
+    }
+  })
+})
+
+/**
  * DELETE /api/locations/:id
  * Delete location (admin only)
  */
