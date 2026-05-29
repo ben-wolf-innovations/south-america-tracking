@@ -11,6 +11,7 @@ export default function PackingList() {
   const [error, setError] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const formRef = useRef(null)
 
   // Form state
@@ -60,6 +61,8 @@ export default function PackingList() {
     e.preventDefault()
     
     try {
+      const scrollPos = window.scrollY
+      
       if (editingItem) {
         // Update existing item
         await api.put(`/packing/${editingItem.id}`, formData)
@@ -73,6 +76,9 @@ export default function PackingList() {
       
       await loadItems()
       resetForm()
+      
+      // Restore scroll position after reload
+      setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to save packing item:', err)
       alert('Failed to save item: ' + (err.response?.data?.error || err.message))
@@ -100,8 +106,10 @@ export default function PackingList() {
     }
 
     try {
+      const scrollPos = window.scrollY
       await api.delete(`/packing/${itemId}`)
       await loadItems()
+      setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to delete item:', err)
       alert('Failed to delete item')
@@ -110,10 +118,12 @@ export default function PackingList() {
 
   const handleToggleComplete = async (item) => {
     try {
+      const scrollPos = window.scrollY
       await api.put(`/packing/${item.id}`, {
         completed: item.completed ? 0 : 1
       })
       await loadItems()
+      setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to update item:', err)
       alert('Failed to update item')
@@ -142,8 +152,12 @@ export default function PackingList() {
     )
   }
 
-  // Filter items by active tab
-  const filteredItems = items.filter(item => item.owner === activeTab)
+  // Filter items by active tab and search query
+  const filteredItems = items.filter(item => {
+    if (item.owner !== activeTab) return false
+    if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
+    return true
+  })
 
   // Calculate totals for current tab (using integer cents to avoid floating point errors)
   const totalBudgetCents = filteredItems.reduce((sum, item) => sum + Math.round(parseFloat(item.budget_amount || 0) * 100), 0)
@@ -181,6 +195,20 @@ export default function PackingList() {
             {tab}
           </button>
         ))}
+      </div>
+
+      {/* Search Bar */}
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search items..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} className="clear-search">✕</button>
+        )}
       </div>
 
       {/* Summary Stats */}
@@ -270,10 +298,16 @@ export default function PackingList() {
       
       {filteredItems.length === 0 ? (
         <div className="empty-state">
-          <p>No items in {activeTab}'s packing list yet.</p>
-          <button onClick={() => setShowAddForm(true)} className="btn-primary">
-            Add First Item
-          </button>
+          {searchQuery ? (
+            <p>No items found matching "{searchQuery}"</p>
+          ) : (
+            <>
+              <p>No items in {activeTab}'s packing list yet.</p>
+              <button onClick={() => setShowAddForm(true)} className="btn-primary">
+                Add First Item
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="items-grid">

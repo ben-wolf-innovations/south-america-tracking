@@ -12,6 +12,7 @@ export default function Locations() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingLocation, setEditingLocation] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -134,9 +135,15 @@ export default function Locations() {
         }
       })
 
-      await api.post('/locations', payload)
+      const response = await api.post('/locations', payload)
+      const newLocationId = response.data.data.id
       await loadLocations()
       resetForm()
+      // Scroll to the newly created location
+      setTimeout(() => {
+        const el = document.getElementById(`location-${newLocationId}`)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
     } catch (err) {
       console.error('Failed to add location:', err)
       alert('Failed to add location: ' + (err.response?.data?.error || err.message))
@@ -220,9 +227,11 @@ export default function Locations() {
 
   const handleDelete = async (id) => {
     try {
+      const scrollPos = window.scrollY
       await api.delete(`/locations/${id}`)
       await loadLocations()
       setDeleteConfirm(null)
+      setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to delete location:', err)
       alert('Failed to delete location: ' + (err.response?.data?.error || err.message))
@@ -276,6 +285,21 @@ export default function Locations() {
       </div>
     )
   }
+
+  // Filter locations by search query
+  const filteredLocations = locations.filter(location => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    return (
+      location.name?.toLowerCase().includes(query) ||
+      location.country?.toLowerCase().includes(query) ||
+      location.accommodation_name?.toLowerCase().includes(query) ||
+      location.accommodation_type?.toLowerCase().includes(query) ||
+      location.activities?.toLowerCase().includes(query) ||
+      location.notes?.toLowerCase().includes(query) ||
+      location.travel_method?.toLowerCase().includes(query)
+    )
+  })
 
   // Calculate totals
   const totalNights = locations.reduce((sum, loc) => sum + (parseInt(loc.nights) || 0), 0)
@@ -628,9 +652,34 @@ export default function Locations() {
         </div>
       )}
 
+      {/* Search Bar */}
+      {!showAddForm && (
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search locations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="clear-search">✕</button>
+          )}
+        </div>
+      )}
+
       {/* Locations List */}
       <div className="locations-list">
-        {locations.map((location, index) => {
+        {filteredLocations.length === 0 ? (
+          <div className="empty-state">
+            {searchQuery ? (
+              <p>No locations found matching "{searchQuery}"</p>
+            ) : (
+              <p>No locations added yet.</p>
+            )}
+          </div>
+        ) : (
+          filteredLocations.map((location, index) => {
           const isEditing = editingLocation?.id === location.id
           
           return (
@@ -1128,7 +1177,8 @@ export default function Locations() {
             )}
           </div>
           )
-        })}
+        })
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}

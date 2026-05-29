@@ -94,6 +94,7 @@ export default function Costs() {
   const handleAddCost = async (e) => {
     e.preventDefault()
     try {
+      const scrollPos = window.scrollY
       const payload = {
         category: formData.category,
         description: formData.description,
@@ -111,6 +112,7 @@ export default function Costs() {
       await api.post('/costs', payload)
       await loadData()
       resetForm()
+      setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to add cost:', err)
       alert('Failed to add cost: ' + (err.response?.data?.error || err.message))
@@ -120,6 +122,7 @@ export default function Costs() {
   const handleEditCost = async (e) => {
     e.preventDefault()
     try {
+      const scrollPos = window.scrollY
       const payload = {
         category: formData.category,
         description: formData.description,
@@ -137,6 +140,7 @@ export default function Costs() {
       await api.put(`/costs/${editingCost.id}`, payload)
       await loadData()
       resetForm()
+      setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to update cost:', err)
       alert('Failed to update cost: ' + (err.response?.data?.error || err.message))
@@ -157,9 +161,11 @@ export default function Costs() {
 
   const handleDelete = async (id) => {
     try {
+      const scrollPos = window.scrollY
       await api.delete(`/costs/${id}`)
       await loadData()
       setDeleteConfirm(null)
+      setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to delete cost:', err)
       alert('Failed to delete cost: ' + (err.response?.data?.error || err.message))
