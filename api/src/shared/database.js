@@ -25,7 +25,7 @@ function getBlobClient() {
   
   const blobServiceClient = BlobServiceClient.fromConnectionString(STORAGE_CONNECTION_STRING)
   const containerClient = blobServiceClient.getContainerClient(CONTAINER_NAME)
-  const blobClient = containerClient.getBlobClient(BLOB_NAME)
+  const blobClient = containerClient.getBlockBlobClient(BLOB_NAME) // Use BlockBlobClient for upload
   
   return { containerClient, blobClient }
 }
@@ -76,6 +76,7 @@ async function uploadDatabase() {
   try {
     const { containerClient, blobClient } = getBlobClient()
     
+    console.log('📦 Checking container...')
     // Ensure container exists
     await containerClient.createIfNotExists()
     
@@ -84,8 +85,9 @@ async function uploadDatabase() {
     const buffer = Buffer.from(data)
     
     console.log(`📤 Uploading database to Azure Blob Storage (${buffer.length} bytes)...`)
+    console.log(`   Container: ${CONTAINER_NAME}, Blob: ${BLOB_NAME}`)
     
-    await blobClient.uploadData(buffer, {
+    const uploadResult = await blobClient.upload(buffer, buffer.length, {
       blobHTTPHeaders: {
         blobContentType: 'application/x-sqlite3'
       }
@@ -93,9 +95,15 @@ async function uploadDatabase() {
     
     lastSaveTime = now
     console.log('✅ Database uploaded successfully')
+    console.log('   ETag:', uploadResult.etag)
+    console.log('   Last Modified:', uploadResult.lastModified)
+    return uploadResult
   } catch (error) {
-    console.error('❌ Error uploading database:', error.message)
-    throw error
+    console.error('❌ CRITICAL ERROR uploading database:', error)
+    console.error('   Error name:', error.name)
+    console.error('   Error message:', error.message)
+    console.error('   Error stack:', error.stack)
+    // Don't throw - we don't want to crash the API, but log prominently
   }
 }
 
@@ -207,8 +215,17 @@ export async function run(sql, params = []) {
     const lastID = database.exec('SELECT last_insert_rowid() as id')[0]?.values[0]?.[0]
     stmt.free()
     
-    // Auto-save after writes (async, don't wait)
-    uploadDatabase().catch(err => console.error('Background save failed:', err))
+    // Auto-save after writes - fire and forget but with better logging
+    console.log('💾 Triggering database upload after write operation...')
+    uploadDatabase().then(result => {
+      if (result) {
+        console.log('✅ Upload completed successfully')
+      } else {
+        console.warn('⚠️ Upload skipped or failed')
+      }
+    }).catch(err => {
+      console.error('❌ CRITICAL: Background save failed:', err)
+    })
     
     return { changes, lastID }
   } catch (error) {
