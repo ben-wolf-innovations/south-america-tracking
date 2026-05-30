@@ -12,6 +12,8 @@ export default function PackingList() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortAlphabetically, setSortAlphabetically] = useState(false)
+  const [categoryFilter, setCategoryFilter] = useState('')
   const formRef = useRef(null)
 
   // Form state
@@ -155,12 +157,18 @@ export default function PackingList() {
     )
   }
 
-  // Filter items by active tab and search query
-  const filteredItems = items.filter(item => {
+  // Filter items by active tab, search query, and category
+  let filteredItems = items.filter(item => {
     if (item.owner !== activeTab) return false
     if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
+    if (categoryFilter && item.category !== categoryFilter) return false
     return true
   })
+
+  // Sort items alphabetically if enabled
+  if (sortAlphabetically) {
+    filteredItems = [...filteredItems].sort((a, b) => a.title.localeCompare(b.title))
+  }
 
   // Calculate totals for current tab (using integer cents to avoid floating point errors)
   const totalBudgetCents = filteredItems.reduce((sum, item) => sum + Math.round(parseFloat(item.budget_amount || 0) * 100), 0)
@@ -200,7 +208,7 @@ export default function PackingList() {
         ))}
       </div>
 
-      {/* Search Bar */}
+      {/* Search and Filters */}
       <div className="search-bar">
         <input
           type="text"
@@ -211,6 +219,48 @@ export default function PackingList() {
         />
         {searchQuery && (
           <button onClick={() => setSearchQuery('')} className="clear-search">✕</button>
+        )}
+      </div>
+
+      <div className="filters-bar">
+        <div className="filter-group">
+          <label className="filter-label">
+            <input
+              type="checkbox"
+              checked={sortAlphabetically}
+              onChange={(e) => setSortAlphabetically(e.target.checked)}
+              className="filter-checkbox"
+            />
+            <span>Sort A-Z</span>
+          </label>
+        </div>
+
+        <div className="filter-group">
+          <label className="filter-label-text">Category:</label>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">All Categories</option>
+            <option value="Toiletries">Toiletries</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Medical">Medical</option>
+            <option value="Admin">Admin</option>
+            <option value="Accessories">Accessories</option>
+          </select>
+        </div>
+
+        {(categoryFilter || sortAlphabetically) && (
+          <button
+            onClick={() => {
+              setCategoryFilter('')
+              setSortAlphabetically(false)
+            }}
+            className="clear-filters"
+          >
+            Clear Filters
+          </button>
         )}
       </div>
 
