@@ -18,7 +18,8 @@ export default function PackingList() {
   const [formData, setFormData] = useState({
     title: '',
     budget_amount: '',
-    actual_amount: ''
+    actual_amount: '',
+    category: ''
   })
 
   useEffect(() => {
@@ -43,7 +44,8 @@ export default function PackingList() {
     setFormData({
       title: '',
       budget_amount: '',
-      actual_amount: ''
+      actual_amount: '',
+      category: ''
     })
     setShowAddForm(false)
     setEditingItem(null)
@@ -90,7 +92,8 @@ export default function PackingList() {
     setFormData({
       title: item.title,
       budget_amount: item.budget_amount,
-      actual_amount: item.actual_amount
+      actual_amount: item.actual_amount,
+      category: item.category || ''
     })
     setShowAddForm(true)
     
@@ -253,6 +256,23 @@ export default function PackingList() {
               />
             </div>
 
+            <div className="form-group">
+              <label>Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                className="category-select"
+              >
+                <option value="">Select a category...</option>
+                <option value="Toiletries">Toiletries</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Medical">Medical</option>
+                <option value="Admin">Admin</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label>Budget Amount (£)</label>
@@ -323,6 +343,9 @@ export default function PackingList() {
                   <span className="checkmark"></span>
                 </label>
                 <h3 className="item-title">{item.title}</h3>
+                {item.category && (
+                  <span className="category-badge">{item.category}</span>
+                )}
               </div>
 
               <div className="item-details">

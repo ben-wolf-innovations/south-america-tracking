@@ -47,7 +47,7 @@ app.http('createPackingItem', {
   handler: requireAdmin(async (request, context) => {
     try {
       const body = await request.json()
-      const { owner, title, budget_amount, actual_amount, trip_id = 1 } = body
+      const { owner, title, budget_amount, actual_amount, category, trip_id = 1 } = body
       
       if (!owner || !title) {
         return {
@@ -67,9 +67,9 @@ app.http('createPackingItem', {
       const roundedActual = Math.round(parseFloat(actual_amount || 0) * 100) / 100
       
       const result = await run(
-        `INSERT INTO packing_items (trip_id, owner, title, budget_amount, actual_amount, completed)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [trip_id, owner, title, roundedBudget, roundedActual, 0]
+        `INSERT INTO packing_items (trip_id, owner, title, budget_amount, actual_amount, completed, category)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [trip_id, owner, title, roundedBudget, roundedActual, 0, category || null]
       )
 
       const newItem = await get('SELECT * FROM packing_items WHERE id = ?', [result.lastID])
@@ -109,7 +109,7 @@ app.http('updatePackingItem', {
         }
       }
 
-      const allowedFields = ['owner', 'title', 'budget_amount', 'actual_amount', 'completed']
+      const allowedFields = ['owner', 'title', 'budget_amount', 'actual_amount', 'completed', 'category']
       const fields = []
       const values = []
 

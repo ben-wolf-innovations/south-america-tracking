@@ -376,6 +376,19 @@
   flex: 1;
 }
 
+.category-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+  color: white;
+}
+
 .item-card.completed .item-title {
   text-decoration: line-through;
   color: var(--text-secondary);
