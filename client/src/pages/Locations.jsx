@@ -10,6 +10,7 @@ export default function Locations() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showTravelOvernightForm, setShowTravelOvernightForm] = useState(false)
   const [editingLocation, setEditingLocation] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -36,7 +37,8 @@ export default function Locations() {
     travel_duration: '',
     transport_booked: false,
     notes: '',
-    sequence: ''
+    sequence: '',
+    is_travel_overnight: false
   })
 
   useEffect(() => {
@@ -91,17 +93,48 @@ export default function Locations() {
       travel_duration: '',
       transport_booked: false,
       notes: '',
-      sequence: ''
+      sequence: '',
+      is_travel_overnight: false
     })
     setShowAddForm(false)
+    setShowTravelOvernightForm(false)
     setEditingLocation(null)
   }
 
+  const handleAddTravelOvernight = () => {
+    setFormData({
+      name: 'Travel Overnight',
+      country: '',
+      latitude: '',
+      longitude: '',
+      nights: 1,
+      accommodation_name: '',
+      accommodation_type: '',
+      accommodation_cost_planned: '',
+      accommodation_booked: false,
+      arrival_date: '',
+      departure_date: '',
+      activities: '',
+      activities_cost_planned: '',
+      food_drink_cost_planned: '',
+      travel_from: '',
+      travel_method: '',
+      travel_cost_planned: '',
+      travel_duration: '',
+      transport_booked: false,
+      notes: '',
+      sequence: '',
+      is_travel_overnight: true
+    })
+    setShowTravelOvernightForm(true)
+    setShowAddForm(false)
+  }
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }))
   }
 
@@ -219,7 +252,8 @@ export default function Locations() {
       travel_duration: location.travel_duration || '',
       transport_booked: location.transport_booked === 1,
       notes: location.notes || '',
-      sequence: ''
+      sequence: '',
+      is_travel_overnight: location.is_travel_overnight === 1
     })
     setEditingLocation(location)
     setShowAddForm(false)
@@ -322,15 +356,81 @@ export default function Locations() {
             <div className="stat-value">{totalNights}</div>
           </div>
         </div>
-        {isAdmin() && !showAddForm && (
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="add-button"
-          >
-            Add Location
-          </button>
+        {isAdmin() && !showAddForm && !showTravelOvernightForm && (
+          <div className="header-actions">
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="add-button"
+            >
+              Add Location
+            </button>
+            <button
+              onClick={handleAddTravelOvernight}
+              className="add-button secondary"
+            >
+              + Travel Overnight
+            </button>
+          </div>
         )}
       </div>
+
+      {/* Travel Overnight Form */}
+      {showTravelOvernightForm && (
+        <div className="location-form-container travel-overnight">
+          <div className="location-form-header">
+            <h3>Add Travel Overnight</h3>
+            <button onClick={resetForm} className="close-button">&times;</button>
+          </div>
+          <form onSubmit={handleAddLocation} className="location-form">
+            <div className="form-section">
+              <p className="info-text">Creates a placeholder for overnight travel (bus, train, etc.) without accommodation costs.</p>
+              <div className="form-grid">
+                <div className="form-field">
+                  <label>Nights</label>
+                  <input
+                    type="number"
+                    name="nights"
+                    value={formData.nights}
+                    onChange={handleInputChange}
+                    min="1"
+                    placeholder="1"
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Insert At Position (Optional)</label>
+                  <input
+                    type="number"
+                    name="sequence"
+                    value={formData.sequence}
+                    onChange={handleInputChange}
+                    min="1"
+                    max={locations.length + 1}
+                    placeholder={`Leave empty for end (${locations.length + 1})`}
+                  />
+                </div>
+              </div>
+              <div className="form-field full-width">
+                <label>Notes (Optional)</label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  rows="3"
+                  placeholder="e.g., Overnight bus from Lima to Cusco"
+                />
+              </div>
+            </div>
+            <div className="form-actions">
+              <button type="button" onClick={resetForm} className="cancel-button">
+                Cancel
+              </button>
+              <button type="submit" className="submit-button">
+                Add Travel Overnight
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Add Form Only */}
       {showAddForm && (
@@ -361,7 +461,7 @@ export default function Locations() {
                     name="country"
                     value={formData.country}
                     onChange={handleInputChange}
-                    required
+                    required={!formData.is_travel_overnight}
                     placeholder="e.g., Peru"
                   />
                 </div>
@@ -683,15 +783,16 @@ export default function Locations() {
           const isEditing = editingLocation?.id === location.id
           
           return (
-          <div key={location.id} id={`location-${location.id}`} className={`location-card ${isEditing ? 'editing' : ''}`}>
+          <div key={location.id} id={`location-${location.id}`} className={`location-card ${isEditing ? 'editing' : ''} ${location.is_travel_overnight === 1 ? 'travel-overnight' : ''}`}>
             <div className="location-card-header">
               <div className="location-sequence">#{location.sequence}</div>
               <div className="location-main">
                 <h3>
                   {location.name}
+                  {location.is_travel_overnight === 1 && <span className="overnight-badge">🌙 Travel</span>}
                   {location.is_current === 1 && <span className="current-badge">Current</span>}
                 </h3>
-                <p className="country">{location.country}</p>
+                <p className="country">{location.country || 'In Transit'}</p>
               </div>
               {isAdmin() && !showAddForm && (
                 <div className="location-actions">

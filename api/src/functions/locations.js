@@ -145,13 +145,21 @@ app.http('createLocation', {
         accommodation_cost_actual, accommodation_notes, accommodation_booking_ref,
         activities, activities_cost_planned, activities_cost_actual,
         food_drink_cost_planned, food_drink_cost_actual, travel_method, travel_notes,
-        travel_cost_planned, travel_cost_actual, sequence
+        travel_cost_planned, travel_cost_actual, sequence, is_travel_overnight = false
       } = body
 
-      if (!name || !country) {
+      if (!name) {
         return {
           status: 400,
-          jsonBody: { success: false, error: 'Name and country are required' }
+          jsonBody: { success: false, error: 'Name is required' }
+        }
+      }
+
+      // Country is optional for travel overnight locations
+      if (!is_travel_overnight && !country) {
+        return {
+          status: 400,
+          jsonBody: { success: false, error: 'Country is required for regular locations' }
         }
       }
 
@@ -176,17 +184,17 @@ app.http('createLocation', {
           accommodation_cost_actual, accommodation_notes, accommodation_booking_ref,
           activities, activities_cost_planned, activities_cost_actual,
           food_drink_cost_planned, food_drink_cost_actual, travel_method, travel_notes,
-          travel_cost_planned, travel_cost_actual
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          travel_cost_planned, travel_cost_actual, is_travel_overnight
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          trip_id, finalSequence, name, country, latitude || null, longitude || null, nights,
+          trip_id, finalSequence, name, country || null, latitude || null, longitude || null, nights,
           arrival_date || null, departure_date || null, accommodation_name || null,
           accommodation_cost_planned || null, accommodation_cost_actual || null,
           accommodation_notes || null, accommodation_booking_ref || null,
           activities || null, activities_cost_planned || null,
           activities_cost_actual || null, food_drink_cost_planned || null,
           food_drink_cost_actual || null, travel_method || null, travel_notes || null,
-          travel_cost_planned || null, travel_cost_actual || null
+          travel_cost_planned || null, travel_cost_actual || null, is_travel_overnight ? 1 : 0
         ]
       )
 
@@ -233,7 +241,7 @@ app.http('updateLocation', {
         'accommodation_notes', 'accommodation_booking_ref',
         'activities', 'activities_cost_planned', 'activities_cost_actual',
         'food_drink_cost_planned', 'food_drink_cost_actual', 'travel_method',
-        'travel_notes', 'travel_cost_planned', 'travel_cost_actual'
+        'travel_notes', 'travel_cost_planned', 'travel_cost_actual', 'is_travel_overnight'
       ]
 
       const fields = []

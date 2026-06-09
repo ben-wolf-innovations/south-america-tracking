@@ -54,6 +54,11 @@
   color: var(--primary-color);
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
 .add-button {
   background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
   color: white;
@@ -69,6 +74,14 @@
 .add-button:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+}
+
+.add-button.secondary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+.add-button.secondary:hover {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
 }
 
 /* Search Bar */
@@ -124,6 +137,21 @@
   margin-bottom: 32px;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-light);
+}
+
+.location-form-container.travel-overnight {
+  border-left: 4px solid #6366f1;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.02), rgba(79, 70, 229, 0.04));
+}
+
+.info-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  padding: 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius);
+  border-left: 3px solid #6366f1;
 }
 
 .location-form-header {
@@ -329,6 +357,15 @@
   transform: none;
 }
 
+.location-card.travel-overnight {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.08));
+  border-left: 4px solid #6366f1;
+}
+
+.location-card.travel-overnight:hover {
+  border-left-color: #4f46e5;
+}
+
 .location-card-header {
   display: flex;
   align-items: flex-start;
@@ -364,6 +401,15 @@
 
 .current-badge {
   background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.overnight-badge {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
