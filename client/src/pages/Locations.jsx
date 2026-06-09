@@ -104,7 +104,7 @@ export default function Locations() {
   const handleAddTravelOvernight = () => {
     setFormData({
       name: 'Travel Overnight',
-      country: '',
+      country: 'Peru',
       latitude: '',
       longitude: '',
       nights: 1,
@@ -160,6 +160,10 @@ export default function Locations() {
         }
         if (key === 'name') {
           payload[key] = value || 'Travel Overnight'
+          return
+        }
+        if (key === 'country') {
+          payload[key] = value || 'Peru'
           return
         }
         
