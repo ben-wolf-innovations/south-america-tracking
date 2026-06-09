@@ -151,19 +151,34 @@ export default function Locations() {
       // Remove empty fields and convert types
       const payload = {}
       Object.keys(formData).forEach(key => {
-        if (formData[key] !== '' && formData[key] !== null) {
+        const value = formData[key]
+        
+        // Always include these fields
+        if (key === 'is_travel_overnight') {
+          payload[key] = value ? 1 : 0
+          return
+        }
+        if (key === 'name') {
+          payload[key] = value || 'Travel Overnight'
+          return
+        }
+        
+        // Skip empty values for other fields
+        if (value !== '' && value !== null && value !== false) {
           if (['nights', 'sequence'].includes(key)) {
-            payload[key] = parseInt(formData[key]) || 0
+            payload[key] = parseInt(value) || 0
           } else if (['latitude', 'longitude', 'accommodation_cost_planned', 'activities_cost_planned', 'food_drink_cost_planned', 'travel_cost_planned', 'travel_duration'].includes(key)) {
             // Round cost values to 2 decimal places to avoid floating point precision issues
             const costFields = ['accommodation_cost_planned', 'activities_cost_planned', 'food_drink_cost_planned', 'travel_cost_planned']
             if (costFields.includes(key)) {
-              payload[key] = Math.round(parseFloat(formData[key]) * 100) / 100 || 0
+              payload[key] = Math.round(parseFloat(value) * 100) / 100 || 0
             } else {
-              payload[key] = parseFloat(formData[key]) || 0
+              payload[key] = parseFloat(value) || 0
             }
+          } else if (typeof value === 'boolean') {
+            payload[key] = value ? 1 : 0
           } else {
-            payload[key] = formData[key]
+            payload[key] = value
           }
         }
       })
@@ -386,13 +401,14 @@ export default function Locations() {
               <p className="info-text">Creates a placeholder for overnight travel (bus, train, etc.) without accommodation costs.</p>
               <div className="form-grid">
                 <div className="form-field">
-                  <label>Nights</label>
+                  <label>Nights *</label>
                   <input
                     type="number"
                     name="nights"
                     value={formData.nights}
                     onChange={handleInputChange}
                     min="1"
+                    required
                     placeholder="1"
                   />
                 </div>
