@@ -50,8 +50,6 @@ export default function Overview() {
       setError('Failed to load trip data')
     } finally {
       setLoading(false)
-    } finally {
-      setLoading(false)
     }
   }
 
