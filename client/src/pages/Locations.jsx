@@ -42,7 +42,10 @@ export default function Locations() {
   })
 
   useEffect(() => {
-    loadLocations()
+    loadLocations().catch(err => {
+      console.error('Initial load failed:', err)
+      // Error state already set by loadLocations
+    })
   }, [])
 
   const loadLocations = async () => {
@@ -58,6 +61,7 @@ export default function Locations() {
     } catch (err) {
       console.error('Failed to load locations:', err)
       setError('Failed to load locations')
+      throw err  // Re-throw so calling functions know it failed
     } finally {
       setLoading(false)
     }
@@ -189,7 +193,10 @@ export default function Locations() {
 
       const response = await api.post('/locations', payload)
       const newLocationId = response.data.data.id
+      
+      // Reload locations to show the new entry
       await loadLocations()
+      
       resetForm()
       // Scroll to the newly created location
       setTimeout(() => {
@@ -198,7 +205,8 @@ export default function Locations() {
       }, 100)
     } catch (err) {
       console.error('Failed to add location:', err)
-      alert('Failed to add location: ' + (err.response?.data?.error || err.message))
+      const errorMsg = err.response?.data?.error || err.message
+      alert(`Failed to add location: ${errorMsg}`)
     }
   }
 
@@ -236,7 +244,10 @@ export default function Locations() {
 
       const locationId = editingLocation.id
       await api.put(`/locations/${locationId}`, payload)
+      
+      // Reload locations to show the updated data
       await loadLocations()
+      
       resetForm()
       // Scroll back to the location card after saving
       setTimeout(() => {
@@ -245,7 +256,8 @@ export default function Locations() {
       }, 100)
     } catch (err) {
       console.error('Failed to update location:', err)
-      alert('Failed to update location: ' + (err.response?.data?.error || err.message))
+      const errorMsg = err.response?.data?.error || err.message
+      alert(`Failed to update location: ${errorMsg}`)
     }
   }
 
@@ -282,12 +294,16 @@ export default function Locations() {
     try {
       const scrollPos = window.scrollY
       await api.delete(`/locations/${id}`)
+      
+      // Reload locations to remove the deleted entry
       await loadLocations()
+      
       setDeleteConfirm(null)
       setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to delete location:', err)
-      alert('Failed to delete location: ' + (err.response?.data?.error || err.message))
+      const errorMsg = err.response?.data?.error || err.message
+      alert(`Failed to delete location: ${errorMsg}`)
     }
   }
 

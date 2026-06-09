@@ -55,7 +55,10 @@ export default function Map() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    loadLocations()
+    loadLocations().catch(err => {
+      console.error('Initial load failed:', err)
+      // Error state already set by loadLocations
+    })
   }, [])
 
   const loadLocations = async () => {
@@ -67,6 +70,7 @@ export default function Map() {
     } catch (err) {
       console.error('Failed to load locations:', err)
       setError('Failed to load map data')
+      throw err  // Re-throw so calling functions know it failed
     } finally {
       setLoading(false)
     }

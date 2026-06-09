@@ -45,7 +45,10 @@ export default function Costs() {
   })
 
   useEffect(() => {
-    loadData()
+    loadData().catch(err => {
+      console.error('Initial load failed:', err)
+      // Error state already set by loadData
+    })
   }, [])
 
   const loadData = async () => {
@@ -66,6 +69,7 @@ export default function Costs() {
     } catch (err) {
       console.error('Failed to load costs:', err)
       setError('Failed to load costs data')
+      throw err  // Re-throw so calling functions know it failed
     } finally {
       setLoading(false)
     }
@@ -110,12 +114,16 @@ export default function Costs() {
 
       console.log('Submitting cost payload:', payload)
       await api.post('/costs', payload)
+      
+      // Reload data to show the new cost
       await loadData()
+      
       resetForm()
       setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to add cost:', err)
-      alert('Failed to add cost: ' + (err.response?.data?.error || err.message))
+      const errorMsg = err.response?.data?.error || err.message
+      alert(`Failed to add cost: ${errorMsg}`)
     }
   }
 
@@ -138,12 +146,16 @@ export default function Costs() {
 
       console.log('Updating cost payload:', payload)
       await api.put(`/costs/${editingCost.id}`, payload)
+      
+      // Reload data to show the updated cost
       await loadData()
+      
       resetForm()
       setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to update cost:', err)
-      alert('Failed to update cost: ' + (err.response?.data?.error || err.message))
+      const errorMsg = err.response?.data?.error || err.message
+      alert(`Failed to update cost: ${errorMsg}`)
     }
   }
 
@@ -163,12 +175,16 @@ export default function Costs() {
     try {
       const scrollPos = window.scrollY
       await api.delete(`/costs/${id}`)
+      
+      // Reload data to remove the deleted cost
       await loadData()
+      
       setDeleteConfirm(null)
       setTimeout(() => window.scrollTo(0, scrollPos), 0)
     } catch (err) {
       console.error('Failed to delete cost:', err)
-      alert('Failed to delete cost: ' + (err.response?.data?.error || err.message))
+      const errorMsg = err.response?.data?.error || err.message
+      alert(`Failed to delete cost: ${errorMsg}`)
     }
   }
 
