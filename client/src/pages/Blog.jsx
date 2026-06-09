@@ -64,16 +64,24 @@ export default function Blog() {
   const loadData = async () => {
     try {
       setLoading(true)
+      console.log('Loading blog data from:', api.defaults.baseURL)
       const [postsRes, locationsRes] = await Promise.all([
         api.get('/blog'),
         api.get('/locations')
       ])
+      console.log('Blog posts response:', postsRes.data)
+      console.log('Locations response:', locationsRes.data)
       setPosts(postsRes.data.data)
       setLocations(locationsRes.data.data)
       setError(null)
     } catch (err) {
       console.error('Failed to load blog posts:', err)
-      setError('Failed to load blog posts')
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      setError(`Failed to load blog posts: ${err.response?.data?.error || err.message}`)
     } finally {
       setLoading(false)
     }

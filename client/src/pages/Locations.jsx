@@ -48,16 +48,24 @@ export default function Locations() {
   const loadLocations = async () => {
     try {
       setLoading(true)
+      console.log('Loading locations from:', api.defaults.baseURL)
       const [locationsRes, costsRes] = await Promise.all([
         api.get('/locations'),
         api.get('/costs')
       ])
+      console.log('Locations response:', locationsRes.data)
+      console.log('Costs response:', costsRes.data)
       setLocations(locationsRes.data.data)
       setCosts(costsRes.data.data)
       setError(null)
     } catch (err) {
       console.error('Failed to load locations:', err)
-      setError('Failed to load locations')
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      setError(`Failed to load locations: ${err.response?.data?.error || err.message}`)
     } finally {
       setLoading(false)
     }

@@ -20,14 +20,18 @@ export default function Overview() {
     try {
       setLoading(true)
       
+      console.log('Loading overview data from:', api.defaults.baseURL)
       // Fetch trip details
       const tripRes = await api.get('/trips/1')
+      console.log('Trip response:', tripRes.data)
       setTrip(tripRes.data.data)
       setStartDate(tripRes.data.data.start_date || '')
       
       // Fetch stats
       const locationsRes = await api.get('/locations')
       const costsRes = await api.get('/costs/summary')
+      console.log('Locations response:', locationsRes.data)
+      console.log('Costs summary response:', costsRes.data)
       
       const locations = locationsRes.data.data
       const costsSummary = costsRes.data.data
@@ -47,7 +51,12 @@ export default function Overview() {
       setError(null)
     } catch (err) {
       console.error('Failed to load overview:', err)
-      setError('Failed to load trip data')
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      setError(`Failed to load trip data: ${err.response?.data?.error || err.message}`)
     } finally {
       setLoading(false)
     }

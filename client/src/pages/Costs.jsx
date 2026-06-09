@@ -51,11 +51,15 @@ export default function Costs() {
   const loadData = async () => {
     try {
       setLoading(true)
+      console.log('Loading costs data from:', api.defaults.baseURL)
       const [costsRes, locationsRes, summaryRes] = await Promise.all([
         api.get('/costs'),
         api.get('/locations'),
         api.get('/costs/summary')
       ])
+      console.log('Costs response:', costsRes.data)
+      console.log('Locations response:', locationsRes.data)
+      console.log('Summary response:', summaryRes.data)
       setCosts(costsRes.data.data)
       setLocations(locationsRes.data.data)
       setSummary(summaryRes.data.data.by_category || [])
@@ -65,7 +69,12 @@ export default function Costs() {
       setError(null)
     } catch (err) {
       console.error('Failed to load costs:', err)
-      setError('Failed to load costs data')
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      setError(`Failed to load costs data: ${err.response?.data?.error || err.message}`)
     } finally {
       setLoading(false)
     }
