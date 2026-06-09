@@ -45,10 +45,7 @@ export default function Costs() {
   })
 
   useEffect(() => {
-    loadData().catch(err => {
-      console.error('Initial load failed:', err)
-      // Error state already set by loadData
-    })
+    loadData()
   }, [])
 
   const loadData = async () => {
@@ -69,7 +66,6 @@ export default function Costs() {
     } catch (err) {
       console.error('Failed to load costs:', err)
       setError('Failed to load costs data')
-      throw err  // Re-throw so calling functions know it failed
     } finally {
       setLoading(false)
     }

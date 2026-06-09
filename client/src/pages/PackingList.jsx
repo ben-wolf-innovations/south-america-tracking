@@ -25,10 +25,7 @@ export default function PackingList() {
   })
 
   useEffect(() => {
-    loadItems().catch(err => {
-      console.error('Initial load failed:', err)
-      // Error state already set by loadItems
-    })
+    loadItems()
   }, [activeTab])
 
   const loadItems = async () => {
@@ -40,7 +37,6 @@ export default function PackingList() {
     } catch (err) {
       console.error('Failed to load packing items:', err)
       setError('Failed to load packing list')
-      throw err  // Re-throw so calling functions know it failed
     } finally {
       setLoading(false)
     }

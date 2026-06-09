@@ -42,10 +42,7 @@ export default function Locations() {
   })
 
   useEffect(() => {
-    loadLocations().catch(err => {
-      console.error('Initial load failed:', err)
-      // Error state already set by loadLocations
-    })
+    loadLocations()
   }, [])
 
   const loadLocations = async () => {
@@ -61,7 +58,6 @@ export default function Locations() {
     } catch (err) {
       console.error('Failed to load locations:', err)
       setError('Failed to load locations')
-      throw err  // Re-throw so calling functions know it failed
     } finally {
       setLoading(false)
     }

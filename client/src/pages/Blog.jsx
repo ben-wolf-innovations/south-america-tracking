@@ -48,10 +48,7 @@ export default function Blog() {
   ]
 
   useEffect(() => {
-    loadData().catch(err => {
-      console.error('Initial load failed:', err)
-      // Error state already set by loadData
-    })
+    loadData()
   }, [])
 
   // Load comments when preview post changes
@@ -77,7 +74,6 @@ export default function Blog() {
     } catch (err) {
       console.error('Failed to load blog posts:', err)
       setError('Failed to load blog posts')
-      throw err  // Re-throw so calling functions know it failed
     } finally {
       setLoading(false)
     }
