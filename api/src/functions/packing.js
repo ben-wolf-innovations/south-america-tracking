@@ -17,7 +17,6 @@ app.http('getPackingItems', {
       const items = await all(
         `SELECT * FROM packing_items 
          WHERE trip_id = ? 
-         AND (deleted IS NULL OR deleted = 0)
          ORDER BY owner, created_at DESC`,
         [tripId]
       )
@@ -173,7 +172,7 @@ app.http('deletePackingItem', {
         }
       }
 
-      await run('UPDATE packing_items SET deleted = 1 WHERE id = ?', [id])
+      await run('DELETE FROM packing_items WHERE id = ?', [id])
 
       return {
         status: 200,

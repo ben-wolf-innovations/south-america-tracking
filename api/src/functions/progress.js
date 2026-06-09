@@ -23,7 +23,7 @@ app.http('progressCheckin', {
       }
 
       const location = await get(
-        'SELECT * FROM locations WHERE id = ? AND (deleted IS NULL OR deleted = 0)',
+        'SELECT * FROM locations WHERE id = ?',
         [location_id]
       )
 
@@ -49,7 +49,6 @@ app.http('progressCheckin', {
         `SELECT * FROM locations 
          WHERE trip_id = ? AND sequence < ? AND visited = 0
          AND (is_travel_overnight IS NULL OR is_travel_overnight = 0)
-         AND (deleted IS NULL OR deleted = 0)
          ORDER BY sequence ASC LIMIT 1`,
         [location.trip_id, location.sequence]
       )
@@ -255,8 +254,7 @@ app.http('progressGetCurrent', {
       
       const currentLocation = await get(
         `SELECT * FROM locations 
-         WHERE trip_id = ? AND is_current = 1
-         AND (deleted IS NULL OR deleted = 0)`,
+         WHERE trip_id = ? AND is_current = 1`,
         [tripId]
       )
 
@@ -303,7 +301,7 @@ app.http('progressGetStats', {
           SUM(CASE WHEN visited = 1 THEN 1 ELSE 0 END) as visited_count,
           SUM(CASE WHEN is_current = 1 THEN 1 ELSE 0 END) as current_count
          FROM locations 
-         WHERE trip_id = ? AND (deleted IS NULL OR deleted = 0)`,
+         WHERE trip_id = ?`,
         [tripId]
       )
 

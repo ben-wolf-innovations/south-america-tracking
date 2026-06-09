@@ -30,7 +30,7 @@ app.http('getLocations', {
         const costsByCategory = await all(
           `SELECT category, SUM(amount_actual) as total
            FROM costs
-           WHERE location_id = ? AND (deleted IS NULL OR deleted = 0)
+           WHERE location_id = ?
            GROUP BY category`,
           [location.id]
         )
