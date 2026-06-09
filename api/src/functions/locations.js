@@ -25,6 +25,35 @@ app.http('getLocations', {
         [tripId]
       )
       
+      // Aggregate actual costs from the costs table
+      for (const location of locations) {
+        const costsByCategory = await all(
+          `SELECT category, SUM(amount_actual) as total
+           FROM costs
+           WHERE location_id = ? AND (deleted IS NULL OR deleted = 0)
+           GROUP BY category`,
+          [location.id]
+        )
+        
+        // Map costs to location fields
+        for (const cost of costsByCategory) {
+          switch (cost.category) {
+            case 'accommodation':
+              location.accommodation_cost_actual = cost.total || 0
+              break
+            case 'travel':
+              location.travel_cost_actual = cost.total || 0
+              break
+            case 'activities':
+              location.activities_cost_actual = cost.total || 0
+              break
+            case 'food':
+              location.food_drink_cost_actual = cost.total || 0
+              break
+          }
+        }
+      }
+      
       // Calculate estimated dates based on actual progress
       if (tripStartDate && locations.length > 0) {
         // Find the last visited location
@@ -142,10 +171,10 @@ app.http('createLocation', {
       const {
         trip_id = 1, name, country, latitude, longitude, nights = 1,
         arrival_date, departure_date, accommodation_name, accommodation_cost_planned,
-        accommodation_cost_actual, accommodation_notes, accommodation_booking_ref,
+        accommodation_cost_actual, accommodation_notes, accommodation_booking_ref, accommodation_booked = false,
         activities, activities_cost_planned, activities_cost_actual,
         food_drink_cost_planned, food_drink_cost_actual, travel_method, travel_notes,
-        travel_cost_planned, travel_cost_actual, sequence, is_travel_overnight = false
+        travel_cost_planned, travel_cost_actual, transport_booked = false, sequence, is_travel_overnight = false
       } = body
 
       if (!name) {
@@ -181,20 +210,20 @@ app.http('createLocation', {
         `INSERT INTO locations (
           trip_id, sequence, name, country, latitude, longitude, nights,
           arrival_date, departure_date, accommodation_name, accommodation_cost_planned,
-          accommodation_cost_actual, accommodation_notes, accommodation_booking_ref,
+          accommodation_cost_actual, accommodation_notes, accommodation_booking_ref, accommodation_booked,
           activities, activities_cost_planned, activities_cost_actual,
           food_drink_cost_planned, food_drink_cost_actual, travel_method, travel_notes,
-          travel_cost_planned, travel_cost_actual, is_travel_overnight
+          travel_cost_planned, travel_cost_actual, transport_booked, is_travel_overnight
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           trip_id, finalSequence, name, country || null, latitude || null, longitude || null, nights,
           arrival_date || null, departure_date || null, accommodation_name || null,
           accommodation_cost_planned || null, accommodation_cost_actual || null,
-          accommodation_notes || null, accommodation_booking_ref || null,
+          accommodation_notes || null, accommodation_booking_ref || null, accommodation_booked ? 1 : 0,
           activities || null, activities_cost_planned || null,
           activities_cost_actual || null, food_drink_cost_planned || null,
           food_drink_cost_actual || null, travel_method || null, travel_notes || null,
-          travel_cost_planned || null, travel_cost_actual || null, is_travel_overnight ? 1 : 0
+          travel_cost_planned || null, travel_cost_actual || null, transport_booked ? 1 : 0, is_travel_overnight ? 1 : 0
         ]
       )
 
@@ -238,10 +267,10 @@ app.http('updateLocation', {
       const allowedFields = [
         'name', 'country', 'latitude', 'longitude', 'nights', 'arrival_date', 'departure_date',
         'accommodation_name', 'accommodation_cost_planned', 'accommodation_cost_actual',
-        'accommodation_notes', 'accommodation_booking_ref',
+        'accommodation_notes', 'accommodation_booking_ref', 'accommodation_booked',
         'activities', 'activities_cost_planned', 'activities_cost_actual',
         'food_drink_cost_planned', 'food_drink_cost_actual', 'travel_method',
-        'travel_notes', 'travel_cost_planned', 'travel_cost_actual', 'is_travel_overnight'
+        'travel_notes', 'travel_cost_planned', 'travel_cost_actual', 'transport_booked', 'is_travel_overnight'
       ]
 
       const fields = []
