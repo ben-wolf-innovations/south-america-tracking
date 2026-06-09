@@ -44,10 +44,11 @@ app.http('progressCheckin', {
         }
       }
 
-      // Check sequential check-in
+      // Check sequential check-in (exclude travel overnight locations)
       const firstUnvisitedPrevious = await get(
         `SELECT * FROM locations 
          WHERE trip_id = ? AND sequence < ? AND visited = 0
+         AND (is_travel_overnight IS NULL OR is_travel_overnight = 0)
          AND (deleted IS NULL OR deleted = 0)
          ORDER BY sequence ASC LIMIT 1`,
         [location.trip_id, location.sequence]

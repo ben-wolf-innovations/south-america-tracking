@@ -354,9 +354,9 @@ export default function Locations() {
     )
   })
 
-  // Calculate totals
+  // Calculate totals (exclude travel overnight from location count)
   const totalNights = locations.reduce((sum, loc) => sum + (parseInt(loc.nights) || 0), 0)
-  const totalLocations = locations.length
+  const totalLocations = locations.filter(loc => !loc.is_travel_overnight).length
 
   return (
     <div className="locations-page">

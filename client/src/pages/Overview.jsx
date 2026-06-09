@@ -32,12 +32,15 @@ export default function Overview() {
       const locations = locationsRes.data.data
       const costsSummary = costsRes.data.data
       
+      // Exclude travel overnight locations from location and country counts
+      const realLocations = locations.filter(l => !l.is_travel_overnight)
+      
       setStats({
-        totalLocations: locations.length,
-        visitedLocations: locations.filter(l => l.visited).length,
+        totalLocations: realLocations.length,
+        visitedLocations: realLocations.filter(l => l.visited).length,
         currentLocation: locations.find(l => l.is_current),
         totalDays: locations.reduce((sum, l) => sum + (l.nights || 0), 0),
-        countries: [...new Set(locations.map(l => l.country))].length,
+        countries: [...new Set(realLocations.map(l => l.country).filter(Boolean))].length,
         costsSummary
       })
       

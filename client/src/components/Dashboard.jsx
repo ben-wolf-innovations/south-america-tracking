@@ -38,12 +38,15 @@ export default function Dashboard() {
       const trip = tripRes.data.data
       const locations = locationsRes.data.data
 
+      // Exclude travel overnight locations from location and country counts
+      const realLocations = locations.filter(l => !l.is_travel_overnight)
+      
       setFooterStats({
         startDate: trip.start_date,
         endDate: trip.end_date,
-        totalLocations: locations.length,
+        totalLocations: realLocations.length,
         totalDays: locations.reduce((sum, l) => sum + (l.nights || 0), 0),
-        countries: [...new Set(locations.map(l => l.country))].length
+        countries: [...new Set(realLocations.map(l => l.country).filter(Boolean))].length
       })
     } catch (err) {
       console.error('Failed to load footer stats:', err)
