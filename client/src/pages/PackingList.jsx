@@ -281,7 +281,7 @@ export default function PackingList() {
         <div className="summary-card">
           <div className="summary-label">Difference</div>
           <div className={`summary-value ${totalActual > totalBudget ? 'over-budget' : 'under-budget'}`}>
-            £{Math.abs(totalActual - totalBudget).toFixed(2)}
+            £{(Math.abs(totalActualCents - totalBudgetCents) / 100).toFixed(2)}
           </div>
         </div>
       </div>
@@ -401,15 +401,15 @@ export default function PackingList() {
               <div className="item-details">
                 <div className="detail-row">
                   <span className="detail-label">Budget:</span>
-                  <span className="detail-value">£{parseFloat(item.budget_amount).toFixed(2)}</span>
+                  <span className="detail-value">£{parseFloat(item.budget_amount || 0).toFixed(2)}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-label">Actual:</span>
-                  <span className="detail-value">£{parseFloat(item.actual_amount).toFixed(2)}</span>
+                  <span className="detail-value">£{parseFloat(item.actual_amount || 0).toFixed(2)}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-label">Difference:</span>
-                  <span className={`detail-value ${parseFloat(item.actual_amount) > parseFloat(item.budget_amount) ? 'over-budget' : 'under-budget'}`}>
+                  <span className={`detail-value ${parseFloat(item.actual_amount || 0) > parseFloat(item.budget_amount || 0) ? 'over-budget' : 'under-budget'}`}>
                     £{(Math.abs(Math.round(parseFloat(item.actual_amount || 0) * 100) - Math.round(parseFloat(item.budget_amount || 0) * 100)) / 100).toFixed(2)}
                   </span>
                 </div>

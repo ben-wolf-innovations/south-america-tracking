@@ -391,11 +391,14 @@ export default function Costs() {
                   onChange={handleInputChange}
                 >
                   <option value="">General / Not location-specific</option>
-                  {locations.map(loc => (
-                    <option key={loc.id} value={loc.id}>
-                      #{loc.sequence} {loc.name}, {loc.country}
-                    </option>
-                  ))}
+                  {locations
+                    .filter(loc => !loc.is_travel_overnight)
+                    .sort((a, b) => a.sequence - b.sequence)
+                    .map(loc => (
+                      <option key={loc.id} value={loc.id}>
+                        #{loc.sequence} {loc.name}, {loc.country}
+                      </option>
+                    ))}
                 </select>
               </div>
 

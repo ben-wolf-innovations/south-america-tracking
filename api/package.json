@@ -12,10 +12,11 @@
   "dependencies": {
     "@azure/functions": "^4.0.0",
     "@azure/storage-blob": "^12.17.0",
+    "@libsql/client": "^0.17.3",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "sql.js": "^1.10.3",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "sql.js": "^1.10.3"
   },
   "devDependencies": {
     "azure-functions-core-tools": "^4.0.5455"

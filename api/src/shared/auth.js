@@ -74,22 +74,8 @@ export function requireAdmin(handler) {
 }
 
 /**
- * Convenience wrapper for authenticated routes (admin or family)
- */
-export function requireAuth(handler) {
-  return withAuth(handler, { requireAdmin: false })
-}
-
-/**
  * Get JWT secret (for token generation)
  */
 export function getJWTSecret() {
   return JWT_SECRET
-}
-
-export default {
-  withAuth,
-  requireAdmin,
-  requireAuth,
-  getJWTSecret
 }

@@ -11,7 +11,9 @@
     "install:all": "npm install && cd client && npm install && cd ../api && npm install",
     "test:db": "cd api && npm test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  },
   "keywords": [
     "travel",
     "tracking",
