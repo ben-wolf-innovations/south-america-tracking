@@ -832,7 +832,9 @@ export default function Locations() {
                   {location.is_travel_overnight === 1 && <span className="overnight-badge">🌙 Travel</span>}
                   {location.is_current === 1 && <span className="current-badge">Current</span>}
                 </h3>
-                <p className="country">{location.country || 'In Transit'}</p>
+                {location.is_travel_overnight !== 1 && (
+                  <p className="country">{location.country || 'In Transit'}</p>
+                )}
               </div>
               {isAdmin() && !showAddForm && (
                 <div className="location-actions">
@@ -927,12 +929,12 @@ export default function Locations() {
                     <span className="info-value">{location.accommodation_type}</span>
                   </div>
                 )}
-                {(location.accommodation_cost_planned || location.accommodation_cost_actual) && (
+                {(location.accommodation_cost_planned > 0 || location.accommodation_cost_actual > 0) && (
                   <div className="info-item">
                     <span className="info-label">Accom. Cost:</span>
                     <span className="info-value">
-                      {location.accommodation_cost_planned ? `£${parseFloat(location.accommodation_cost_planned).toFixed(2)}/night budgeted` : ''}
-                      {location.accommodation_cost_actual && ` (£${parseFloat(location.accommodation_cost_actual).toFixed(2)} total actual)`}
+                      {location.accommodation_cost_planned > 0 ? `£${parseFloat(location.accommodation_cost_planned).toFixed(2)}/night budgeted` : ''}
+                      {location.accommodation_cost_actual > 0 ? ` (£${parseFloat(location.accommodation_cost_actual).toFixed(2)} total actual)` : ''}
                     </span>
                   </div>
                 )}
@@ -951,12 +953,12 @@ export default function Locations() {
                     </span>
                   </div>
                 )}
-                {(location.travel_cost_planned || location.travel_cost_actual) && (
+                {(location.travel_cost_planned > 0 || location.travel_cost_actual > 0) && (
                   <div className="info-item">
                     <span className="info-label">Travel Cost:</span>
                     <span className="info-value">
-                      {location.travel_cost_planned ? `£${parseFloat(location.travel_cost_planned).toFixed(2)} budgeted` : ''}
-                      {location.travel_cost_actual && ` (£${parseFloat(location.travel_cost_actual).toFixed(2)} actual)`}
+                      {location.travel_cost_planned > 0 ? `£${parseFloat(location.travel_cost_planned).toFixed(2)} budgeted` : ''}
+                      {location.travel_cost_actual > 0 ? ` (£${parseFloat(location.travel_cost_actual).toFixed(2)} actual)` : ''}
                     </span>
                   </div>
                 )}
@@ -967,12 +969,12 @@ export default function Locations() {
                   </div>
                 )}
               </div>
-              {(location.food_drink_cost_planned || location.food_drink_cost_actual) && (
+              {(location.food_drink_cost_planned > 0 || location.food_drink_cost_actual > 0) && (
                 <div className="info-item">
                   <span className="info-label">Food & Drink Budget:</span>
                   <span className="info-value">
-                    {location.food_drink_cost_planned ? `£${parseFloat(location.food_drink_cost_planned).toFixed(2)}/day budgeted` : ''}
-                    {location.food_drink_cost_actual && ` (£${parseFloat(location.food_drink_cost_actual).toFixed(2)} actual)`}
+                    {location.food_drink_cost_planned > 0 ? `£${parseFloat(location.food_drink_cost_planned).toFixed(2)}/day budgeted` : ''}
+                    {location.food_drink_cost_actual > 0 ? ` (£${parseFloat(location.food_drink_cost_actual).toFixed(2)} actual)` : ''}
                   </span>
                 </div>
               )}
@@ -994,12 +996,12 @@ export default function Locations() {
                   <strong>Activities:</strong> {location.activities}
                 </div>
               )}
-              {(location.activities_cost_planned || location.activities_cost_actual) && (
+              {(location.activities_cost_planned > 0 || location.activities_cost_actual > 0) && (
                 <div className="info-item">
                   <span className="info-label">Activities Budget:</span>
                   <span className="info-value">
-                    {location.activities_cost_planned ? `£${parseFloat(location.activities_cost_planned).toFixed(2)} budgeted` : ''}
-                    {location.activities_cost_actual && ` (£${parseFloat(location.activities_cost_actual).toFixed(2)} actual)`}
+                    {location.activities_cost_planned > 0 ? `£${parseFloat(location.activities_cost_planned).toFixed(2)} budgeted` : ''}
+                    {location.activities_cost_actual > 0 ? ` (£${parseFloat(location.activities_cost_actual).toFixed(2)} actual)` : ''}
                   </span>
                 </div>
               )}
