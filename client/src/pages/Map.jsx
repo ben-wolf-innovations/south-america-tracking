@@ -149,39 +149,59 @@ export default function Map() {
   // Filter locations with valid coordinates
   const validLocations = locations.filter(loc => loc.latitude && loc.longitude)
 
+  // The next location to be visited: lowest sequence among locations that
+  // aren't visited yet and aren't the current location.
+  const nextVisitedLocation = [...validLocations]
+    .filter(l => l.visited !== 1 && l.is_current !== 1)
+    .sort((a, b) => a.sequence - b.sequence)[0]
+
+  // Pin layering priority for a location within its same-coordinate group:
+  // 1. Current location is always on top.
+  // 2. If nobody at the pin has been visited, lowest sequence is on top.
+  // 3. Otherwise, if the next-to-be-visited location is at this pin, it's on top.
+  // 4. Otherwise, the most recently visited location (max sequence, visited=1) is on top.
+  const getPinPriority = (loc, group) => {
+    if (loc.is_current === 1) return 1000000
+
+    const anyVisitedInGroup = group.some(l => l.visited === 1)
+    if (!anyVisitedInGroup) {
+      return 100000 - loc.sequence
+    }
+
+    if (nextVisitedLocation && loc.id === nextVisitedLocation.id) {
+      return 90000
+    }
+
+    if (loc.visited === 1) {
+      return 1000 + loc.sequence
+    }
+
+    return loc.sequence
+  }
+
   // Add small offsets to markers at the same coordinates so they're all clickable
   // Also ensure the current/most recent location appears on top (rendered last)
   const locationsWithOffsets = validLocations.map((loc, index, arr) => {
     // Find all locations at the same coordinates
-    const sameCoordLocations = arr.filter(l => 
-      Math.abs(l.latitude - loc.latitude) < 0.0001 && 
+    const sameCoordLocations = arr.filter(l =>
+      Math.abs(l.latitude - loc.latitude) < 0.0001 &&
       Math.abs(l.longitude - loc.longitude) < 0.0001
     )
-    
+
     if (sameCoordLocations.length > 1) {
-      // Sort by priority: current location > visited (by sequence desc) > planned (by sequence)
-      // This ensures the most relevant location gets the highest render order
-      const sortedLocations = [...sameCoordLocations].sort((a, b) => {
-        // Current location has lowest priority number (renders last = on top)
-        if (a.is_current === 1 && b.is_current !== 1) return -1
-        if (b.is_current === 1 && a.is_current !== 1) return 1
-        
-        // Among visited or planned, higher sequence = more recent = lower priority number
-        if (a.visited === 1 && b.visited === 1) return b.sequence - a.sequence
-        if (a.visited === 1 && b.visited !== 1) return -1
-        if (b.visited === 1 && a.visited !== 1) return 1
-        
-        // For planned locations, higher sequence is next in journey
-        return b.sequence - a.sequence
-      })
-      
+      // Sort by pin layering priority so the most relevant location is placed
+      // last (which keeps it visually consistent with the render order below)
+      const sortedLocations = [...sameCoordLocations].sort((a, b) =>
+        getPinPriority(a, sameCoordLocations) - getPinPriority(b, sameCoordLocations)
+      )
+
       // Find this location's index in the sorted array (for offset positioning)
       const duplicateIndex = sortedLocations.findIndex(l => l.id === loc.id)
-      
+
       // Offset in a circle pattern (0.002 degrees ≈ 200m)
       const offsetRadius = 0.002
       const angle = (duplicateIndex / sortedLocations.length) * 2 * Math.PI
-      
+
       return {
         ...loc,
         displayLatitude: loc.latitude + Math.cos(angle) * offsetRadius,
@@ -189,7 +209,7 @@ export default function Map() {
         renderOrder: duplicateIndex // Store for sorting later
       }
     }
-    
+
     return {
       ...loc,
       displayLatitude: loc.latitude,
@@ -198,34 +218,21 @@ export default function Map() {
     }
   })
 
-  // Sort by render order so current/most recent locations render last (appear on top)
-  // Render order: planned (oldest first) -> visited (oldest first) -> current
+  // Sort by render order so the highest-priority pin in each group renders
+  // last (appears on top), per the rules in getPinPriority above.
   const sortedLocations = [...locationsWithOffsets].sort((a, b) => {
     // Group by coordinates first
-    const sameCoords = Math.abs(a.latitude - b.latitude) < 0.0001 && 
+    const sameCoords = Math.abs(a.latitude - b.latitude) < 0.0001 &&
                        Math.abs(a.longitude - b.longitude) < 0.0001
-    
+
     if (sameCoords) {
-      const aIsCurrent = a.is_current === 1
-      const bIsCurrent = b.is_current === 1
-      const aIsVisited = a.visited === 1
-      const bIsVisited = b.visited === 1
-      
-      // Current location always renders last (on top)
-      if (aIsCurrent && !bIsCurrent) return 1
-      if (bIsCurrent && !aIsCurrent) return -1
-      
-      // Among visited, higher sequence renders last (most recent on top)
-      if (aIsVisited && bIsVisited) return a.sequence - b.sequence
-      
-      // Visited renders after planned (visited on top of planned)
-      if (aIsVisited && !bIsVisited) return 1
-      if (bIsVisited && !aIsVisited) return -1
-      
-      // Among planned, lower sequence renders last (next location on top)
-      return b.sequence - a.sequence
+      const group = locationsWithOffsets.filter(l =>
+        Math.abs(l.latitude - a.latitude) < 0.0001 &&
+        Math.abs(l.longitude - a.longitude) < 0.0001
+      )
+      return getPinPriority(a, group) - getPinPriority(b, group)
     }
-    
+
     // Different coordinates: maintain original order
     return 0
   })
