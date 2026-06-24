@@ -23,6 +23,7 @@
   },
   "mimeTypes": {
     ".json": "application/json",
+    ".webmanifest": "application/manifest+json",
     ".js": "text/javascript",
     ".css": "text/css"
   }

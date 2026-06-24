@@ -1,0 +1,13 @@
+{
+  "name": "South America Trip Tracker",
+  "short_name": "SA Trip",
+  "icons": [
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any" }
+  ],
+  "theme_color": "#0e7c5a",
+  "background_color": "#f4ede0",
+  "display": "standalone",
+  "start_url": "/"
+}

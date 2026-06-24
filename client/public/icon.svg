@@ -1,0 +1,54 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#0e7c5a"/>
+  <circle cx="256" cy="256" r="190" fill="#f4ede0"/>
+
+  <!-- Alpaca body + long neck -->
+  <g>
+    <!-- body -->
+    <path d="M196 392 q-6 -70 14 -116 q18 -40 76 -40 q56 0 70 40 q22 48 16 116 z" fill="#ffffff" stroke="#3a2c20" stroke-width="8" stroke-linejoin="round"/>
+    <!-- long neck -->
+    <path d="M242 280 q-16 -84 8 -150 q14 -38 44 -38 q34 0 42 40 q14 70 -4 152 z" fill="#ffffff" stroke="#3a2c20" stroke-width="8" stroke-linejoin="round"/>
+    <!-- head -->
+    <ellipse cx="288" cy="138" rx="52" ry="50" fill="#ffffff" stroke="#3a2c20" stroke-width="8"/>
+    <!-- ears -->
+    <path d="M250 96 q-10 -32 8 -42 q14 16 12 38 z" fill="#ffffff" stroke="#3a2c20" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M326 96 q10 -32 -8 -42 q-14 16 -12 38 z" fill="#ffffff" stroke="#3a2c20" stroke-width="7" stroke-linejoin="round"/>
+    <!-- snout / nose -->
+    <ellipse cx="294" cy="168" rx="22" ry="15" fill="#f6d8c4"/>
+    <path d="M288 166 q6 8 12 0" fill="none" stroke="#3a2c20" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Aviator sunglasses -->
+  <g stroke="#3a2c20" stroke-width="7" stroke-linejoin="round">
+    <path d="M256 132 q-4 28 18 30 q22 2 22 -24 q0 -8 -20 -8 q-16 0 -20 2 z" fill="#1c1c20"/>
+    <path d="M300 130 q0 32 22 30 q22 -2 18 -30 q-4 -4 -20 -4 q-16 0 -20 4 z" fill="#1c1c20"/>
+    <line x1="294" y1="128" x2="302" y2="128"/>
+    <line x1="248" y1="124" x2="256" y2="130" stroke-linecap="round"/>
+  </g>
+  <!-- lens glints -->
+  <circle cx="266" cy="142" r="5" fill="#5fd0ff" opacity="0.8"/>
+  <circle cx="312" cy="140" r="5" fill="#5fd0ff" opacity="0.8"/>
+
+  <!-- Coloured bobbles around base of neck -->
+  <g stroke="#3a2c20" stroke-width="4">
+    <circle cx="228" cy="286" r="13" fill="#d8262c"/>
+    <circle cx="258" cy="298" r="13" fill="#f2c029"/>
+    <circle cx="290" cy="298" r="13" fill="#1f6fb2"/>
+    <circle cx="320" cy="286" r="13" fill="#e07b1a"/>
+  </g>
+
+  <!-- Chullo hat (Andean knitted hat with earflaps + pom-pom) -->
+  <g stroke="#3a2c20" stroke-width="6" stroke-linejoin="round">
+    <circle cx="288" cy="34" r="15" fill="#d8262c"/>
+    <path d="M232 92 q56 -54 112 0 z" fill="#d8262c"/>
+    <path d="M240 80 q48 -42 96 0" fill="#f2c029" stroke="none"/>
+    <path d="M250 66 q38 -30 76 0" fill="#1f6fb2" stroke="none"/>
+    <path d="M260 54 q28 -22 56 0" fill="#f4ede0" stroke="none"/>
+    <path d="M232 92 q56 -64 112 0" fill="none"/>
+    <path d="M236 92 q-14 30 -6 58 l16 -6 q-4 -28 6 -50 z" fill="#1f6fb2"/>
+    <path d="M340 92 q14 30 6 58 l-16 -6 q4 -28 -6 -50 z" fill="#1f6fb2"/>
+    <line x1="234" y1="152" x2="234" y2="174" stroke="#f2c029"/>
+    <line x1="342" y1="152" x2="342" y2="174" stroke="#f2c029"/>
+  </g>
+</svg>
