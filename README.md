@@ -22,10 +22,10 @@ Interactive Leaflet map showing all planned locations as markers with a route po
 Full CRUD for trip stops. Each location stores accommodation, food, activities and travel costs (planned and actual), plus nights, dates, and booking status. Locations are sequence-ordered and support drag-to-reorder and insertion at any point in the sequence.
 
 **Costs**
-Log individual expenses against a location and category. The summary view shows planned vs actual spend by category and by country.
+Log individual expenses against a location and category. Filter by location/category and sort by cost or date. The summary view shows planned vs actual spend by category and by country (the Other category is actual-only, as it has no budget).
 
 **Packing List**
-Track items to pack with a budget and actual cost per item. Filtered by owner (Ben, Elspeth, Both) and category. Shows totals and difference.
+Track items to pack with a budget and actual cost per item. Filtered by owner (Ben, Elspeth, Both), category, and a "Still to get" toggle for unchecked items. Shows totals and difference.
 
 **Blog**
 Travel journal with publish/draft toggle. Admin can write and publish posts; family sees published posts only.
