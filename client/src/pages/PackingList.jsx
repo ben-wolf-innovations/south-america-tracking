@@ -14,6 +14,7 @@ export default function PackingList() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortAlphabetically, setSortAlphabetically] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState('')
+  const [stillToGet, setStillToGet] = useState(false)
   const formRef = useRef(null)
 
   // Form state
@@ -162,6 +163,7 @@ export default function PackingList() {
     if (item.owner !== activeTab) return false
     if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
     if (categoryFilter && item.category !== categoryFilter) return false
+    if (stillToGet && item.completed) return false
     return true
   })
 
@@ -236,6 +238,18 @@ export default function PackingList() {
         </div>
 
         <div className="filter-group">
+          <label className="filter-label">
+            <input
+              type="checkbox"
+              checked={stillToGet}
+              onChange={(e) => setStillToGet(e.target.checked)}
+              className="filter-checkbox"
+            />
+            <span>Still to get</span>
+          </label>
+        </div>
+
+        <div className="filter-group">
           <label className="filter-label-text">Category:</label>
           <select
             value={categoryFilter}
@@ -251,11 +265,12 @@ export default function PackingList() {
           </select>
         </div>
 
-        {(categoryFilter || sortAlphabetically) && (
+        {(categoryFilter || sortAlphabetically || stillToGet) && (
           <button
             onClick={() => {
               setCategoryFilter('')
               setSortAlphabetically(false)
+              setStillToGet(false)
             }}
             className="clear-filters"
           >
