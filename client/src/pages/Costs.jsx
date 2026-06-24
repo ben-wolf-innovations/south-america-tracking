@@ -317,10 +317,12 @@ export default function Costs() {
                 <div key={item.category} className="category-summary-card">
                   <div className="category-name">{getCategoryLabel(item.category)}</div>
                   <div className="category-amounts">
-                    <div className="amount-row">
-                      <span>Budgeted:</span>
-                      <span className="planned-amount">£{parseFloat(item.total_planned || 0).toFixed(2)}</span>
-                    </div>
+                    {item.category !== 'other' && (
+                      <div className="amount-row">
+                        <span>Budgeted:</span>
+                        <span className="planned-amount">£{parseFloat(item.total_planned || 0).toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="amount-row">
                       <span>Actual Spent:</span>
                       <span className="actual-amount">£{actual.toFixed(2)}</span>
@@ -362,7 +364,9 @@ export default function Costs() {
                         <div key={`${countryItem.country}-${category.value}`} className="country-category-row">
                           <div className="country-category-name">{category.label}</div>
                           <div className="country-category-amounts">
-                            <span className="country-budgeted">B: £{parseFloat(categoryData.budgeted || 0).toFixed(2)}</span>
+                            {category.value !== 'other' && (
+                              <span className="country-budgeted">B: £{parseFloat(categoryData.budgeted || 0).toFixed(2)}</span>
+                            )}
                             <span className="country-actual">A: £{parseFloat(categoryData.actual || 0).toFixed(2)}</span>
                           </div>
                         </div>

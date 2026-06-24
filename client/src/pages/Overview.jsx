@@ -278,10 +278,12 @@ export default function Overview() {
                 <div key={item.value} className="overview-category-card">
                   <div className="overview-category-name">{item.label}</div>
                   <div className="overview-category-amounts">
-                    <div className="overview-amount-row">
-                      <span>Budgeted:</span>
-                      <span className="planned-amount">£{item.total_planned.toFixed(2)}</span>
-                    </div>
+                    {item.value !== 'other' && (
+                      <div className="overview-amount-row">
+                        <span>Budgeted:</span>
+                        <span className="planned-amount">£{item.total_planned.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="overview-amount-row">
                       <span>Actual Spent:</span>
                       <span className="actual-amount">£{item.total_actual.toFixed(2)}</span>
@@ -322,7 +324,9 @@ export default function Overview() {
                           <div key={cat.value} className="overview-country-category-row">
                             <div className="overview-country-category-name">{cat.label}</div>
                             <div className="overview-country-category-amounts">
-                              <span className="country-budgeted">B: £{parseFloat(d.budgeted || 0).toFixed(2)}</span>
+                              {cat.value !== 'other' && (
+                                <span className="country-budgeted">B: £{parseFloat(d.budgeted || 0).toFixed(2)}</span>
+                              )}
                               <span className="country-actual">A: £{parseFloat(d.actual || 0).toFixed(2)}</span>
                             </div>
                           </div>
