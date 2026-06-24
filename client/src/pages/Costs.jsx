@@ -35,6 +35,9 @@ export default function Costs() {
   const [filterLocation, setFilterLocation] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
 
+  // Sort
+  const [sortBy, setSortBy] = useState('')
+
   // Form state
   const [formData, setFormData] = useState({
     location_id: '',
@@ -198,6 +201,27 @@ export default function Costs() {
     if (filterLocation && cost.location_id !== parseInt(filterLocation)) return false
     if (filterCategory && cost.category !== filterCategory) return false
     return true
+  })
+
+  // Sort costs (does not mutate filteredCosts). Null/empty dates always sort last.
+  const sortedCosts = [...filteredCosts].sort((a, b) => {
+    switch (sortBy) {
+      case 'cost-desc':
+        return parseFloat(b.amount_actual || 0) - parseFloat(a.amount_actual || 0)
+      case 'cost-asc':
+        return parseFloat(a.amount_actual || 0) - parseFloat(b.amount_actual || 0)
+      case 'date-desc':
+      case 'date-asc': {
+        const aTime = a.date ? new Date(a.date).getTime() : null
+        const bTime = b.date ? new Date(b.date).getTime() : null
+        if (aTime === null && bTime === null) return 0
+        if (aTime === null) return 1   // a has no date, push it after b
+        if (bTime === null) return -1  // b has no date, push it after a
+        return sortBy === 'date-desc' ? bTime - aTime : aTime - bTime
+      }
+      default:
+        return 0
+    }
   })
 
   // Calculate totals (using integer cents to avoid floating point errors)
@@ -482,11 +506,26 @@ export default function Costs() {
             </select>
           </div>
 
-          {(filterLocation || filterCategory) && (
+          <div className="filter-field">
+            <label>Sort by:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="">Default</option>
+              <option value="cost-desc">Cost: high to low</option>
+              <option value="cost-asc">Cost: low to high</option>
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+            </select>
+          </div>
+
+          {(filterLocation || filterCategory || sortBy) && (
             <button
               onClick={() => {
                 setFilterLocation('')
                 setFilterCategory('')
+                setSortBy('')
               }}
               className="clear-filters-button"
             >
@@ -514,7 +553,7 @@ export default function Costs() {
             )}
           </div>
         ) : (
-          filteredCosts.map((cost) => {
+          sortedCosts.map((cost) => {
             const location = locations.find(loc => loc.id === cost.location_id)
             const actual = parseFloat(cost.amount_actual || 0)
 
