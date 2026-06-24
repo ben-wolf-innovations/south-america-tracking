@@ -386,6 +386,13 @@
   gap: 16px;
 }
 
+/* Cap at 4 cards per row on wide screens (was packing 5) */
+@media (min-width: 1024px) {
+  .overview-country-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .overview-country-card {
   background: white;
   border-radius: var(--radius-md);
@@ -420,17 +427,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   font-size: 13px;
 }
 
 .overview-country-category-name {
   color: var(--text-secondary);
   font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .overview-country-category-amounts {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .overview-country-total-row {
