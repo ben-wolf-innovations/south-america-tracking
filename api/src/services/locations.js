@@ -99,7 +99,8 @@ export async function createLocation(body) {
     accommodation_cost_actual, accommodation_notes, accommodation_booking_ref, accommodation_booked = false,
     activities, activities_cost_planned, activities_cost_actual,
     food_drink_cost_planned, food_drink_cost_actual, travel_method,
-    travel_cost_planned, travel_cost_actual, transport_booked = false, sequence, is_travel_overnight = false
+    travel_cost_planned, travel_cost_actual, transport_booked = false, sequence, is_travel_overnight = false,
+    notes, travel_duration
   } = body
 
   if (!name) throw new ValidationError('Name is required')
@@ -118,8 +119,8 @@ export async function createLocation(body) {
     accommodation_cost_actual, accommodation_notes, accommodation_booking_ref, accommodation_booked,
     activities, activities_cost_planned, activities_cost_actual,
     food_drink_cost_planned, food_drink_cost_actual, travel_method,
-    travel_cost_planned, travel_cost_actual, transport_booked, is_travel_overnight
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    travel_cost_planned, travel_cost_actual, transport_booked, is_travel_overnight, notes, travel_duration
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
   const insertParams = [
     trip_id, finalSequence, name, country || null, latitude || null, longitude || null, nights,
@@ -129,7 +130,8 @@ export async function createLocation(body) {
     activities || null, activities_cost_planned || null,
     activities_cost_actual || null, food_drink_cost_planned || null,
     food_drink_cost_actual || null, travel_method || null,
-    travel_cost_planned || null, travel_cost_actual || null, transport_booked ? 1 : 0, is_travel_overnight ? 1 : 0
+    travel_cost_planned || null, travel_cost_actual || null, transport_booked ? 1 : 0, is_travel_overnight ? 1 : 0,
+    notes || null, travel_duration || null
   ]
 
   if (sequence) {
@@ -154,7 +156,8 @@ export async function updateLocation(id, updates) {
     'accommodation_notes', 'accommodation_booking_ref', 'accommodation_booked',
     'activities', 'activities_cost_planned', 'activities_cost_actual',
     'food_drink_cost_planned', 'food_drink_cost_actual', 'travel_method',
-    'travel_cost_planned', 'travel_cost_actual', 'transport_booked', 'is_travel_overnight'
+    'travel_cost_planned', 'travel_cost_actual', 'transport_booked', 'is_travel_overnight',
+    'notes', 'travel_duration'
   ]
 
   const fields = []

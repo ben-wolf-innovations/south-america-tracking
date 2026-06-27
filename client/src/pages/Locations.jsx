@@ -23,7 +23,6 @@ export default function Locations() {
     longitude: '',
     nights: 0,
     accommodation_name: '',
-    accommodation_type: '',
     accommodation_cost_planned: '',
     accommodation_booked: false,
     arrival_date: '',
@@ -31,7 +30,6 @@ export default function Locations() {
     activities: '',
     activities_cost_planned: '',
     food_drink_cost_planned: '',
-    travel_from: '',
     travel_method: '',
     travel_cost_planned: '',
     travel_duration: '',
@@ -87,7 +85,6 @@ export default function Locations() {
       longitude: '',
       nights: 0,
       accommodation_name: '',
-      accommodation_type: '',
       accommodation_cost_planned: '',
       accommodation_booked: false,
       arrival_date: '',
@@ -95,7 +92,6 @@ export default function Locations() {
       activities: '',
       activities_cost_planned: '',
       food_drink_cost_planned: '',
-      travel_from: '',
       travel_method: '',
       travel_cost_planned: '',
       travel_duration: '',
@@ -117,7 +113,6 @@ export default function Locations() {
       longitude: '',
       nights: 1,
       accommodation_name: '',
-      accommodation_type: '',
       accommodation_cost_planned: '',
       accommodation_booked: false,
       arrival_date: '',
@@ -125,7 +120,6 @@ export default function Locations() {
       activities: '',
       activities_cost_planned: '',
       food_drink_cost_planned: '',
-      travel_from: '',
       travel_method: '',
       travel_cost_planned: '',
       travel_duration: '',
@@ -218,7 +212,7 @@ export default function Locations() {
     e.preventDefault()
     try {
       const payload = {}
-      const textFields = ['notes', 'activities', 'accommodation_notes', 'travel_notes', 'accommodation_name', 'accommodation_type', 'travel_from', 'travel_method']
+      const textFields = ['notes', 'activities', 'accommodation_notes', 'travel_notes', 'accommodation_name', 'travel_method']
       Object.keys(formData).forEach(key => {
         // Always include date fields (even if empty, send as null to clear them)
         if (key === 'arrival_date' || key === 'departure_date') {
@@ -273,7 +267,6 @@ export default function Locations() {
       longitude: location.longitude || '',
       nights: location.nights || 0,
       accommodation_name: location.accommodation_name || '',
-      accommodation_type: location.accommodation_type || '',
       accommodation_cost_planned: location.accommodation_cost_planned || '',
       accommodation_booked: location.accommodation_booked === 1,
       arrival_date: location.arrival_date || '',
@@ -281,7 +274,6 @@ export default function Locations() {
       activities: location.activities || '',
       activities_cost_planned: location.activities_cost_planned || '',
       food_drink_cost_planned: location.food_drink_cost_planned || '',
-      travel_from: location.travel_from || '',
       travel_method: location.travel_method || '',
       travel_cost_planned: location.travel_cost_planned || '',
       travel_duration: location.travel_duration || '',
@@ -367,7 +359,6 @@ export default function Locations() {
       location.name?.toLowerCase().includes(query) ||
       location.country?.toLowerCase().includes(query) ||
       location.accommodation_name?.toLowerCase().includes(query) ||
-      location.accommodation_type?.toLowerCase().includes(query) ||
       location.activities?.toLowerCase().includes(query) ||
       location.notes?.toLowerCase().includes(query) ||
       location.travel_method?.toLowerCase().includes(query)
@@ -635,16 +626,6 @@ export default function Locations() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Type</label>
-                  <input
-                    type="text"
-                    name="accommodation_type"
-                    value={formData.accommodation_type}
-                    onChange={handleInputChange}
-                    placeholder="Hostel/Hotel/Airbnb"
-                  />
-                </div>
-                <div className="form-field">
                   <label>Budget (£ per night)</label>
                   <input
                     type="number"
@@ -672,16 +653,6 @@ export default function Locations() {
             <div className="form-section">
               <h4>Travel Details</h4>
               <div className="form-grid">
-                <div className="form-field">
-                  <label>From</label>
-                  <input
-                    type="text"
-                    name="travel_from"
-                    value={formData.travel_from}
-                    onChange={handleInputChange}
-                    placeholder="Previous location"
-                  />
-                </div>
                 <div className="form-field">
                   <label>Method</label>
                   <input
@@ -923,12 +894,6 @@ export default function Locations() {
                     </span>
                   </div>
                 )}
-                {location.accommodation_type && (
-                  <div className="info-item">
-                    <span className="info-label">Type:</span>
-                    <span className="info-value">{location.accommodation_type}</span>
-                  </div>
-                )}
                 {(location.accommodation_cost_planned > 0 || location.accommodation_cost_actual > 0) && (
                   <div className="info-item">
                     <span className="info-label">Accom. Cost:</span>
@@ -936,12 +901,6 @@ export default function Locations() {
                       {location.accommodation_cost_planned > 0 ? `£${parseFloat(location.accommodation_cost_planned).toFixed(2)}/night budgeted` : ''}
                       {location.accommodation_cost_actual > 0 ? ` (£${parseFloat(location.accommodation_cost_actual).toFixed(2)} total actual)` : ''}
                     </span>
-                  </div>
-                )}
-                {location.travel_from && (
-                  <div className="info-item">
-                    <span className="info-label">From:</span>
-                    <span className="info-value">{location.travel_from}</span>
                   </div>
                 )}
                 {location.travel_method && (
@@ -1138,16 +1097,6 @@ export default function Locations() {
                       />
                     </div>
                     <div className="form-field">
-                      <label>Type</label>
-                      <input
-                        type="text"
-                        name="accommodation_type"
-                        value={formData.accommodation_type}
-                        onChange={handleInputChange}
-                        placeholder="Hostel/Hotel/Airbnb"
-                      />
-                    </div>
-                    <div className="form-field">
                       <label>Budget (£ per night)</label>
                       <input
                         type="number"
@@ -1187,16 +1136,6 @@ export default function Locations() {
                 <div className="form-section">
                   <h4>Travel Details</h4>
                   <div className="form-grid">
-                    <div className="form-field">
-                      <label>From</label>
-                      <input
-                        type="text"
-                        name="travel_from"
-                        value={formData.travel_from}
-                        onChange={handleInputChange}
-                        placeholder="Previous location"
-                      />
-                    </div>
                     <div className="form-field">
                       <label>Method</label>
                       <input
