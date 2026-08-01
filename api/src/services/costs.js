@@ -171,10 +171,8 @@ export async function getCostsSummary(tripId) {
   )
 
   const locationActuals = await get(
-    `SELECT
-      SUM(COALESCE(accommodation_cost_actual, 0)) + SUM(COALESCE(activities_cost_actual, 0)) +
-      SUM(COALESCE(food_drink_cost_actual, 0)) + SUM(COALESCE(travel_cost_actual, 0)) as total_actual
-     FROM locations
+    `SELECT SUM(amount_actual) as total_actual
+     FROM costs
      WHERE trip_id = ?`,
     [tripId]
   )
