@@ -342,12 +342,17 @@ export default function Costs() {
           <h3>Actual Spending by Country</h3>
           <div className="country-grid">
             {countrySummary.map((countryItem) => {
-              const countryTotals = CATEGORIES.reduce((acc, category) => {
+              const countryTotalsCents = CATEGORIES.reduce((acc, category) => {
                 const categoryData = countryItem.categories?.[category.value] || { budgeted: 0, actual: 0 }
-                acc.budgeted += parseFloat(categoryData.budgeted || 0)
-                acc.actual += parseFloat(categoryData.actual || 0)
+                acc.budgetedCents += Math.round(parseFloat(categoryData.budgeted || 0) * 100)
+                acc.actualCents += Math.round(parseFloat(categoryData.actual || 0) * 100)
                 return acc
-              }, { budgeted: 0, actual: 0 })
+              }, { budgetedCents: 0, actualCents: 0 })
+
+              const countryTotals = {
+                budgeted: countryTotalsCents.budgetedCents / 100,
+                actual: countryTotalsCents.actualCents / 100
+              }
 
               return (
                 <div key={countryItem.country} className="country-summary-card">
