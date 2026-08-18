@@ -1,5 +1,6 @@
 import { get, all, run, transaction } from '../shared/turso.js'
 import { ValidationError } from '../shared/errors.js'
+import { estimateLocationDates } from '../shared/estimateDates.js'
 
 export async function getLocations(tripId) {
   const trip = await get('SELECT * FROM trips WHERE id = ?', [tripId])
@@ -34,55 +35,7 @@ export async function getLocations(tripId) {
   }
 
   if (tripStartDate && locations.length > 0) {
-    const lastVisited = locations
-      .filter(loc => loc.visited === 1)
-      .sort((a, b) => b.sequence - a.sequence)[0]
-
-    let baseDate = null
-    let startFromSequence = 1
-
-    if (lastVisited) {
-      if (lastVisited.departure_date) {
-        baseDate = new Date(lastVisited.departure_date)
-      } else if (lastVisited.arrival_date) {
-        baseDate = new Date(lastVisited.arrival_date)
-        baseDate.setDate(baseDate.getDate() + (lastVisited.nights || 0))
-      } else {
-        baseDate = new Date(tripStartDate)
-      }
-      startFromSequence = lastVisited.sequence + 1
-    } else {
-      baseDate = new Date(tripStartDate)
-    }
-
-    let cumulativeDays = 0
-
-    locations.forEach(location => {
-      if (location.sequence < startFromSequence) {
-        const tempDate = new Date(tripStartDate)
-        tempDate.setDate(tempDate.getDate() + cumulativeDays)
-        location.estimated_arrival_date = tempDate.toISOString().split('T')[0]
-
-        const tempDeparture = new Date(tempDate)
-        tempDeparture.setDate(tempDeparture.getDate() + (location.nights || 0))
-        location.estimated_departure_date = tempDeparture.toISOString().split('T')[0]
-      } else {
-        const daysSinceBase = locations
-          .filter(loc => loc.sequence >= startFromSequence && loc.sequence < location.sequence)
-          .reduce((sum, loc) => sum + (loc.nights || 0), 0)
-
-        const estimatedArrival = new Date(baseDate)
-        estimatedArrival.setDate(estimatedArrival.getDate() + daysSinceBase)
-
-        const estimatedDeparture = new Date(estimatedArrival)
-        estimatedDeparture.setDate(estimatedDeparture.getDate() + (location.nights || 0))
-
-        location.estimated_arrival_date = estimatedArrival.toISOString().split('T')[0]
-        location.estimated_departure_date = estimatedDeparture.toISOString().split('T')[0]
-      }
-
-      cumulativeDays += (location.nights || 0)
-    })
+    estimateLocationDates(locations, tripStartDate)
   }
 
   return locations

@@ -1,5 +1,6 @@
 import { get, all, run, transaction } from '../shared/turso.js'
 import { ValidationError } from '../shared/errors.js'
+import { estimateLocationDates } from '../shared/estimateDates.js'
 
 export async function checkIn(locationId) {
   if (!locationId) throw new ValidationError('Location ID is required')
@@ -33,46 +34,16 @@ export async function checkIn(locationId) {
     const tripStartDate = trip?.start_date ? new Date(trip.start_date) : null
 
     if (tripStartDate) {
-      const lastVisited = await get(
-        `SELECT * FROM locations
-         WHERE trip_id = ? AND sequence < ? AND visited = 1
-         ORDER BY sequence DESC LIMIT 1`,
-        [location.trip_id, location.sequence]
+      const allLocations = await all(
+        `SELECT * FROM locations WHERE trip_id = ? ORDER BY sequence ASC`,
+        [location.trip_id]
       )
 
-      let baseDate = null
-      let startFromSequence = 1
+      const estimated = estimateLocationDates(allLocations, tripStartDate)
+      const target = estimated.find(loc => loc.id === location.id)
 
-      if (lastVisited) {
-        if (lastVisited.departure_date) {
-          baseDate = new Date(lastVisited.departure_date)
-        } else if (lastVisited.arrival_date) {
-          baseDate = new Date(lastVisited.arrival_date)
-          baseDate.setDate(baseDate.getDate() + (lastVisited.nights || 0))
-        } else {
-          baseDate = new Date(tripStartDate)
-        }
-        startFromSequence = lastVisited.sequence + 1
-      } else {
-        baseDate = new Date(tripStartDate)
-      }
-
-      const intermediateLocations = await all(
-        `SELECT * FROM locations
-         WHERE trip_id = ? AND sequence >= ? AND sequence < ?
-         ORDER BY sequence ASC`,
-        [location.trip_id, startFromSequence, location.sequence]
-      )
-
-      const daysSinceBase = intermediateLocations.reduce((sum, loc) => sum + (loc.nights || 0), 0)
-      const estimatedArrival = new Date(baseDate)
-      estimatedArrival.setDate(estimatedArrival.getDate() + daysSinceBase)
-
-      const estimatedDeparture = new Date(estimatedArrival)
-      estimatedDeparture.setDate(estimatedDeparture.getDate() + (location.nights || 0))
-
-      if (!arrivalDate) arrivalDate = estimatedArrival.toISOString().split('T')[0]
-      if (!departureDate) departureDate = estimatedDeparture.toISOString().split('T')[0]
+      if (!arrivalDate) arrivalDate = target.estimated_arrival_date
+      if (!departureDate) departureDate = target.estimated_departure_date
     }
   }
 
