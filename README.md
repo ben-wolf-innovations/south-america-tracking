@@ -18,6 +18,8 @@ Trip stats at a glance: current location, days elapsed, budget vs actual spend b
 **Map**
 Interactive Leaflet map showing all planned locations as markers with a route polyline. Markers are colour-coded by status (visited, current, planned). Supports check-in directly from the map.
 
+Checking in stamps the arrival and departure dates from the estimator, but only where they are blank. Each stamp is recorded in `arrival_from_checkin` / `departure_from_checkin`, so "Clear All Visited" and "Undo Last Check-In" remove only the dates a check-in added and leave dates you booked and entered by hand. Editing a date by hand clears its flag, making it yours again.
+
 **Locations**
 Full CRUD for trip stops. Each location stores accommodation, food, activities and travel costs (planned and actual), plus nights, dates, and booking status. Locations are sequence-ordered and support drag-to-reorder and insertion at any point in the sequence.
 

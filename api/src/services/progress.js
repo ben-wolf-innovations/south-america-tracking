@@ -29,6 +29,11 @@ export async function checkIn(locationId) {
   let arrivalDate = location.arrival_date
   let departureDate = location.departure_date
 
+  // Track which dates we fill in ourselves, so clearing visited flags can
+  // remove those without touching dates that were booked and entered by hand.
+  const arrivalFromCheckin = arrivalDate ? 0 : 1
+  const departureFromCheckin = departureDate ? 0 : 1
+
   if (!arrivalDate || !departureDate) {
     const trip = await get('SELECT * FROM trips WHERE id = ?', [location.trip_id])
     const tripStartDate = trip?.start_date ? new Date(trip.start_date) : null
@@ -49,7 +54,19 @@ export async function checkIn(locationId) {
 
   await transaction([
     { sql: 'UPDATE locations SET is_current = 0 WHERE trip_id = ?', params: [location.trip_id] },
-    { sql: 'UPDATE locations SET is_current = 1, visited = 1, visited_date = ?, arrival_date = ?, departure_date = ? WHERE id = ?', params: [new Date().toISOString().split('T')[0], arrivalDate, departureDate, locationId] }
+    {
+      sql: `UPDATE locations
+            SET is_current = 1, visited = 1, visited_date = ?,
+                arrival_date = ?, departure_date = ?,
+                arrival_from_checkin = ?, departure_from_checkin = ?
+            WHERE id = ?`,
+      params: [
+        new Date().toISOString().split('T')[0],
+        arrivalDate, departureDate,
+        arrivalFromCheckin, departureFromCheckin,
+        locationId
+      ]
+    }
   ])
 
   const updatedLocation = await get('SELECT * FROM locations WHERE id = ?', [locationId])
@@ -57,10 +74,18 @@ export async function checkIn(locationId) {
   return { message: `Checked in to ${location.name}!`, location: updatedLocation }
 }
 
+// Clears progress without losing booked dates: only dates a check-in stamped
+// are removed, and dates entered by hand stay put.
 export async function clearVisited(tripId) {
   await run(
     `UPDATE locations
-     SET visited = 0, is_current = 0, visited_date = NULL, arrival_date = NULL, departure_date = NULL
+     SET visited = 0,
+         is_current = 0,
+         visited_date = NULL,
+         arrival_date = CASE WHEN arrival_from_checkin = 1 THEN NULL ELSE arrival_date END,
+         departure_date = CASE WHEN departure_from_checkin = 1 THEN NULL ELSE departure_date END,
+         arrival_from_checkin = 0,
+         departure_from_checkin = 0
      WHERE trip_id = ?`,
     [tripId]
   )
@@ -78,7 +103,13 @@ export async function undoLastVisited(tripId) {
 
   await run(
     `UPDATE locations
-     SET visited = 0, is_current = 0, visited_date = NULL, arrival_date = NULL, departure_date = NULL
+     SET visited = 0,
+         is_current = 0,
+         visited_date = NULL,
+         arrival_date = CASE WHEN arrival_from_checkin = 1 THEN NULL ELSE arrival_date END,
+         departure_date = CASE WHEN departure_from_checkin = 1 THEN NULL ELSE departure_date END,
+         arrival_from_checkin = 0,
+         departure_from_checkin = 0
      WHERE id = ?`,
     [lastVisited.id]
   )
