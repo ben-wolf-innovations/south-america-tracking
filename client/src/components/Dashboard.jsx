@@ -104,6 +104,9 @@ export default function Dashboard() {
           <Link to="/map" className="nav-link">
             Map
           </Link>
+          <Link to="/itinerary" className="nav-link">
+            Itinerary
+          </Link>
           {isAdmin() && (
             <Link to="/locations" className="nav-link">
               Locations

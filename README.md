@@ -23,6 +23,9 @@ Checking in stamps the arrival and departure dates from the estimator, but only 
 **Locations**
 Full CRUD for trip stops. Supports check-in from the stop's card, same as the map: only the next stop in sequence offers the button, and the result is shown as an inline banner. Cards carry a Visited or Current badge. Each location stores accommodation, food, activities and travel costs (planned and actual), plus nights, dates, and booking status. Locations are sequence-ordered and support drag-to-reorder and insertion at any point in the sequence.
 
+**Itinerary**
+A plain read-only list of every stop in order: dates, nights, accommodation, activities and notes. No travel or cost detail. Built for family, but visible to both roles. Overnight travel stops are shown in sequence and marked as such.
+
 **Costs**
 Log individual expenses against a location and category. Filter by location/category and sort by cost or date. The summary view shows planned vs actual spend by category and by country (the Other category is actual-only, as it has no budget).
 
@@ -40,7 +43,9 @@ Live GBP exchange rates (30-minute cache) for all trip currencies, plus per-coun
 Two PIN-based roles:
 
 - **Admin**: full read/write access to all pages
-- **Family**: read-only access to Overview, Map, Blog, and Useful Info
+- **Family**: read-only access to Overview, Map, Itinerary, Blog, and Useful Info
+
+The Itinerary page omits cost data in its own UI, but `GET /locations` still returns cost columns to any signed-in role, so this is presentation, not a privacy boundary. Family already sees full budget figures on Overview.
 
 Tokens are JWTs signed with `JWT_SECRET` and expire after 7 days.
 
