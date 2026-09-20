@@ -125,6 +125,11 @@ export async function updateLocation(id, updates) {
 
   if (fields.length === 0) throw new ValidationError('No valid fields to update')
 
+  // A date edited by hand is no longer a check-in stamp, so clearing visited
+  // flags must leave it alone.
+  if ('arrival_date' in updates) fields.push('arrival_from_checkin = 0')
+  if ('departure_date' in updates) fields.push('departure_from_checkin = 0')
+
   values.push(id)
   await run(`UPDATE locations SET ${fields.join(', ')} WHERE id = ?`, values)
 

@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard'
 import Login from './pages/Login'
 import Overview from './pages/Overview'
 import Map from './pages/Map'
+import Itinerary from './pages/Itinerary'
 import Locations from './pages/Locations'
 import Costs from './pages/Costs'
 import Blog from './pages/Blog'
@@ -25,6 +26,7 @@ function App() {
         }>
           <Route index element={<Overview />} />
           <Route path="map" element={<Map />} />
+          <Route path="itinerary" element={<Itinerary />} />
           <Route path="locations" element={
             <ProtectedRoute requireAdmin>
               <Locations />

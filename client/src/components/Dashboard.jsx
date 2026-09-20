@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
+import { useDataRefresh, triggerRefresh } from '../hooks/useDataRefresh'
 import './Dashboard.css'
 
 export default function Dashboard() {
@@ -9,12 +10,9 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const location = useLocation()
   const [footerStats, setFooterStats] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => {
-    loadFooterStats()
-  }, [])
-
-  // Reload footer stats when route changes (in case data was updated)
+  // Also covers the first render, so there is no separate mount fetch.
   useEffect(() => {
     loadFooterStats()
   }, [location.pathname])
@@ -53,6 +51,16 @@ export default function Dashboard() {
     }
   }
 
+  useDataRefresh(loadFooterStats)
+
+  // Saved to the home screen there is no browser reload button, so this is the
+  // only way to pull fresh data without closing the app.
+  const handleRefresh = () => {
+    setRefreshing(true)
+    triggerRefresh()
+    setTimeout(() => setRefreshing(false), 600)
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/login')
@@ -60,6 +68,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
+      <div className="dashboard-chrome">
       <header className="dashboard-header">
         <div className="header-content">
           <h1 className="header-title">
@@ -70,9 +79,19 @@ export default function Dashboard() {
             <span className="user-badge">
               {user?.accessLevel === 'admin' ? '👤 Admin' : '👥 Family'}
             </span>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
+            <div className="header-buttons">
+              <button
+                onClick={handleRefresh}
+                className={`header-refresh ${refreshing ? 'spinning' : ''}`}
+                title="Refresh data"
+                aria-label="Refresh data"
+              >
+                &#8635;
+              </button>
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -84,6 +103,9 @@ export default function Dashboard() {
           </Link>
           <Link to="/map" className="nav-link">
             Map
+          </Link>
+          <Link to="/itinerary" className="nav-link">
+            Itinerary
           </Link>
           {isAdmin() && (
             <Link to="/locations" className="nav-link">
@@ -108,6 +130,7 @@ export default function Dashboard() {
           </Link>
         </div>
       </nav>
+      </div>
 
       <main className="dashboard-main">
         <Outlet />

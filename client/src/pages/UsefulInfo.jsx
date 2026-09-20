@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
 import './UsefulInfo.css'
 
 export default function UsefulInfo() {
@@ -39,6 +40,8 @@ export default function UsefulInfo() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadRates)
 
   useEffect(() => {
     loadRates()

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
 import './PackingList.css'
 
 export default function PackingList() {
@@ -42,6 +43,8 @@ export default function PackingList() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadItems)
 
   const resetForm = () => {
     setFormData({

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
+import * as progress from '../services/progress'
 import './Locations.css'
 
 export default function Locations() {
@@ -14,6 +16,7 @@ export default function Locations() {
   const [editingLocation, setEditingLocation] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [status, setStatus] = useState(null)
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -68,6 +71,8 @@ export default function Locations() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadLocations)
 
   // Helper function to calculate "other" costs for a location (using integer cents to avoid floating point errors)
   const getOtherCostsForLocation = (locationId) => {
@@ -303,6 +308,17 @@ export default function Locations() {
     }
   }
 
+  const handleCheckIn = async (location) => {
+    try {
+      const message = await progress.checkIn(location.id)
+      await loadLocations()
+      setStatus({ type: 'success', text: message })
+    } catch (err) {
+      console.error('Failed to check in:', err)
+      setStatus({ type: 'error', text: progress.errorMessage(err) })
+    }
+  }
+
   const handleReorder = async (locationId, direction) => {
     try {
       const currentIndex = locations.findIndex(loc => loc.id === locationId)
@@ -364,6 +380,8 @@ export default function Locations() {
       location.travel_method?.toLowerCase().includes(query)
     )
   })
+
+  const nextSequence = progress.nextCheckInSequence(locations)
 
   // Calculate totals (exclude travel overnight from location count)
   const totalNights = locations.reduce((sum, loc) => sum + (parseInt(loc.nights) || 0), 0)
@@ -779,6 +797,13 @@ export default function Locations() {
         </div>
       )}
 
+      {status && (
+        <div className={`status-banner ${status.type}`}>
+          <span>{status.text}</span>
+          <button onClick={() => setStatus(null)} className="status-dismiss">&times;</button>
+        </div>
+      )}
+
       {/* Locations List */}
       <div className="locations-list">
         {filteredLocations.length === 0 ? (
@@ -802,6 +827,9 @@ export default function Locations() {
                   {location.name}
                   {location.is_travel_overnight === 1 && <span className="overnight-badge">🌙 Travel</span>}
                   {location.is_current === 1 && <span className="current-badge">Current</span>}
+                  {location.visited === 1 && location.is_current !== 1 && (
+                    <span className="visited-badge">Visited</span>
+                  )}
                 </h3>
                 {location.is_travel_overnight !== 1 && (
                   <p className="country">{location.country || 'In Transit'}</p>
@@ -809,6 +837,16 @@ export default function Locations() {
               </div>
               {isAdmin() && !showAddForm && (
                 <div className="location-actions">
+                  {progress.canCheckIn(location, nextSequence) && (
+                    <button
+                      onClick={() => handleCheckIn(location)}
+                      className="checkin-button"
+                      disabled={isEditing}
+                      title={`Check in to ${location.name}`}
+                    >
+                      Check In
+                    </button>
+                  )}
                   <button
                     onClick={() => handleReorder(location.id, 'up')}
                     disabled={index === 0 || isEditing}
