@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
 import { useAuth } from '../context/AuthContext'
 import './Overview.css'
 
@@ -61,6 +62,8 @@ export default function Overview() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadData)
 
   const handleUpdateStartDate = async () => {
     try {

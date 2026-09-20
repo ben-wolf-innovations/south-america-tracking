@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
 import './Costs.css'
 
 const CATEGORIES = [
@@ -82,6 +83,8 @@ export default function Costs() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadData)
 
   const resetForm = () => {
     setFormData({

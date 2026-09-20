@@ -4,6 +4,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
 import './Map.css'
 
 // Fix default marker icons in Leaflet with Vite
@@ -71,6 +72,8 @@ export default function Map() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadLocations)
 
   const handleCheckIn = async (locationId) => {
     if (!isAdmin()) {

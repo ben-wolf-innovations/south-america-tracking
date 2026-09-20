@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import './Blog.css'
@@ -86,6 +87,8 @@ export default function Blog() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadData)
 
   const loadComments = async (postId) => {
     try {

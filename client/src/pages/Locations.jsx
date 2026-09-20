@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
+import { useDataRefresh } from '../hooks/useDataRefresh'
 import './Locations.css'
 
 export default function Locations() {
@@ -68,6 +69,8 @@ export default function Locations() {
       setLoading(false)
     }
   }
+
+  useDataRefresh(loadLocations)
 
   // Helper function to calculate "other" costs for a location (using integer cents to avoid floating point errors)
   const getOtherCostsForLocation = (locationId) => {
