@@ -234,7 +234,7 @@
   padding: 10px 12px;
   border: 2px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 16px; /* 16px min: stops iOS zooming the viewport on focus */
   font-family: inherit;
   transition: all 0.2s;
 }
