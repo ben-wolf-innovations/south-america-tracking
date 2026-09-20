@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
 import { useDataRefresh } from '../hooks/useDataRefresh'
+import * as progress from '../services/progress'
 import './Map.css'
 
 // Fix default marker icons in Leaflet with Vite
@@ -82,12 +83,11 @@ export default function Map() {
     }
 
     try {
-      const response = await api.post('/progress/checkin', { location_id: locationId })
-      alert(response.data.message)
+      alert(await progress.checkIn(locationId))
       await loadLocations() // Reload to update markers
     } catch (err) {
       console.error('Failed to check in:', err)
-      alert('Failed to check in: ' + (err.response?.data?.error || err.message))
+      alert('Failed to check in: ' + progress.errorMessage(err))
     }
   }
 
@@ -97,17 +97,16 @@ export default function Map() {
       return
     }
 
-    if (!window.confirm('Are you sure you want to clear all visited flags? This will reset your progress.')) {
+    if (!window.confirm('Clear all visited flags? Dates you entered by hand are kept; only dates a check-in filled in are removed.')) {
       return
     }
 
     try {
-      const response = await api.post('/progress/clear-visited')
-      alert(response.data.message)
+      alert(await progress.clearVisited())
       await loadLocations() // Reload to update markers
     } catch (err) {
       console.error('Failed to clear visited:', err)
-      alert('Failed to clear visited: ' + (err.response?.data?.error || err.message))
+      alert('Failed to clear visited: ' + progress.errorMessage(err))
     }
   }
 
@@ -122,12 +121,11 @@ export default function Map() {
     }
 
     try {
-      const response = await api.post('/progress/undo-last-visited')
-      alert(response.data.message)
+      alert(await progress.undoLastVisited())
       await loadLocations() // Reload to update markers
     } catch (err) {
       console.error('Failed to undo last visited:', err)
-      alert('Failed to undo: ' + (err.response?.data?.error || err.message))
+      alert('Failed to undo: ' + progress.errorMessage(err))
     }
   }
 
