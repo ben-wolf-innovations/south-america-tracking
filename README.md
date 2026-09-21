@@ -4,7 +4,7 @@ A web app for planning and tracking a 6-month South America trip. Built for two 
 
 ## Stack
 
-- **Frontend**: React 18, Vite, Leaflet.js
+- **Frontend**: React 18, Vite, Leaflet.js (Esri World Street Map tiles)
 - **Backend**: Azure Functions v4 (Node.js, ESM)
 - **Database**: Turso (libSQL cloud)
 - **Auth**: JWT with PIN-based login (two access levels)
