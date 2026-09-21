@@ -332,9 +332,13 @@ export default function Map() {
           scrollWheelZoom={true}
           className="leaflet-map"
         >
+          {/* Esri rather than OpenStreetMap: OSM's volunteer servers return an
+              "Access blocked" tile for requests without a Referer header and
+              for busy shared IPs such as public wifi. Esri needs neither. */}
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='Tiles &copy; <a href="https://www.esri.com">Esri</a> &mdash; Source: Esri, HERE, Garmin, USGS, and the GIS user community'
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+            maxZoom={19}
           />
 
           {/* Route polyline segments with colored paths */}
