@@ -64,7 +64,6 @@ export default function Blog() {
 
   const loadData = async () => {
     try {
-      setLoading(true)
       console.log('Loading blog data from:', api.defaults.baseURL)
       const [postsRes, locationsRes] = await Promise.all([
         api.get('/blog'),

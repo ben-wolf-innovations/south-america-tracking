@@ -54,7 +54,6 @@ export default function Costs() {
 
   const loadData = async () => {
     try {
-      setLoading(true)
       console.log('Loading costs data from:', api.defaults.baseURL)
       const [costsRes, locationsRes, summaryRes] = await Promise.all([
         api.get('/costs'),

@@ -32,7 +32,6 @@ export default function PackingList() {
 
   const loadItems = async () => {
     try {
-      setLoading(true)
       const response = await api.get('/packing')
       setItems(response.data.data)
       setError(null)

@@ -31,7 +31,6 @@ export default function Itinerary() {
 
   const loadItinerary = async () => {
     try {
-      setLoading(true)
       const response = await api.get('/locations')
       setLocations(response.data.data)
       setError(null)

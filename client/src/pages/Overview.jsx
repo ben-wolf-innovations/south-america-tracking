@@ -19,7 +19,6 @@ export default function Overview() {
 
   const loadData = async () => {
     try {
-      setLoading(true)
       
       console.log('Loading overview data from:', api.defaults.baseURL)
       // Fetch trip details

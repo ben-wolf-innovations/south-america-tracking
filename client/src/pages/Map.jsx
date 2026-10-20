@@ -62,7 +62,6 @@ export default function Map() {
 
   const loadLocations = async () => {
     try {
-      setLoading(true)
       const response = await api.get('/locations')
       setLocations(response.data.data)
       setError(null)
