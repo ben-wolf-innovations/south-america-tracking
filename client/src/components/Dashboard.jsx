@@ -122,6 +122,11 @@ export default function Dashboard() {
               Packing
             </NavLink>
           )}
+          {isAdmin() && (
+            <NavLink to="/todo" className="nav-link">
+              To do
+            </NavLink>
+          )}
           <NavLink to="/blog" className="nav-link">
             Blog
           </NavLink>

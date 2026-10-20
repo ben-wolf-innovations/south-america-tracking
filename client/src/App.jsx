@@ -10,6 +10,7 @@ import Locations from './pages/Locations'
 import Costs from './pages/Costs'
 import Blog from './pages/Blog'
 import PackingList from './pages/PackingList'
+import Todo from './pages/Todo'
 import UsefulInfo from './pages/UsefulInfo'
 import './App.css'
 
@@ -40,6 +41,11 @@ function App() {
           <Route path="packing" element={
             <ProtectedRoute requireAdmin>
               <PackingList />
+            </ProtectedRoute>
+          } />
+          <Route path="todo" element={
+            <ProtectedRoute requireAdmin>
+              <Todo />
             </ProtectedRoute>
           } />
           <Route path="blog" element={<Blog />} />
