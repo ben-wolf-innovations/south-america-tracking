@@ -19,19 +19,14 @@ export default function Overview() {
 
   const loadData = async () => {
     try {
-      
-      console.log('Loading overview data from:', api.defaults.baseURL)
       // Fetch trip details
       const tripRes = await api.get('/trips/1')
-      console.log('Trip response:', tripRes.data)
       setTrip(tripRes.data.data)
       setStartDate(tripRes.data.data.start_date || '')
       
       // Fetch stats
       const locationsRes = await api.get('/locations')
       const costsRes = await api.get('/costs/summary')
-      console.log('Locations response:', locationsRes.data)
-      console.log('Costs summary response:', costsRes.data)
       
       const locations = locationsRes.data.data
       const costsSummary = costsRes.data.data

@@ -54,15 +54,11 @@ export default function Costs() {
 
   const loadData = async () => {
     try {
-      console.log('Loading costs data from:', api.defaults.baseURL)
       const [costsRes, locationsRes, summaryRes] = await Promise.all([
         api.get('/costs'),
         api.get('/locations'),
         api.get('/costs/summary')
       ])
-      console.log('Costs response:', costsRes.data)
-      console.log('Locations response:', locationsRes.data)
-      console.log('Summary response:', summaryRes.data)
       setCosts(costsRes.data.data)
       setLocations(locationsRes.data.data)
       setSummary(summaryRes.data.data.by_category || [])
@@ -122,7 +118,6 @@ export default function Costs() {
         payload.location_id = parseInt(formData.location_id)
       }
 
-      console.log('Submitting cost payload:', payload)
       await api.post('/costs', payload)
       
       // Reload data to show the new cost
@@ -154,7 +149,6 @@ export default function Costs() {
         payload.location_id = parseInt(formData.location_id)
       }
 
-      console.log('Updating cost payload:', payload)
       await api.put(`/costs/${editingCost.id}`, payload)
       
       // Reload data to show the updated cost

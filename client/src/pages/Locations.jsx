@@ -48,13 +48,10 @@ export default function Locations() {
 
   const loadLocations = async () => {
     try {
-      console.log('Loading locations from:', api.defaults.baseURL)
       const [locationsRes, costsRes] = await Promise.all([
         api.get('/locations'),
         api.get('/costs')
       ])
-      console.log('Locations response:', locationsRes.data)
-      console.log('Costs response:', costsRes.data)
       setLocations(locationsRes.data.data)
       setCosts(costsRes.data.data)
       setError(null)
