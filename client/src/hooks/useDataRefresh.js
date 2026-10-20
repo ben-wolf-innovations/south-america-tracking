@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react'
 
 export const REFRESH_EVENT = 'dataRefresh'
 
-// Foregrounding the app refetches only if the data is at least this old, so
-// flicking between apps doesn't fire a request every time.
-const STALE_AFTER_MS = 30000
+// Coming back to the app or browser tab refetches only if the data is at
+// least this old, so switching between tabs doesn't reload every time.
+const STALE_AFTER_MS = 30 * 60 * 1000
 
 export function triggerRefresh() {
   window.dispatchEvent(new CustomEvent(REFRESH_EVENT))

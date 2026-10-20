@@ -95,3 +95,50 @@ export async function toggleBlogPublish(id) {
 
   return get('SELECT * FROM blog_posts WHERE id = ?', [id])
 }
+
+// Everyone signed in can read and add comments, but family only on published
+// posts. Returns null when the post does not exist.
+async function getCommentablePost(postId, isAdmin) {
+  const post = await get('SELECT * FROM blog_posts WHERE id = ?', [postId])
+  if (!post) return null
+
+  if (!post.published && !isAdmin) {
+    throw new ForbiddenError('This post is not yet published')
+  }
+
+  return post
+}
+
+export async function getBlogComments(postId, isAdmin) {
+  const post = await getCommentablePost(postId, isAdmin)
+  if (!post) return null
+
+  return all(
+    'SELECT * FROM blog_comments WHERE post_id = ? ORDER BY created_at ASC',
+    [postId]
+  )
+}
+
+export async function createBlogComment(postId, { user_name, comment_text }, isAdmin) {
+  if (!user_name?.trim() || !comment_text?.trim()) {
+    throw new ValidationError('Name and comment are required')
+  }
+
+  const post = await getCommentablePost(postId, isAdmin)
+  if (!post) return null
+
+  const result = await run(
+    'INSERT INTO blog_comments (post_id, user_name, comment_text) VALUES (?, ?, ?)',
+    [postId, user_name.trim(), comment_text.trim()]
+  )
+
+  return get('SELECT * FROM blog_comments WHERE id = ?', [result.lastID])
+}
+
+export async function deleteBlogComment(postId, commentId) {
+  const result = await run(
+    'DELETE FROM blog_comments WHERE id = ? AND post_id = ?',
+    [commentId, postId]
+  )
+  return result.changes > 0
+}

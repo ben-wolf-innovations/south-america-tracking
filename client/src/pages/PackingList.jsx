@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
 import { useDataRefresh } from '../hooks/useDataRefresh'
 import './PackingList.css'
 
 export default function PackingList() {
-  const { isAdmin } = useAuth()
   const [activeTab, setActiveTab] = useState('Ben')
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -32,7 +30,6 @@ export default function PackingList() {
 
   const loadItems = async () => {
     try {
-      setLoading(true)
       const response = await api.get('/packing')
       setItems(response.data.data)
       setError(null)
@@ -137,17 +134,6 @@ export default function PackingList() {
       console.error('Failed to update item:', err)
       alert('Failed to update item')
     }
-  }
-
-  if (!isAdmin()) {
-    return (
-      <div className="packing-list-page">
-        <div className="access-denied">
-          <h2>Access Denied</h2>
-          <p>Only administrators can access the packing list.</p>
-        </div>
-      </div>
-    )
   }
 
   if (loading) {

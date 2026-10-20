@@ -1,10 +1,14 @@
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this'
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is not set')
 
 /**
  * Higher-order function to wrap Azure Functions handlers with JWT authentication
- * 
+ *
+ * A missing, invalid or expired token is 401 so the client sends the user back
+ * to login. 403 is reserved for a valid token without admin access.
+ *
  * @param {Function} handler - The actual handler function
  * @param {Object} options - Configuration options
  * @param {boolean} options.requireAdmin - Whether admin access is required
@@ -13,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-t
  */
 export function withAuth(handler, options = {}) {
   const { requireAdmin = false, optional = false } = options
-  
+
   return async (request, context) => {
     // Extract token from Authorization header
     const authHeader = request.headers.get('authorization')
@@ -25,44 +29,34 @@ export function withAuth(handler, options = {}) {
         context.user = null
         return await handler(request, context)
       }
-      
+
       return {
         status: 401,
         jsonBody: { error: 'Access token required' }
       }
     }
 
+    let user
     try {
-      // Verify JWT token
-      const user = jwt.verify(token, JWT_SECRET)
-      
-      // Check admin requirement
-      if (requireAdmin && user.accessLevel !== 'admin') {
-        return {
-          status: 403,
-          jsonBody: { error: 'Admin access required' }
-        }
-      }
-      
-      // Store user in context (request is immutable in Azure Functions)
-      context.user = user
-      
-      // Call the actual handler
-      return await handler(request, context)
-      
+      user = jwt.verify(token, JWT_SECRET)
     } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        return {
-          status: 403,
-          jsonBody: { error: 'Token expired' }
-        }
-      }
-      
       return {
-        status: 403,
-        jsonBody: { error: 'Invalid or expired token' }
+        status: 401,
+        jsonBody: { error: error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token' }
       }
     }
+
+    if (requireAdmin && user.accessLevel !== 'admin') {
+      return {
+        status: 403,
+        jsonBody: { error: 'Admin access required' }
+      }
+    }
+
+    // Store user in context (request is immutable in Azure Functions)
+    context.user = user
+
+    return await handler(request, context)
   }
 }
 

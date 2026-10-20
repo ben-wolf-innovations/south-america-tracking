@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import api from '../config/api'
+import { useAuth } from '../context/AuthContext'
 import { useDataRefresh } from '../hooks/useDataRefresh'
+import StopPlanSummary from '../components/planning/StopPlanSummary'
 import './Itinerary.css'
 
 const formatDate = (value) =>
@@ -18,10 +20,24 @@ function stopDates(location) {
   }
 }
 
+// Planning is admin only, and a failure there should not hide the itinerary.
+async function loadPlanEntries() {
+  try {
+    const response = await api.get('/planning')
+    return response.data.data
+  } catch (err) {
+    console.error('Failed to load planning summary:', err)
+    return []
+  }
+}
+
 // A plain read-only itinerary: where we are, where we stay, and what we are
-// doing. Deliberately carries no travel or cost detail.
+// doing. Deliberately carries no travel or cost detail for family; admins also
+// see a brief planning summary on each stop.
 export default function Itinerary() {
+  const { isAdmin } = useAuth()
   const [locations, setLocations] = useState([])
+  const [planEntries, setPlanEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -31,9 +47,12 @@ export default function Itinerary() {
 
   const loadItinerary = async () => {
     try {
-      setLoading(true)
-      const response = await api.get('/locations')
+      const [response, entries] = await Promise.all([
+        api.get('/locations'),
+        isAdmin() ? loadPlanEntries() : []
+      ])
       setLocations(response.data.data)
+      setPlanEntries(entries)
       setError(null)
     } catch (err) {
       console.error('Failed to load itinerary:', err)
@@ -134,6 +153,13 @@ export default function Itinerary() {
                   </div>
                 )}
               </dl>
+
+              {isAdmin() && (
+                <StopPlanSummary
+                  locationId={location.id}
+                  entries={planEntries.filter(entry => entry.location_id === location.id)}
+                />
+              )}
             </li>
           )
         })}

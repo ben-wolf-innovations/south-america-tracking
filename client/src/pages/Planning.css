@@ -1,0 +1,357 @@
+.planning-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.planning-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.planning-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.planning-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.plan-status {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 24px;
+}
+
+.plan-error {
+  color: var(--danger-color);
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+/* Buttons */
+.plan-btn {
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition);
+}
+
+.plan-btn.primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.plan-btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+.plan-btn.secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.plan-btn.secondary:hover {
+  background: var(--border-color);
+}
+
+.plan-btn.danger {
+  background: transparent;
+  color: var(--danger-color);
+}
+
+.plan-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Filters */
+.plan-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 20px;
+}
+
+.plan-filters select {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  font-size: 14px;
+  max-width: 100%;
+}
+
+.plan-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.plan-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color);
+}
+
+/* Add panel */
+.plan-add {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.plan-add h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+/* Days */
+.plan-day {
+  margin-bottom: 24px;
+  scroll-margin-top: 160px; /* clears the sticky app header */
+}
+
+.plan-day.past {
+  opacity: 0.6;
+}
+
+.plan-day-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 8px 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.plan-today {
+  background: var(--secondary-color);
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.plan-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Entry */
+.plan-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--text-muted);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.plan-entry.editing {
+  display: block;
+}
+
+.plan-entry.type-checkin { border-left-color: var(--primary-color); }
+.plan-entry.type-checkout { border-left-color: var(--primary-dark); }
+.plan-entry.type-transport { border-left-color: var(--secondary-color); }
+.plan-entry.type-tour { border-left-color: var(--accent-color); }
+
+.plan-entry-time {
+  width: 96px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.plan-entry-time {
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-entry-end {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.plan-entry-time.none {
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.plan-entry-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-entry-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.plan-type,
+.plan-booked,
+.plan-est {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.plan-type {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.plan-booked.yes {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+.plan-booked.no {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+
+.plan-est {
+  border: 1px dashed var(--text-muted);
+  color: var(--text-secondary);
+}
+
+.plan-entry-title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.plan-entry-place,
+.plan-entry-meta,
+.plan-entry-notes {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.plan-entry-notes {
+  white-space: pre-wrap;
+}
+
+.plan-entry-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Forms */
+.plan-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.plan-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.plan-field.wide {
+  grid-column: span 2;
+}
+
+.plan-field input,
+.plan-field select,
+.plan-field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 16px; /* 16px stops iOS zooming into the field */
+  font-weight: 400;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.plan-field textarea {
+  resize: vertical;
+}
+
+.plan-form-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.plan-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (max-width: 640px) {
+  .plan-entry {
+    flex-wrap: wrap;
+  }
+
+  .plan-entry-time {
+    width: auto;
+  }
+
+  .plan-entry-body {
+    flex-basis: 100%;
+    order: 2;
+  }
+
+  .plan-entry-actions {
+    order: 3;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .plan-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .plan-field.wide {
+    grid-column: span 2;
+  }
+}

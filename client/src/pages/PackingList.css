@@ -566,7 +566,6 @@
 
 /* Loading & Error States */
 .loading,
-.access-denied,
 .error-message {
   text-align: center;
   padding: 60px 20px;
@@ -596,15 +595,6 @@
   border: 2px solid var(--danger-color);
   padding: 16px;
   margin-bottom: 24px;
-}
-
-.access-denied h2 {
-  color: var(--danger-color);
-  margin-bottom: 12px;
-}
-
-.access-denied p {
-  color: var(--text-secondary);
 }
 
 /* Responsive */

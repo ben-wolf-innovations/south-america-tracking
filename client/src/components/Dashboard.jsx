@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
@@ -8,14 +8,14 @@ import './Dashboard.css'
 export default function Dashboard() {
   const { user, logout, isAdmin } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
   const [footerStats, setFooterStats] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
 
-  // Also covers the first render, so there is no separate mount fetch.
+  // Trip totals rarely change, so load once. Refresh and the tripUpdated event
+  // below cover the times they do.
   useEffect(() => {
     loadFooterStats()
-  }, [location.pathname])
+  }, [])
 
   // Listen for trip update events
   useEffect(() => {
@@ -98,36 +98,46 @@ export default function Dashboard() {
 
       <nav className="dashboard-nav">
         <div className="nav-content">
-          <Link to="/" className="nav-link">
+          <NavLink to="/" end className="nav-link">
             Overview
-          </Link>
-          <Link to="/map" className="nav-link">
+          </NavLink>
+          <NavLink to="/map" className="nav-link">
             Map
-          </Link>
-          <Link to="/itinerary" className="nav-link">
+          </NavLink>
+          <NavLink to="/itinerary" className="nav-link">
             Itinerary
-          </Link>
+          </NavLink>
           {isAdmin() && (
-            <Link to="/locations" className="nav-link">
+            <NavLink to="/planning" className="nav-link">
+              Planning
+            </NavLink>
+          )}
+          {isAdmin() && (
+            <NavLink to="/locations" className="nav-link">
               Locations
-            </Link>
+            </NavLink>
           )}
           {isAdmin() && (
-            <Link to="/costs" className="nav-link">
+            <NavLink to="/costs" className="nav-link">
               Costs
-            </Link>
+            </NavLink>
           )}
           {isAdmin() && (
-            <Link to="/packing" className="nav-link">
+            <NavLink to="/packing" className="nav-link">
               Packing
-            </Link>
+            </NavLink>
           )}
-          <Link to="/blog" className="nav-link">
+          {isAdmin() && (
+            <NavLink to="/todo" className="nav-link">
+              To do
+            </NavLink>
+          )}
+          <NavLink to="/blog" className="nav-link">
             Blog
-          </Link>
-          <Link to="/info" className="nav-link">
+          </NavLink>
+          <NavLink to="/info" className="nav-link">
             Useful Info
-          </Link>
+          </NavLink>
         </div>
       </nav>
       </div>

@@ -15,11 +15,12 @@ export default function UsefulInfo() {
   const [localApps, setLocalApps] = useState([])
   const [meta, setMeta] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
 
   const loadRates = async () => {
     try {
-      setLoading(true)
+      setRefreshing(true)
       setError(null)
       const res = await api.get('/info/exchange-rates')
       const data = res.data.data
@@ -38,6 +39,7 @@ export default function UsefulInfo() {
       setError('Failed to load exchange rates. Please try again.')
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
@@ -80,8 +82,8 @@ export default function UsefulInfo() {
       <section className="info-section">
         <div className="section-heading">
           <h3>Exchange Rates</h3>
-          <button onClick={loadRates} className="refresh-button" disabled={loading}>
-            {loading ? 'Refreshing…' : 'Refresh'}
+          <button onClick={loadRates} className="refresh-button" disabled={refreshing}>
+            {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
         </div>
         <p className="section-subtext">Live rates — what £1 buys you in each country</p>

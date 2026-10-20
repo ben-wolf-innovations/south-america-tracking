@@ -20,14 +20,16 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Handle response errors globally
+// A 401 means the token is missing, invalid or expired, so send the user back
+// to login. The login request itself returns 401 for a wrong PIN, which the
+// login page shows as an error instead.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear invalid token and redirect to login
+    const isLoginRequest = error.config?.url === '/auth/login'
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token')
-      localStorage.removeItem('accessLevel')
+      localStorage.removeItem('user')
       window.location.href = '/login'
     }
     return Promise.reject(error)

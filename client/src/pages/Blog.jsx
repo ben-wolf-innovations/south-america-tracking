@@ -64,14 +64,10 @@ export default function Blog() {
 
   const loadData = async () => {
     try {
-      setLoading(true)
-      console.log('Loading blog data from:', api.defaults.baseURL)
       const [postsRes, locationsRes] = await Promise.all([
         api.get('/blog'),
         api.get('/locations')
       ])
-      console.log('Blog posts response:', postsRes.data)
-      console.log('Locations response:', locationsRes.data)
       setPosts(postsRes.data.data)
       setLocations(locationsRes.data.data)
       setError(null)
@@ -408,7 +404,7 @@ export default function Blog() {
                       <div className="comment-header">
                         <span className="comment-author">{comment.user_name}</span>
                         <span className="comment-date">
-                          {new Date(comment.created_at).toLocaleDateString()}
+                          {new Date(comment.created_at.replace(' ', 'T') + 'Z').toLocaleDateString('en-GB')}
                         </span>
                       </div>
                       <p className="comment-text">{comment.comment_text}</p>
