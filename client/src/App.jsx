@@ -11,6 +11,7 @@ import Costs from './pages/Costs'
 import Blog from './pages/Blog'
 import PackingList from './pages/PackingList'
 import Todo from './pages/Todo'
+import Planning from './pages/Planning'
 import UsefulInfo from './pages/UsefulInfo'
 import './App.css'
 
@@ -28,6 +29,11 @@ function App() {
           <Route index element={<Overview />} />
           <Route path="map" element={<Map />} />
           <Route path="itinerary" element={<Itinerary />} />
+          <Route path="planning" element={
+            <ProtectedRoute requireAdmin>
+              <Planning />
+            </ProtectedRoute>
+          } />
           <Route path="locations" element={
             <ProtectedRoute requireAdmin>
               <Locations />

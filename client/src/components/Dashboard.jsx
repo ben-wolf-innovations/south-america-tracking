@@ -108,6 +108,11 @@ export default function Dashboard() {
             Itinerary
           </NavLink>
           {isAdmin() && (
+            <NavLink to="/planning" className="nav-link">
+              Planning
+            </NavLink>
+          )}
+          {isAdmin() && (
             <NavLink to="/locations" className="nav-link">
               Locations
             </NavLink>
