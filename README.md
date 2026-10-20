@@ -21,7 +21,7 @@ Interactive Leaflet map showing all planned locations as markers with a route po
 Checking in stamps the arrival and departure dates from the estimator, but only where they are blank. Each stamp is recorded in `arrival_from_checkin` / `departure_from_checkin`, so "Clear All Visited" and "Undo Last Check-In" remove only the dates a check-in added and leave dates you booked and entered by hand. Editing a date by hand clears its flag, making it yours again.
 
 **Locations**
-Full CRUD for trip stops. Supports check-in from the stop's card, same as the map: only the next stop in sequence offers the button, and the result is shown as an inline banner. Cards carry a Visited or Current badge. Each location stores accommodation, food, activities and travel costs (planned and actual), plus nights, dates, and booking status. Locations are sequence-ordered and support drag-to-reorder and insertion at any point in the sequence.
+Full CRUD for trip stops. Supports check-in from the stop's card, same as the map: only the next stop in sequence offers the button, and the result is shown as an inline banner. Cards carry a Visited or Current badge. Each location stores accommodation (including booking ref), food, activities and travel costs (planned and actual), plus nights, dates, and booking status. Adding and editing share one form (`components/locations/LocationForm.jsx`). Locations are sequence-ordered and support drag-to-reorder and insertion at any point in the sequence.
 
 **Itinerary**
 A plain read-only list of every stop in order: dates, nights, accommodation, activities and notes. No travel or cost detail. Built for family, but visible to both roles. Overnight travel stops are shown in sequence and marked as such. Admins also see a short planning summary on each stop (anything with a time, anything not booked, and added tours) with a link to that stop in Planning.
@@ -118,7 +118,7 @@ api/src/
 
 client/src/
   pages/        one file per page
-  components/   shared UI components, plus planning/ and todo/ for those pages
+  components/   shared UI components, plus locations/, planning/ and todo/ for those pages
   context/      AuthContext
   config/       API base URL config
   hooks/        useDataRefresh (Refresh button and stale-data reload)
