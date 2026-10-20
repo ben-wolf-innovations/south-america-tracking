@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import api from '../config/api'
 import { useDataRefresh } from '../hooks/useDataRefresh'
 import * as progress from '../services/progress'
+import LocationForm, { EMPTY_LOCATION_FORM, locationToForm } from '../components/locations/LocationForm'
 import './Locations.css'
 
 export default function Locations() {
@@ -19,28 +20,7 @@ export default function Locations() {
   const [status, setStatus] = useState(null)
 
   // Form state for add/edit
-  const [formData, setFormData] = useState({
-    name: '',
-    country: '',
-    latitude: '',
-    longitude: '',
-    nights: 0,
-    accommodation_name: '',
-    accommodation_cost_planned: '',
-    accommodation_booked: false,
-    arrival_date: '',
-    departure_date: '',
-    activities: '',
-    activities_cost_planned: '',
-    food_drink_cost_planned: '',
-    travel_method: '',
-    travel_cost_planned: '',
-    travel_duration: '',
-    transport_booked: false,
-    notes: '',
-    sequence: '',
-    is_travel_overnight: false
-  })
+  const [formData, setFormData] = useState(EMPTY_LOCATION_FORM)
 
   useEffect(() => {
     loadLocations()
@@ -79,28 +59,7 @@ export default function Locations() {
   }
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      country: '',
-      latitude: '',
-      longitude: '',
-      nights: 0,
-      accommodation_name: '',
-      accommodation_cost_planned: '',
-      accommodation_booked: false,
-      arrival_date: '',
-      departure_date: '',
-      activities: '',
-      activities_cost_planned: '',
-      food_drink_cost_planned: '',
-      travel_method: '',
-      travel_cost_planned: '',
-      travel_duration: '',
-      transport_booked: false,
-      notes: '',
-      sequence: '',
-      is_travel_overnight: false
-    })
+    setFormData(EMPTY_LOCATION_FORM)
     setShowAddForm(false)
     setShowTravelOvernightForm(false)
     setEditingLocation(null)
@@ -108,25 +67,10 @@ export default function Locations() {
 
   const handleAddTravelOvernight = () => {
     setFormData({
+      ...EMPTY_LOCATION_FORM,
       name: 'Travel Overnight',
       country: 'Peru',
-      latitude: '',
-      longitude: '',
       nights: 1,
-      accommodation_name: '',
-      accommodation_cost_planned: '',
-      accommodation_booked: false,
-      arrival_date: '',
-      departure_date: '',
-      activities: '',
-      activities_cost_planned: '',
-      food_drink_cost_planned: '',
-      travel_method: '',
-      travel_cost_planned: '',
-      travel_duration: '',
-      transport_booked: false,
-      notes: '',
-      sequence: '',
       is_travel_overnight: true
     })
     setShowTravelOvernightForm(true)
@@ -213,7 +157,7 @@ export default function Locations() {
     e.preventDefault()
     try {
       const payload = {}
-      const textFields = ['notes', 'activities', 'accommodation_notes', 'travel_notes', 'accommodation_name', 'travel_method']
+      const textFields = ['notes', 'activities', 'accommodation_notes', 'travel_notes', 'accommodation_name', 'accommodation_booking_ref', 'travel_method']
       Object.keys(formData).forEach(key => {
         // Always include date fields (even if empty, send as null to clear them)
         if (key === 'arrival_date' || key === 'departure_date') {
@@ -261,28 +205,7 @@ export default function Locations() {
   }
 
   const startEdit = (location) => {
-    setFormData({
-      name: location.name || '',
-      country: location.country || '',
-      latitude: location.latitude || '',
-      longitude: location.longitude || '',
-      nights: location.nights || 0,
-      accommodation_name: location.accommodation_name || '',
-      accommodation_cost_planned: location.accommodation_cost_planned || '',
-      accommodation_booked: location.accommodation_booked === 1,
-      arrival_date: location.arrival_date || '',
-      departure_date: location.departure_date || '',
-      activities: location.activities || '',
-      activities_cost_planned: location.activities_cost_planned || '',
-      food_drink_cost_planned: location.food_drink_cost_planned || '',
-      travel_method: location.travel_method || '',
-      travel_cost_planned: location.travel_cost_planned || '',
-      travel_duration: location.travel_duration || '',
-      transport_booked: location.transport_booked === 1,
-      notes: location.notes || '',
-      sequence: '',
-      is_travel_overnight: location.is_travel_overnight === 1
-    })
+    setFormData(locationToForm(location))
     setEditingLocation(location)
     setShowAddForm(false)
   }
@@ -484,296 +407,15 @@ export default function Locations() {
             <h3>Add New Location</h3>
             <button onClick={resetForm} className="close-button">&times;</button>
           </div>
-          <form onSubmit={handleAddLocation} className="location-form">
-            <div className="form-section">
-              <h4>Basic Information</h4>
-              <div className="form-grid">
-                <div className="form-field">
-                  <label>Location Name *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="e.g., Lima"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Country *</label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    required={!formData.is_travel_overnight}
-                    placeholder="e.g., Peru"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Latitude *</label>
-                  <input
-                    type="number"
-                    step="any"
-                    name="latitude"
-                    value={formData.latitude}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="-12.0464"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Longitude *</label>
-                  <input
-                    type="number"
-                    step="any"
-                    name="longitude"
-                    value={formData.longitude}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="-77.0428"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Nights</label>
-                  <input
-                    type="number"
-                    name="nights"
-                    value={formData.nights}
-                    onChange={handleInputChange}
-                    min="0"
-                    placeholder="2"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Insert at Position</label>
-                  <input
-                    type="number"
-                    name="sequence"
-                    value={formData.sequence}
-                    onChange={handleInputChange}
-                    min="1"
-                    max={locations.length + 1}
-                    placeholder={`Leave empty for end (${locations.length + 1})`}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Dates</h4>
-              {editingLocation && (editingLocation.estimated_arrival_date || editingLocation.estimated_departure_date) && (
-                <p style={{ fontSize: '0.85em', color: '#666', marginBottom: '10px' }}>
-                  <strong>Estimated:</strong> {' '}
-                  {editingLocation.estimated_arrival_date && 
-                    new Date(editingLocation.estimated_arrival_date).toLocaleDateString('en-GB', { 
-                      day: 'numeric', month: 'short', year: 'numeric' 
-                    })
-                  }
-                  {' - '}
-                  {editingLocation.estimated_departure_date && 
-                    new Date(editingLocation.estimated_departure_date).toLocaleDateString('en-GB', { 
-                      day: 'numeric', month: 'short', year: 'numeric' 
-                    })
-                  }
-                  <br />
-                  <em>Leave blank to use estimated dates, or enter actual dates below</em>
-                </p>
-              )}
-              <div className="form-grid">
-                <div className="form-field">
-                  <label>Arrival Date</label>
-                  <div className="date-input-group">
-                    <input
-                      type="date"
-                      name="arrival_date"
-                      value={formData.arrival_date}
-                      onChange={handleInputChange}
-                    />
-                    {formData.arrival_date && (
-                      <button
-                        type="button"
-                        className="clear-date-btn"
-                        onClick={() => clearDateField('arrival_date')}
-                        title="Clear date"
-                      >
-                        &times;
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="form-field">
-                  <label>Departure Date</label>
-                  <div className="date-input-group">
-                    <input
-                      type="date"
-                      name="departure_date"
-                      value={formData.departure_date}
-                      onChange={handleInputChange}
-                    />
-                    {formData.departure_date && (
-                      <button
-                        type="button"
-                        className="clear-date-btn"
-                        onClick={() => clearDateField('departure_date')}
-                        title="Clear date"
-                      >
-                        &times;
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Accommodation</h4>
-              <div className="form-grid">
-                <div className="form-field">
-                  <label>Name</label>
-                  <input
-                    type="text"
-                    name="accommodation_name"
-                    value={formData.accommodation_name}
-                    onChange={handleInputChange}
-                    placeholder="Hostel/Hotel name"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Budget (£ per night)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="accommodation_cost_planned"
-                    value={formData.accommodation_cost_planned}
-                    onChange={handleInputChange}
-                    placeholder="50.00"
-                  />
-                </div>
-                <div className="form-field">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="accommodation_booked"
-                      checked={formData.accommodation_booked}
-                      onChange={(e) => setFormData(prev => ({ ...prev, accommodation_booked: e.target.checked }))}
-                    />
-                    <span>Accommodation Booked</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Travel Details</h4>
-              <div className="form-grid">
-                <div className="form-field">
-                  <label>Method</label>
-                  <input
-                    type="text"
-                    name="travel_method"
-                    value={formData.travel_method}
-                    onChange={handleInputChange}
-                    placeholder="Bus/Flight/Train"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Budget (£ total)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="travel_cost_planned"
-                    value={formData.travel_cost_planned}
-                    onChange={handleInputChange}
-                    placeholder="25.00"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Duration</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    name="travel_duration"
-                    value={formData.travel_duration}
-                    onChange={handleInputChange}
-                    placeholder="4.5 hours"
-                  />
-                </div>
-                <div className="form-field">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="transport_booked"
-                      checked={formData.transport_booked}
-                      onChange={(e) => setFormData(prev => ({ ...prev, transport_booked: e.target.checked }))}
-                    />
-                    <span>Transport Booked</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Budget Planning</h4>
-              <div className="form-grid">
-                <div className="form-field">
-                  <label>Activities Budget (£ total)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="activities_cost_planned"
-                    value={formData.activities_cost_planned}
-                    onChange={handleInputChange}
-                    placeholder="100.00"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Food & Drink Budget (£ per day)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="food_drink_cost_planned"
-                    value={formData.food_drink_cost_planned}
-                    onChange={handleInputChange}
-                    placeholder="30.00"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Additional Details</h4>
-              <div className="form-field full-width">
-                <label>Activities</label>
-                <textarea
-                  name="activities"
-                  value={formData.activities}
-                  onChange={handleInputChange}
-                  rows="3"
-                  placeholder="Things to do here..."
-                />
-              </div>
-              <div className="form-field full-width">
-                <label>Notes</label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  rows="3"
-                  placeholder="Any additional notes..."
-                />
-              </div>
-            </div>
-
-            <div className="form-actions">
-              <button type="button" onClick={resetForm} className="cancel-button">
-                Cancel
-              </button>
-              <button type="submit" className="submit-button">
-                Add Location
-              </button>
-            </div>
-          </form>
+          <LocationForm
+            mode="add"
+            formData={formData}
+            maxSequence={locations.length + 1}
+            onChange={handleInputChange}
+            onClearDate={clearDateField}
+            onSubmit={handleAddLocation}
+            onCancel={resetForm}
+          />
         </div>
       )}
 
@@ -1005,290 +647,15 @@ export default function Locations() {
             ) : (
             // Edit form inline
             <div className="location-card-body editing-form">
-              <form onSubmit={handleEditLocation} className="location-form inline">
-                <div className="form-section">
-                  <h4>Basic Information</h4>
-                  <div className="form-grid">
-                    <div className="form-field">
-                      <label>Location Name *</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Lima"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Country *</label>
-                      <input
-                        type="text"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Peru"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Latitude *</label>
-                      <input
-                        type="number"
-                        step="any"
-                        name="latitude"
-                        value={formData.latitude}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="-12.0464"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Longitude *</label>
-                      <input
-                        type="number"
-                        step="any"
-                        name="longitude"
-                        value={formData.longitude}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="-77.0428"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Nights</label>
-                      <input
-                        type="number"
-                        name="nights"
-                        value={formData.nights}
-                        onChange={handleInputChange}
-                        min="0"
-                        placeholder="2"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <h4>Dates</h4>
-                  <div className="form-grid">
-                    <div className="form-field">
-                      <label>Arrival Date</label>
-                      <div className="date-input-group">
-                        <input
-                          type="date"
-                          name="arrival_date"
-                          value={formData.arrival_date}
-                          onChange={handleInputChange}
-                        />
-                        {formData.arrival_date && (
-                          <button
-                            type="button"
-                            className="clear-date-btn"
-                            onClick={() => clearDateField('arrival_date')}
-                            title="Clear date"
-                          >
-                            &times;
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="form-field">
-                      <label>Departure Date</label>
-                      <div className="date-input-group">
-                        <input
-                          type="date"
-                          name="departure_date"
-                          value={formData.departure_date}
-                          onChange={handleInputChange}
-                        />
-                        {formData.departure_date && (
-                          <button
-                            type="button"
-                            className="clear-date-btn"
-                            onClick={() => clearDateField('departure_date')}
-                            title="Clear date"
-                          >
-                            &times;
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <h4>Accommodation</h4>
-                  <div className="form-grid">
-                    <div className="form-field">
-                      <label>Name</label>
-                      <input
-                        type="text"
-                        name="accommodation_name"
-                        value={formData.accommodation_name}
-                        onChange={handleInputChange}
-                        placeholder="Hostel/Hotel name"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Budget (£ per night)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        name="accommodation_cost_planned"
-                        value={formData.accommodation_cost_planned}
-                        onChange={handleInputChange}
-                        placeholder="50.00"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Actual Cost (£ total for stay)</label>
-                      <input
-                        type="text"
-                        value={editingLocation?.accommodation_cost_actual 
-                          ? `£${parseFloat(editingLocation.accommodation_cost_actual).toFixed(2)}`
-                          : '£0.00'}
-                        disabled
-                        style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
-                      />
-                      <small style={{ color: '#666', fontSize: '0.85em' }}>Auto-calculated from Costs page</small>
-                    </div>
-                    <div className="form-field">
-                      <label className="checkbox-label">
-                        <input
-                          type="checkbox"
-                          name="accommodation_booked"
-                          checked={formData.accommodation_booked}
-                          onChange={(e) => setFormData(prev => ({ ...prev, accommodation_booked: e.target.checked }))}
-                        />
-                        <span>Accommodation Booked</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <h4>Travel Details</h4>
-                  <div className="form-grid">
-                    <div className="form-field">
-                      <label>Method</label>
-                      <input
-                        type="text"
-                        name="travel_method"
-                        value={formData.travel_method}
-                        onChange={handleInputChange}
-                        placeholder="Bus/Flight/Train"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Budget (£ total)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        name="travel_cost_planned"
-                        value={formData.travel_cost_planned}
-                        onChange={handleInputChange}
-                        placeholder="25.00"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Actual Cost (£ total)</label>
-                      <input
-                        type="text"
-                        value={editingLocation?.travel_cost_actual 
-                          ? `£${parseFloat(editingLocation.travel_cost_actual).toFixed(2)}`
-                          : '£0.00'}
-                        disabled
-                        style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
-                      />
-                      <small style={{ color: '#666', fontSize: '0.85em' }}>Auto-calculated from Costs page</small>
-                    </div>
-                    <div className="form-field">
-                      <label>Duration (hours)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        name="travel_duration"
-                        value={formData.travel_duration}
-                        onChange={handleInputChange}
-                        placeholder="4.5"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label className="checkbox-label">
-                        <input
-                          type="checkbox"
-                          name="transport_booked"
-                          checked={formData.transport_booked}
-                          onChange={(e) => setFormData(prev => ({ ...prev, transport_booked: e.target.checked }))}
-                        />
-                        <span>Transport Booked</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <h4>Budget Planning</h4>
-                  <div className="form-grid">
-                    <div className="form-field">
-                      <label>Activities Budget (£ total)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        name="activities_cost_planned"
-                        value={formData.activities_cost_planned}
-                        onChange={handleInputChange}
-                        placeholder="100.00"
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Food & Drink Budget (£ per day)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        name="food_drink_cost_planned"
-                        value={formData.food_drink_cost_planned}
-                        onChange={handleInputChange}
-                        placeholder="30.00"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <h4>Additional Details</h4>
-                  <div className="form-field full-width">
-                    <label>Activities</label>
-                    <textarea
-                      name="activities"
-                      value={formData.activities}
-                      onChange={handleInputChange}
-                      rows="3"
-                      placeholder="Things to do here..."
-                    />
-                  </div>
-                  <div className="form-field full-width">
-                    <label>Notes</label>
-                    <textarea
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      rows="3"
-                      placeholder="Any additional notes..."
-                    />
-                  </div>
-                </div>
-
-                <div className="form-actions">
-                  <button type="button" onClick={resetForm} className="cancel-button">
-                    Cancel
-                  </button>
-                  <button type="submit" className="submit-button">
-                    Update Location
-                  </button>
-                </div>
-              </form>
+              <LocationForm
+                mode="edit"
+                formData={formData}
+                location={editingLocation}
+                onChange={handleInputChange}
+                onClearDate={clearDateField}
+                onSubmit={handleEditLocation}
+                onCancel={resetForm}
+              />
             </div>
             )}
           </div>
