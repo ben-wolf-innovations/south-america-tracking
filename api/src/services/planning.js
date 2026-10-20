@@ -6,8 +6,9 @@ import { getLocations } from './locations.js'
 // from Locations instead.
 const PLAN_TYPES = ['tour', 'transport', 'other']
 
-// Untimed entries on the same day fall in the order the day usually runs.
-const TYPE_ORDER = { checkout: 0, transport: 1, checkin: 2, tour: 3, other: 4 }
+// An untimed entry sorts at the time of day it usually happens, so an
+// untimed flight still comes before a 15:00 check-in. Only used for ordering.
+const USUAL_TIME = { checkout: '10:00', transport: '12:00', checkin: '15:00', tour: '23:58', other: '23:59' }
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/
@@ -35,6 +36,7 @@ function entriesFromLocations(locations) {
         type: 'transport',
         location_id: location.id,
         location_name: location.name,
+        from_location_id: previousStop?.id ?? null,
         from_name: previousStop?.name ?? null,
         title: location.travel_method,
         date: previousStop ? departureOf(previousStop) : arrivalOf(location),
@@ -54,6 +56,7 @@ function entriesFromLocations(locations) {
         source: 'location',
         location_id: location.id,
         location_name: location.name,
+        from_location_id: null,
         from_name: null,
         title: location.accommodation_name || location.name,
         end_time: null,
@@ -96,6 +99,7 @@ function entryFromPlanItem(item) {
     type: item.type,
     location_id: item.location_id,
     location_name: item.location_name,
+    from_location_id: null,
     from_name: null,
     title: item.title,
     date: item.date,
@@ -111,8 +115,7 @@ function entryFromPlanItem(item) {
 
 function compareEntries(a, b) {
   return a.date.localeCompare(b.date)
-    || (a.start_time || '99:99').localeCompare(b.start_time || '99:99')
-    || TYPE_ORDER[a.type] - TYPE_ORDER[b.type]
+    || (a.start_time || USUAL_TIME[a.type]).localeCompare(b.start_time || USUAL_TIME[b.type])
     || a.title.localeCompare(b.title)
 }
 
