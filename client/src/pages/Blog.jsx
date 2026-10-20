@@ -407,7 +407,7 @@ export default function Blog() {
                       <div className="comment-header">
                         <span className="comment-author">{comment.user_name}</span>
                         <span className="comment-date">
-                          {new Date(comment.created_at).toLocaleDateString()}
+                          {new Date(comment.created_at.replace(' ', 'T') + 'Z').toLocaleDateString('en-GB')}
                         </span>
                       </div>
                       <p className="comment-text">{comment.comment_text}</p>
