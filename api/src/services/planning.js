@@ -46,7 +46,7 @@ function entriesFromLocations(locations) {
         booked: location.transport_booked === 1,
         booking_ref: null,
         address: null,
-        notes: null,
+        notes: location.transport_notes,
       })
     }
 
@@ -63,7 +63,7 @@ function entriesFromLocations(locations) {
         booked: location.accommodation_booked === 1,
         booking_ref: location.accommodation_booking_ref,
         address: null,
-        notes: null,
+        notes: location.accommodation_notes,
       }
 
       entries.push({

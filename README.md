@@ -33,7 +33,7 @@ A day-by-day timeline of where we need to be when. Check-ins, check-outs and tra
 - Transport for each stop with a travel method. The method is how we get to that stop, so the entry is dated the day we leave the previous real stop, which puts overnight buses on the day they depart.
 - Tours and other entries are added by hand, optionally linked to a stop like costs are. Deleting a stop deletes its plans.
 
-Editing a stop-based entry saves its times, booked flag and booking ref on the stop (`checkin_time`, `checkout_time`, `transport_depart_time`, `transport_arrive_time`); dates are changed in Locations. Times are local to the destination, stored as `HH:MM` with no timezone conversion. Filter by type, stop, not booked and past days.
+Editing a stop-based entry saves its times, booked flag, booking ref and notes on the stop (`checkin_time`, `checkout_time`, `transport_depart_time`, `transport_arrive_time`, `transport_notes`, and `accommodation_notes`, which check-in and check-out share); dates are changed in Locations. Notes are for meeting points, addresses and similar. Times are local to the destination, stored as `HH:MM` with no timezone conversion. Filter by type, stop, not booked and past days.
 
 **To do** (admin only)
 One shared list. Each item has a title and one notes field, can be edited or deleted, and moves to a collapsible Done section when ticked.
@@ -139,7 +139,7 @@ Environment variables for the deployed API are set in the Azure Functions app se
 
 ### Schema changes
 
-The schema lives in Turso only. Changes go in one-off scripts in `api/src/scripts/`, run locally against Turso with `local.settings.json`. Run the script before redeploying the API, and redeploy the API before merging client changes that call new endpoints. `migrate-planning-todo.js` adds the Planning and To do columns and tables; it is additive and safe to re-run.
+The schema lives in Turso only. Changes go in one-off scripts in `api/src/scripts/`, run locally against Turso with `local.settings.json`. Run the script before redeploying the API, and redeploy the API before merging client changes that call new endpoints. `migrate-planning-todo.js` adds the Planning and To do columns and tables, and `migrate-transport-notes.js` adds `locations.transport_notes`; both are additive and safe to re-run.
 
 ## Trip
 
