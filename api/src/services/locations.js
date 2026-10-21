@@ -111,7 +111,7 @@ export async function updateLocation(id, updates) {
     'food_drink_cost_planned', 'food_drink_cost_actual', 'travel_method',
     'travel_cost_planned', 'travel_cost_actual', 'transport_booked', 'is_travel_overnight',
     'notes', 'travel_duration',
-    'checkin_time', 'checkout_time', 'transport_depart_time', 'transport_arrive_time'
+    'checkin_time', 'checkout_time', 'transport_depart_time', 'transport_arrive_time', 'transport_notes'
   ]
 
   const fields = []

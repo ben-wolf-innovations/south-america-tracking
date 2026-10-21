@@ -295,6 +295,10 @@
   grid-column: span 2;
 }
 
+.plan-field.full {
+  grid-column: 1 / -1;
+}
+
 .plan-field input,
 .plan-field select,
 .plan-field textarea {
