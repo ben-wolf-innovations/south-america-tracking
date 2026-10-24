@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import api from '../config/api'
 import { useDataRefresh } from '../hooks/useDataRefresh'
+import CashSection from '../components/usefulInfo/CashSection'
+import TimeZonesSection from '../components/usefulInfo/TimeZonesSection'
 import './UsefulInfo.css'
 
 export default function UsefulInfo() {
   const [rates, setRates] = useState([])
-  const [paymentInfo, setPaymentInfo] = useState([])
+  const [cashInfo, setCashInfo] = useState(null)
   const [emergencyContacts, setEmergencyContacts] = useState([])
   const [timeZones, setTimeZones] = useState([])
   const [tippingCustoms, setTippingCustoms] = useState([])
@@ -25,7 +27,7 @@ export default function UsefulInfo() {
       const res = await api.get('/info/exchange-rates')
       const data = res.data.data
       setRates(data.rates || [])
-      setPaymentInfo(data.payment_info || [])
+      setCashInfo(data.cash_info || null)
       setEmergencyContacts(data.emergency_contacts || [])
       setTimeZones(data.time_zones || [])
       setTippingCustoms(data.tipping_customs || [])
@@ -68,6 +70,8 @@ export default function UsefulInfo() {
       return dateStr
     }
   }
+
+  const usdPerGbp = rates.find(r => r.code === 'USD')?.rate
 
   return (
     <div className="useful-info-page">
@@ -132,37 +136,8 @@ export default function UsefulInfo() {
         )}
       </section>
 
-      {/* Payment Information Section */}
-      {!loading && !error && paymentInfo.length > 0 && (
-        <section className="info-section">
-          <div className="section-heading">
-            <h3>Payment & ATM Information</h3>
-          </div>
-          <p className="section-subtext">Card acceptance and ATM fees by country</p>
-
-          <div className="payment-table-wrapper">
-            <table className="payment-table">
-              <thead>
-                <tr>
-                  <th>Country</th>
-                  <th>Payment Preference</th>
-                  <th>Mastercard (Monzo)</th>
-                  <th>Average ATM Fees</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paymentInfo.map((info) => (
-                  <tr key={info.country}>
-                    <td className="country-cell">{info.country}</td>
-                    <td>{info.paymentPreference}</td>
-                    <td>{info.mastercardAcceptance}</td>
-                    <td>{info.atmFees}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+      {!loading && !error && cashInfo && (
+        <CashSection cash={cashInfo} usdPerGbp={usdPerGbp} />
       )}
 
       {/* Emergency Contacts Section */}
@@ -200,24 +175,8 @@ export default function UsefulInfo() {
         </section>
       )}
 
-      {/* Time Zones Section */}
       {!loading && !error && timeZones.length > 0 && (
-        <section className="info-section">
-          <div className="section-heading">
-            <h3>Time Zones</h3>
-          </div>
-          <p className="section-subtext">Local time offsets from UTC</p>
-
-          <div className="compact-grid">
-            {timeZones.map((tz) => (
-              <div key={tz.country} className="compact-card">
-                <div className="compact-country">{tz.country}</div>
-                <div className="compact-value">{tz.timezone}</div>
-                {tz.note && <div className="compact-note">{tz.note}</div>}
-              </div>
-            ))}
-          </div>
-        </section>
+        <TimeZonesSection zones={timeZones} />
       )}
 
       {/* Tipping Customs Section */}

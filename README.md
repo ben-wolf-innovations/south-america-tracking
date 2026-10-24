@@ -48,7 +48,12 @@ Track items to pack with a budget and actual cost per item. Filtered by owner (B
 Travel journal with publish/draft toggle. Admin can write and publish posts; family sees published posts only. Both roles can comment (family on published posts only); only admin can delete comments.
 
 **Useful Info**
-Live GBP exchange rates (30-minute cache) for all trip currencies, plus per-country payment info, emergency contacts, time zones, visa info, tipping customs, power plugs, and connectivity notes.
+Live GBP exchange rates (30-minute cache) for all trip currencies, plus emergency contacts, visa info, tipping customs, power plugs, connectivity and local apps.
+
+- **Cash & Payments**: how we get cash with the fewest fees. Our accounts and their fee-free allowances (Monzo Perks, Wise, Western Union), rules of thumb, a cash plan along the route, a Galapagos cash budget (totals worked out in the client, with a £ equivalent from the live USD rate), and ATM and card notes per country. Figures were researched in Oct 2026 and are static, so they need checking before use.
+- **Time Zones**: live local time for each place, with its UTC offset and difference from the UK. The API sends IANA zone names (`America/Lima`) and the client works out offsets, so clock changes in Chile and the UK are handled without edits.
+
+All Useful Info content is static data in `api/src/services/info.js`, so changing it needs an API redeploy.
 
 ## Access Levels
 
@@ -118,11 +123,11 @@ api/src/
 
 client/src/
   pages/        one file per page
-  components/   shared UI components, plus locations/, planning/ and todo/ for those pages
+  components/   shared UI components, plus locations/, planning/, todo/ and usefulInfo/ for those pages
   context/      AuthContext
   config/       API base URL config
   hooks/        useDataRefresh (Refresh button and stale-data reload)
-  utils/        shared helpers (planning formatting)
+  utils/        shared helpers (planning formatting, cash totals, time zones)
 ```
 
 Page CSS files are global in Vite, so new pages prefix their class names (`plan-`, `todo-`) to avoid clashing with others.
@@ -143,4 +148,4 @@ The schema lives in Turso only. Changes go in one-off scripts in `api/src/script
 
 ## Trip
 
-38 stops across Peru, Ecuador, Bolivia, Chile, and Argentina. Starts November 2026.
+Stops across Peru, Ecuador (including the Galapagos), Bolivia, Chile, Argentina and Uruguay. Starts November 2026.

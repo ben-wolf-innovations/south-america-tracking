@@ -1,0 +1,179 @@
+.cash-subheading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 1.75rem 0 0.75rem 0;
+}
+
+.section-subtext + .cash-subheading {
+  margin-top: 0;
+}
+
+/* Accounts */
+.cash-accounts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.cash-account {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.cash-account-name {
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.4rem;
+}
+
+.cash-account-allowance {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.cash-account-over {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.cash-account-notes {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.6rem 0 0 0;
+}
+
+/* Rules and route */
+.cash-rules,
+.cash-route {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--text-color);
+  font-size: 0.92rem;
+}
+
+.cash-rules li,
+.cash-route li {
+  margin-bottom: 0.5rem;
+}
+
+.cash-route-stage {
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-right: 0.4rem;
+}
+
+/* Galapagos budget */
+.cash-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cash-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cash-total {
+  flex: 1 1 200px;
+  background: #f0f7f7;
+  border: 1px solid #cfe6e6;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cash-total-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+}
+
+.cash-total-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+.cash-total-gbp {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+/* Countries */
+.cash-countries {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.cash-country {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.cash-country-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cash-country-name {
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.9rem;
+}
+
+.cash-need {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: #f2f2f2;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  white-space: nowrap;
+}
+
+.cash-country-details {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.cash-country-details dt {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 0.6rem;
+}
+
+.cash-country-details dt:first-child {
+  margin-top: 0;
+}
+
+.cash-country-details dd {
+  margin: 0.15rem 0 0 0;
+  color: var(--text-color);
+}
+
+@media (max-width: 600px) {
+  .cash-countries,
+  .cash-accounts {
+    grid-template-columns: 1fr;
+  }
+}
