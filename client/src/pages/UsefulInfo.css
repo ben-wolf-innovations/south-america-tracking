@@ -325,6 +325,20 @@
   font-style: italic;
 }
 
+/* Time zones: live local time */
+.tz-time {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  line-height: 1.1;
+}
+
+.tz-day {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .useful-info-page {
