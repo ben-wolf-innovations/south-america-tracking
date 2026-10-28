@@ -248,7 +248,16 @@ export default function Blog() {
       <div className="blog-header">
         <div>
           <h2>Travel Blog</h2>
-          <p className="subtitle">Share your journey and experiences</p>
+          <p className="subtitle">
+            Follow us in photos on Instagram:{' '}
+            <a
+              href="https://www.instagram.com/christmasinthegalapagos/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              christmasinthegalapagos
+            </a>
+          </p>
         </div>
         {isAdmin() && !showAddForm && !editingPost && !previewPost && (
           <button
