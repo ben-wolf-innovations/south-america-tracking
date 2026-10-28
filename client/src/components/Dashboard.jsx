@@ -77,7 +77,7 @@ export default function Dashboard() {
           </h1>
           <div className="header-actions">
             <span className="user-badge">
-              {user?.accessLevel === 'admin' ? '👤 Admin' : '👥 Family'}
+              {user?.accessLevel === 'admin' ? '👤 Admin' : '👥 Family & Friends'}
             </span>
             <div className="header-buttons">
               <button

@@ -66,8 +66,8 @@ export default function Login() {
         </form>
 
         <div className="login-footer">
-          <p className="hint">Family PIN: 5678</p>
-          <p className="info">Admin has full edit access, Family has read-only view</p>
+          <p className="hint">Family & Friends PIN: 5678</p>
+          <p className="info">Admin has full edit access, Family & Friends has read-only view</p>
         </div>
       </div>
     </div>
