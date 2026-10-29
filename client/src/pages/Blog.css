@@ -25,6 +25,11 @@
   font-size: 0.95rem;
 }
 
+.blog-header .subtitle a {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 /* Form */
 .blog-form-container {
   background: white;
