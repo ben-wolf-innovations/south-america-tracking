@@ -1,6 +1,7 @@
 import { app } from '@azure/functions'
 import { withAuth, requireAdmin } from '../shared/auth.js'
 import { getLocations, getLocation, createLocation, updateLocation, reorderLocation, deleteLocation } from '../services/locations.js'
+import { visibleLocation } from '../services/locationVisibility.js'
 import { ValidationError } from '../shared/errors.js'
 
 app.http('getLocations', {
@@ -11,7 +12,8 @@ app.http('getLocations', {
     try {
       const tripId = request.query.get('trip_id') || '1'
       const locations = await getLocations(tripId)
-      return { status: 200, jsonBody: { success: true, data: locations } }
+      const data = locations.map(location => visibleLocation(location, context.user))
+      return { status: 200, jsonBody: { success: true, data } }
     } catch (error) {
       context.error('Error fetching locations:', error)
       return { status: 500, jsonBody: { success: false, error: error.message } }
@@ -29,7 +31,7 @@ app.http('getLocation', {
       if (!location) {
         return { status: 404, jsonBody: { success: false, error: 'Location not found' } }
       }
-      return { status: 200, jsonBody: { success: true, data: location } }
+      return { status: 200, jsonBody: { success: true, data: visibleLocation(location, context.user) } }
     } catch (error) {
       context.error('Error fetching location:', error)
       return { status: 500, jsonBody: { success: false, error: error.message } }

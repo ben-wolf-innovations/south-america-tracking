@@ -1,6 +1,7 @@
 import { app } from '@azure/functions'
 import { withAuth, requireAdmin } from '../shared/auth.js'
 import { checkIn, clearVisited, undoLastVisited, getCurrentLocation, getProgressStats } from '../services/progress.js'
+import { visibleLocation } from '../services/locationVisibility.js'
 import { ValidationError } from '../shared/errors.js'
 
 app.http('progressCheckin', {
@@ -73,7 +74,7 @@ app.http('progressGetCurrent', {
       if (!currentLocation) {
         return { status: 200, jsonBody: { success: true, data: null, message: 'No current location set' } }
       }
-      return { status: 200, jsonBody: { success: true, data: currentLocation } }
+      return { status: 200, jsonBody: { success: true, data: visibleLocation(currentLocation, context.user) } }
     } catch (error) {
       context.error('Error getting current location:', error)
       return { status: 500, jsonBody: { success: false, error: error.message } }
