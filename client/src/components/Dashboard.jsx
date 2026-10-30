@@ -135,9 +135,15 @@ export default function Dashboard() {
           <NavLink to="/blog" className="nav-link">
             Blog
           </NavLink>
-          <NavLink to="/info" className="nav-link">
-            Useful Info
-          </NavLink>
+          {isAdmin() ? (
+            <NavLink to="/info" className="nav-link">
+              Useful Info
+            </NavLink>
+          ) : (
+            <NavLink to="/time-zones" className="nav-link">
+              Time Zones
+            </NavLink>
+          )}
         </div>
       </nav>
       </div>

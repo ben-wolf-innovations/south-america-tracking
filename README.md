@@ -24,7 +24,7 @@ Checking in stamps the arrival and departure dates from the estimator, but only 
 Full CRUD for trip stops. Supports check-in from the stop's card, same as the map: only the next stop in sequence offers the button, and the result is shown as an inline banner. Cards carry a Visited or Current badge. Each location stores accommodation (including booking ref), food, activities and travel costs (planned and actual), plus nights, dates, and booking status. Adding and editing share one form (`components/locations/LocationForm.jsx`). Locations are sequence-ordered and support drag-to-reorder and insertion at any point in the sequence.
 
 **Itinerary**
-A plain read-only list of every stop in order: dates, nights, accommodation, activities and notes. No travel or cost detail. Built for family, but visible to both roles. Overnight travel stops are shown in sequence and marked as such. Admins also see a short planning summary on each stop (anything with a time, anything not booked, and added tours) with a link to that stop in Planning.
+A plain read-only list of every stop in order: location, dates and activities. No accommodation, notes, travel or cost detail. Built for family, but visible to both roles. Overnight travel stops are shown in sequence and marked as such. Admins also see a short planning summary on each stop (anything with a time, anything not booked, and added tours) with a link to that stop in Planning.
 
 **Planning** (admin only)
 A day-by-day timeline of where we need to be when. Check-ins, check-outs and transport are built from Locations, so dates always match the stops:
@@ -47,7 +47,7 @@ Track items to pack with a budget and actual cost per item. Filtered by owner (B
 **Blog**
 Travel journal with publish/draft toggle. Admin can write and publish posts; family sees published posts only. Both roles can comment (family on published posts only); only admin can delete comments.
 
-**Useful Info**
+**Useful Info** (admin only; family gets a Time Zones tab with just the time zones section)
 Live GBP exchange rates (30-minute cache) for all trip currencies, plus emergency contacts, visa info, tipping customs, power plugs, connectivity and local apps.
 
 - **Cash & Payments**: how we get cash with the fewest fees. Our accounts and their fee-free allowances (Monzo Perks, Wise, Western Union), rules of thumb, a cash plan along the route, a Galapagos cash budget (totals worked out in the client, with a £ equivalent from the live USD rate), and ATM and card notes per country. Figures were researched in Oct 2026 and are static, so they need checking before use.
@@ -60,9 +60,9 @@ All Useful Info content is static data in `api/src/services/info.js`, so changin
 Two PIN-based roles:
 
 - **Admin**: full read/write access to all pages, including Planning and To do
-- **Family**: read-only access to Overview, Map, Itinerary, Blog, and Useful Info
+- **Family**: read-only access to Overview, Map, Itinerary, Blog, and Time Zones
 
-The Itinerary page omits cost data in its own UI, but `GET /locations` still returns cost columns to any signed-in role, so this is presentation, not a privacy boundary. Family already sees full budget figures on Overview.
+The API removes accommodation names, booking refs and notes from locations for family (`services/locationVisibility.js`), so Overview and Map hide the hotel too. `GET /costs` is admin only, as cost descriptions can name a hotel. The Itinerary page omits cost data in its own UI, but `GET /locations` still returns cost columns to any signed-in role, so this is presentation, not a privacy boundary. Family already sees full budget figures on Overview.
 
 Tokens are JWTs signed with `JWT_SECRET` and expire after 7 days. The API refuses to start without `JWT_SECRET`. A missing, invalid or expired token returns 401, which sends the user back to the login page; 403 means signed in but not admin.
 

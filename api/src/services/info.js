@@ -205,6 +205,10 @@ const CACHE_TTL_MS = 30 * 60 * 1000
 let ratesCache = null
 let ratesCachedAt = null
 
+export function getTimeZones() {
+  return TIME_ZONES
+}
+
 export async function getExchangeRates() {
   const now = Date.now()
   const cacheValid = ratesCache && ratesCachedAt && (now - ratesCachedAt < CACHE_TTL_MS)

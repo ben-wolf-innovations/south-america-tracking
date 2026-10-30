@@ -31,9 +31,9 @@ async function loadPlanEntries() {
   }
 }
 
-// A plain read-only itinerary: where we are, where we stay, and what we are
-// doing. Deliberately carries no travel or cost detail for family; admins also
-// see a brief planning summary on each stop.
+// A plain read-only itinerary: where we are, when, and what we are doing.
+// Deliberately carries no accommodation, notes, travel or cost detail; admins
+// also see a brief planning summary on each stop.
 export default function Itinerary() {
   const { isAdmin } = useAuth()
   const [locations, setLocations] = useState([])
@@ -128,28 +128,10 @@ export default function Itinerary() {
                     <dd>{dates.text}</dd>
                   </div>
                 )}
-                {location.nights > 0 && (
-                  <div className="itinerary-detail">
-                    <dt>Nights</dt>
-                    <dd>{location.nights}</dd>
-                  </div>
-                )}
-                {location.accommodation_name && (
-                  <div className="itinerary-detail">
-                    <dt>Staying at</dt>
-                    <dd>{location.accommodation_name}</dd>
-                  </div>
-                )}
                 {location.activities && (
                   <div className="itinerary-detail wide">
                     <dt>Activities</dt>
                     <dd>{location.activities}</dd>
-                  </div>
-                )}
-                {location.notes && (
-                  <div className="itinerary-detail wide">
-                    <dt>Notes</dt>
-                    <dd>{location.notes}</dd>
                   </div>
                 )}
               </dl>

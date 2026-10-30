@@ -7,7 +7,7 @@ app.http('getCosts', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'costs',
-  handler: withAuth(async (request, context) => {
+  handler: requireAdmin(async (request, context) => {
     try {
       const tripId = request.query.get('trip_id') || '1'
       const costs = await getCosts(tripId, {

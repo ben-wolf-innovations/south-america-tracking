@@ -13,6 +13,7 @@ import PackingList from './pages/PackingList'
 import Todo from './pages/Todo'
 import Planning from './pages/Planning'
 import UsefulInfo from './pages/UsefulInfo'
+import TimeZones from './pages/TimeZones'
 import './App.css'
 
 function App() {
@@ -55,7 +56,12 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="blog" element={<Blog />} />
-          <Route path="info" element={<UsefulInfo />} />
+          <Route path="info" element={
+            <ProtectedRoute requireAdmin>
+              <UsefulInfo />
+            </ProtectedRoute>
+          } />
+          <Route path="time-zones" element={<TimeZones />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
